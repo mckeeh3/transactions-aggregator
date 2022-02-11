@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>io.mta</groupId>
+  <groupId>io.aggregator</groupId>
   <artifactId>transactions-aggregator</artifactId>
   <version>v1</version>
   <packaging>jar</packaging>
@@ -13,7 +13,7 @@
     <!-- TODO Update to your own Docker repository or Docker Hub scope -->
     <dockerImage>my-docker-repo/${project.artifactId}</dockerImage>
     <dockerTag>${project.version}</dockerTag>
-    <mainClass>io.mta.Main</mainClass>
+    <mainClass>io.aggregator.Main</mainClass>
 
     <jdk.target>11</jdk.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
