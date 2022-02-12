@@ -135,6 +135,16 @@ public class SecondTest {
             .setTimestamp(TimeTo.now())
             .build());
 
+    testKit.addTransaction( // try adding the same transaction again - should be idempotent
+        SecondApi.AddTransactionCommand
+            .newBuilder()
+            .setMerchandId("merchant-1")
+            .setEpochSecond(epochSecond)
+            .setTransactionId("transaction-2")
+            .setAmount(6.54)
+            .setTimestamp(TimeTo.now())
+            .build());
+
     testKit.addTransaction(
         SecondApi.AddTransactionCommand
             .newBuilder()

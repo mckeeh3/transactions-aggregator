@@ -1,7 +1,6 @@
 package io.aggregator.entity;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.akkaserverless.javasdk.eventsourcedentity.EventSourcedEntityContext;
 import com.google.protobuf.Empty;
@@ -12,11 +11,6 @@ import org.slf4j.LoggerFactory;
 import io.aggregator.api.SecondApi;
 import io.aggregator.api.SecondApi.AddTransactionCommand;
 import io.aggregator.api.SecondApi.AggregateCommand;
-import io.aggregator.entity.SecondEntity.SecondAggregated;
-import io.aggregator.entity.SecondEntity.SecondCreated;
-import io.aggregator.entity.SecondEntity.SecondState;
-import io.aggregator.entity.SecondEntity.SecondTransactionAdded;
-import io.aggregator.entity.SecondEntity.Transaction;
 
 // This class was initially generated based on the .proto definition by Akka Serverless tooling.
 //
@@ -60,7 +54,7 @@ public class Second extends AbstractSecond {
     return handle(state, event);
   }
 
-  private Effect<Empty> handle(SecondState state, AddTransactionCommand command) {
+  private Effect<Empty> handle(SecondEntity.SecondState state, AddTransactionCommand command) {
     log.info("state: {}\nAddTransactionCommand: {}", state, command);
 
     return effects()
@@ -68,7 +62,7 @@ public class Second extends AbstractSecond {
         .thenReply(newState -> Empty.getDefaultInstance());
   }
 
-  private Effect<Empty> handle(SecondState state, AggregateCommand command) {
+  private Effect<Empty> handle(SecondEntity.SecondState state, AggregateCommand command) {
     log.info("state: {}\nAggregateCommand: {}", state, command);
 
     return effects()
@@ -76,14 +70,14 @@ public class Second extends AbstractSecond {
         .thenReply(newState -> Empty.getDefaultInstance());
   }
 
-  private SecondState handle(SecondState state, SecondCreated event) {
+  private SecondEntity.SecondState handle(SecondEntity.SecondState state, SecondEntity.SecondCreated event) {
     return state.toBuilder()
         .setMerchandId(event.getMerchandId())
         .setEpochSecond(event.getEpochSecond())
         .build();
   }
 
-  private SecondState handle(SecondState state, SecondTransactionAdded event) {
+  private SecondEntity.SecondState handle(SecondEntity.SecondState state, SecondEntity.SecondTransactionAdded event) {
     var transactionAlreadyAdded = state.getTransactionsList().stream()
         .anyMatch(transaction -> transaction.getTransactionId().equals(event.getTransactionId()));
 
@@ -92,7 +86,7 @@ public class Second extends AbstractSecond {
     } else {
       return state.toBuilder()
           .addTransactions(
-              Transaction.newBuilder()
+              SecondEntity.Transaction.newBuilder()
                   .setMerchandId(event.getMerchandId())
                   .setEpochSecond(event.getEpochSecond())
                   .setTransactionId(event.getTransactionId())
@@ -103,11 +97,11 @@ public class Second extends AbstractSecond {
     }
   }
 
-  private SecondState handle(SecondState state, SecondAggregated event) {
+  private SecondEntity.SecondState handle(SecondEntity.SecondState state, SecondEntity.SecondAggregated event) {
     return state; // this is a non-state changing event
   }
 
-  private List<?> eventsFor(SecondState state, AddTransactionCommand command) {
+  private List<?> eventsFor(SecondEntity.SecondState state, AddTransactionCommand command) {
     var transactionAdded = SecondEntity.SecondTransactionAdded.newBuilder()
         .setMerchandId(command.getMerchandId())
         .setEpochSecond(command.getEpochSecond())
@@ -128,10 +122,10 @@ public class Second extends AbstractSecond {
     }
   }
 
-  private SecondAggregated eventFor(SecondState state, AggregateCommand command) {
+  private SecondEntity.SecondAggregated eventFor(SecondEntity.SecondState state, AggregateCommand command) {
     var total = state.getTransactionsList().stream().reduce(0.0, (a, b) -> a + b.getAmount(), (a, b) -> a + b);
 
-    return SecondAggregated
+    return SecondEntity.SecondAggregated
         .newBuilder()
         .setMerchandId(state.getMerchandId())
         .setEpochSecond(state.getEpochSecond())
