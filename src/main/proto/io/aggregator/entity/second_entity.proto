@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package io.aggregator.entity;
+
+message SecondCreated {
+  string merchand_id = 1;
+  int64 epoch_second = 2;
+}
+
+message SecondTransactionAdded {
+  string merchand_id = 1;
+  int64 epoch_second = 2;
+  string transaction_id = 3;
+  double amount = 4;
+  google.protobuf.Timestamp timestamp = 5;
+}
+
+message SecondAggregated {
+  string merchand_id = 1;
+  int64 epoch_second = 2;
+  double transaction_total_amount = 4;
+  int32 transaction_count = 5;
+}
+
+message SecondState {
+  string merchand_id = 1;
+  int64 epoch_second = 2;
+  repeated Transaction transactions = 3;
+}
+
+message Transaction {
+  string merchand_id = 1;
+  int64 epoch_second = 2;
+  string transaction_id = 3;
+  double amount = 4;
+  google.protobuf.Timestamp timestamp = 5;
+}

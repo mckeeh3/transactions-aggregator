@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+import "akkaserverless/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+package io.aggregator.api;
+
+service Second {
+  option (akkaserverless.codegen) = {
+    event_sourced_entity : {
+      name : "io.aggregator.entity.Second"
+      entity_type : "second"
+      state : "io.aggregator.entity.SecondState"
+      events : [
+        "io.aggregator.entity.SecondCreated",
+        "io.aggregator.entity.SecondTransactionAdded",
+        "io.aggregator.entity.SecondAggregated" //
+      ]
+    }
+  };
+
+  rpc AddTransaction(AddTransactionCommand) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post : "/second/{merchand_id}/{epoch_second}/transactions"
+      body : "*"
+    };
+  }
+
+  rpc Aggregate(AggregateCommand) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post : "/second/{merchand_id}/{epoch_second}/aggregate"
+      body : "*"
+    };
+  }
+}
+
+message AddTransactionCommand {
+  string merchand_id = 1 [ (akkaserverless.field).entity_key = true ];
+  int64 epoch_second = 2 [ (akkaserverless.field).entity_key = true ];
+  string transaction_id = 3;
+  double amount = 4;
+  google.protobuf.Timestamp timestamp = 5;
+}
+
+message AggregateCommand {
+  string merchand_id = 1 [ (akkaserverless.field).entity_key = true ];
+  int64 epoch_second = 2 [ (akkaserverless.field).entity_key = true ];
+}
