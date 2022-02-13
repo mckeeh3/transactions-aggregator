@@ -7,6 +7,8 @@ import "google/protobuf/timestamp.proto";
 
 package io.aggregator.api;
 
+option java_outer_classname = "SecondApi";
+
 service Second {
   option (akkaserverless.codegen) = {
     event_sourced_entity : {
@@ -47,4 +49,5 @@ message AddTransactionCommand {
 message AggregateCommand {
   string merchand_id = 1 [ (akkaserverless.field).entity_key = true ];
   int64 epoch_second = 2 [ (akkaserverless.field).entity_key = true ];
+  google.protobuf.Timestamp aggregateRequestTimestamp = 3;
 }

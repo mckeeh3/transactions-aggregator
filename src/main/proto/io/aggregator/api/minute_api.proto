@@ -1,0 +1,70 @@
+syntax = "proto3";
+
+import "akkaserverless/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+package io.aggregator.api;
+
+option java_outer_classname = "MinuteApi";
+
+service Minute {
+  option (akkaserverless.codegen) = {
+    event_sourced_entity : {
+      name : "io.aggregator.entity.Minute"
+      entity_type : "minute"
+      state : "io.aggregator.entity.MinuteState"
+      events : [
+        "io.aggregator.entity.MinuteCreated",
+        "io.aggregator.entity.SecondAdded",
+        "io.aggregator.entity.MinuteAggregated",
+        "io.aggregator.entity.ActiveSecondAggregated" //
+      ]
+    }
+  };
+
+  rpc AddSecond(AddSecondCommand) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post : "/minute/{merchant_id}/{epoch_minute}/seconds"
+      body : "*"
+    };
+  }
+
+  rpc AggregateMinute(AggregateMinuteCommand) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post : "/minute/{merchant_id}/{epoch_minute}/aggregate"
+      body : "*"
+    };
+  }
+
+  rpc SecondAggregation(SecondAggregationCommand)
+      returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post : "/minute/{merchant_id}/{epoch_minute}/second-aggregation"
+      body : "*"
+    };
+  }
+}
+
+message AddSecondCommand {
+  string merchant_id = 1 [ (akkaserverless.field).entity_key = true ];
+  int64 epoch_minute = 2 [ (akkaserverless.field).entity_key = true ];
+  int64 epoch_second = 3;
+}
+
+message AggregateMinuteCommand {
+  string merchant_id = 1 [ (akkaserverless.field).entity_key = true ];
+  int64 epoch_minute = 2 [ (akkaserverless.field).entity_key = true ];
+  google.protobuf.Timestamp aggregateRequestTimestamp = 3;
+}
+
+message SecondAggregationCommand {
+  string merchant_id = 1 [ (akkaserverless.field).entity_key = true ];
+  int64 epoch_minute = 2 [ (akkaserverless.field).entity_key = true ];
+  int64 epoch_second = 3;
+  double transaction_total_amount = 4;
+  int32 transaction_count = 5;
+  google.protobuf.Timestamp last_update_timestamp = 6;
+  google.protobuf.Timestamp aggregateRequestTimestamp = 7;
+}

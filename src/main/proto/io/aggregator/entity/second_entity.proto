@@ -4,6 +4,8 @@ import "google/protobuf/timestamp.proto";
 
 package io.aggregator.entity;
 
+option java_outer_classname = "SecondEntity";
+
 message SecondCreated {
   string merchand_id = 1;
   int64 epoch_second = 2;
@@ -22,12 +24,15 @@ message SecondAggregated {
   int64 epoch_second = 2;
   double transaction_total_amount = 4;
   int32 transaction_count = 5;
+  google.protobuf.Timestamp last_update_timestamp = 6;
+  google.protobuf.Timestamp aggregateRequestTimestamp = 7;
 }
 
 message SecondState {
   string merchand_id = 1;
   int64 epoch_second = 2;
   repeated Transaction transactions = 3;
+  google.protobuf.Timestamp last_update_timestamp = 4;
 }
 
 message Transaction {

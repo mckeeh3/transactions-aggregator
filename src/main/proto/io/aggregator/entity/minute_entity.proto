@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package io.aggregator.entity;
+
+option java_outer_classname = "MinuteEntity";
+
+message MinuteCreated {
+  string merchant_id = 1;
+  int64 epoch_minute = 2;
+}
+
+message SecondAdded {
+  string merchant_id = 1;
+  int64 epoch_second = 2;
+}
+
+message MinuteAggregated {
+  string merchant_id = 1;
+  int64 epoch_minute = 2;
+  double transaction_total_amount = 3;
+  int32 transaction_count = 4;
+  google.protobuf.Timestamp last_update_timestamp = 5;
+  google.protobuf.Timestamp aggregateRequestTimestamp = 6;
+}
+
+message ActiveSecondAggregated {
+  string merchant_id = 1;
+  int64 epoch_second = 2;
+  double transaction_total_amount = 3;
+  int32 transaction_count = 4;
+  google.protobuf.Timestamp last_update_timestamp = 5;
+  google.protobuf.Timestamp aggregateRequestTimestamp = 6;
+}
+
+message MinuteAggregationRequested {
+  string merchant_id = 1;
+  int64 epoch_minute = 2;
+  repeated int64 epoch_seconds = 3;
+  google.protobuf.Timestamp aggregateRequestTimestamp = 6;
+}
+
+message MinuteState {
+  string merchant_id = 1;
+  int64 epoch_minute = 2;
+  repeated ActiveSecond activeSeconds = 3;
+  google.protobuf.Timestamp last_update_timestamp = 4;
+  google.protobuf.Timestamp aggregateRequestTimestamp = 6;
+}
+
+message ActiveSecond {
+  int64 epoch_second = 1;
+  double transaction_total_amount = 2;
+  int32 transaction_count = 3;
+  google.protobuf.Timestamp last_update_timestamp = 4;
+  google.protobuf.Timestamp aggregateRequestTimestamp = 5;
+}

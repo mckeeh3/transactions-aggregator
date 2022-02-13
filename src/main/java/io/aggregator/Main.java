@@ -1,6 +1,7 @@
 package io.aggregator;
 
 import com.akkaserverless.javasdk.AkkaServerless;
+import io.aggregator.entity.Minute;
 import io.aggregator.entity.Second;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +21,7 @@ public final class Main {
     // If you prefer, you may remove this and manually register these components in a
     // `new AkkaServerless()` instance.
     return AkkaServerlessFactory.withComponents(
+      Minute::new,
       Second::new);
   }
 
