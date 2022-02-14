@@ -97,6 +97,8 @@ public class Minute extends AbstractMinute {
     return state.toBuilder()
         .setMerchantId(event.getMerchantId())
         .setEpochMinute(event.getEpochMinute())
+        .setEpochHour(TimeTo.epochHourFor(event.getEpochMinute()))
+        .setEpochDay(TimeTo.epochDayFor(event.getEpochMinute()))
         .build();
   }
 

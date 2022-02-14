@@ -7,12 +7,12 @@ package io.aggregator.entity;
 option java_outer_classname = "SecondEntity";
 
 message SecondCreated {
-  string merchand_id = 1;
+  string merchant_id = 1;
   int64 epoch_second = 2;
 }
 
 message SecondTransactionAdded {
-  string merchand_id = 1;
+  string merchant_id = 1;
   int64 epoch_second = 2;
   string transaction_id = 3;
   double amount = 4;
@@ -20,7 +20,7 @@ message SecondTransactionAdded {
 }
 
 message SecondAggregated {
-  string merchand_id = 1;
+  string merchant_id = 1;
   int64 epoch_second = 2;
   double transaction_total_amount = 4;
   int32 transaction_count = 5;
@@ -29,14 +29,17 @@ message SecondAggregated {
 }
 
 message SecondState {
-  string merchand_id = 1;
+  string merchant_id = 1;
   int64 epoch_second = 2;
-  repeated Transaction transactions = 3;
-  google.protobuf.Timestamp last_update_timestamp = 4;
+  int64 epoch_minute = 3;
+  int64 epoch_hour = 4;
+  int64 epoch_day = 5;
+  repeated Transaction transactions = 6;
+  google.protobuf.Timestamp last_update_timestamp = 7;
 }
 
 message Transaction {
-  string merchand_id = 1;
+  string merchant_id = 1;
   int64 epoch_second = 2;
   string transaction_id = 3;
   double amount = 4;

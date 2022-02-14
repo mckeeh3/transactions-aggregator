@@ -39,7 +39,7 @@ public class SecondTest {
     var response = testKit.addTransaction(
         SecondApi.AddTransactionCommand
             .newBuilder()
-            .setMerchandId("merchant-1")
+            .setMerchantId("merchant-1")
             .setEpochSecond(epochSecond)
             .setTransactionId("transaction-1")
             .setAmount(1.23)
@@ -52,10 +52,10 @@ public class SecondTest {
     assertNotNull(secondCreated);
     assertNotNull(transactionAdded);
 
-    assertEquals("merchant-1", secondCreated.getMerchandId());
+    assertEquals("merchant-1", secondCreated.getMerchantId());
     assertTrue(secondCreated.getEpochSecond() > 0);
 
-    assertEquals("merchant-1", transactionAdded.getMerchandId());
+    assertEquals("merchant-1", transactionAdded.getMerchantId());
     assertTrue(transactionAdded.getEpochSecond() > 0);
     assertEquals("transaction-1", transactionAdded.getTransactionId());
     assertEquals(1.23, transactionAdded.getAmount(), 0.0);
@@ -63,12 +63,12 @@ public class SecondTest {
 
     var state = (SecondEntity.SecondState) response.getUpdatedState();
 
-    assertEquals("merchant-1", state.getMerchandId());
+    assertEquals("merchant-1", state.getMerchantId());
     assertTrue(state.getEpochSecond() > 0);
     assertEquals(1, state.getTransactionsList().size());
 
     var transaction = state.getTransactionsList().get(0);
-    assertEquals("merchant-1", transaction.getMerchandId());
+    assertEquals("merchant-1", transaction.getMerchantId());
     assertTrue(transaction.getEpochSecond() > 0);
     assertEquals("transaction-1", transaction.getTransactionId());
     assertEquals(1.23, transaction.getAmount(), 0.0);
@@ -77,7 +77,7 @@ public class SecondTest {
     testKit.addTransaction(
         SecondApi.AddTransactionCommand
             .newBuilder()
-            .setMerchandId("merchant-1")
+            .setMerchantId("merchant-1")
             .setEpochSecond(epochSecond)
             .setTransactionId("transaction-2")
             .setAmount(4.56)
@@ -87,7 +87,7 @@ public class SecondTest {
     response = testKit.addTransaction( // try adding the same transaction again - should be idempotent
         SecondApi.AddTransactionCommand
             .newBuilder()
-            .setMerchandId("merchant-1")
+            .setMerchantId("merchant-1")
             .setEpochSecond(epochSecond)
             .setTransactionId("transaction-2")
             .setAmount(4.56)
@@ -102,7 +102,7 @@ public class SecondTest {
     assertEquals(2, state.getTransactionsList().size());
 
     transaction = state.getTransactionsList().get(1);
-    assertEquals("merchant-1", transaction.getMerchandId());
+    assertEquals("merchant-1", transaction.getMerchantId());
     assertTrue(transaction.getEpochSecond() > 0);
     assertEquals("transaction-2", transaction.getTransactionId());
     assertEquals(4.56, transaction.getAmount(), 0.0);
@@ -118,7 +118,7 @@ public class SecondTest {
     testKit.addTransaction(
         SecondApi.AddTransactionCommand
             .newBuilder()
-            .setMerchandId("merchant-1")
+            .setMerchantId("merchant-1")
             .setEpochSecond(epochSecond)
             .setTransactionId("transaction-1")
             .setAmount(1.23)
@@ -128,7 +128,7 @@ public class SecondTest {
     testKit.addTransaction(
         SecondApi.AddTransactionCommand
             .newBuilder()
-            .setMerchandId("merchant-1")
+            .setMerchantId("merchant-1")
             .setEpochSecond(epochSecond)
             .setTransactionId("transaction-2")
             .setAmount(4.56)
@@ -138,7 +138,7 @@ public class SecondTest {
     testKit.addTransaction( // try adding the same transaction again - should be idempotent
         SecondApi.AddTransactionCommand
             .newBuilder()
-            .setMerchandId("merchant-1")
+            .setMerchantId("merchant-1")
             .setEpochSecond(epochSecond)
             .setTransactionId("transaction-2")
             .setAmount(6.54)
@@ -148,7 +148,7 @@ public class SecondTest {
     testKit.addTransaction(
         SecondApi.AddTransactionCommand
             .newBuilder()
-            .setMerchandId("merchant-1")
+            .setMerchantId("merchant-1")
             .setEpochSecond(epochSecond)
             .setTransactionId("transaction-3")
             .setAmount(7.89)
@@ -158,14 +158,14 @@ public class SecondTest {
     var response = testKit.aggregate(
         SecondApi.AggregateSecondCommand
             .newBuilder()
-            .setMerchandId("merchant-1")
+            .setMerchantId("merchant-1")
             .setEpochSecond(epochSecond)
             .build());
 
     var aggregated = response.getNextEventOfType(SecondEntity.SecondAggregated.class);
 
     assertNotNull(aggregated);
-    assertEquals("merchant-1", aggregated.getMerchandId());
+    assertEquals("merchant-1", aggregated.getMerchantId());
     assertEquals(epochSecond, aggregated.getEpochSecond());
     assertEquals(1.23 + 4.56 + 7.89, aggregated.getTransactionTotalAmount(), 0.0);
     assertEquals(3, aggregated.getTransactionCount());

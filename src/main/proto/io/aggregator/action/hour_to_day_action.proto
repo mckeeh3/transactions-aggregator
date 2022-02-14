@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package io.aggregator.action;
+
+import "akkaserverless/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/any.proto";
+import "io/aggregator/entity/hour_entity.proto";
+
+option java_outer_classname = "HourToDayService";
+
+service HourToDay {
+  option (akkaserverless.codegen) = {
+    action : {}
+  };
+
+  rpc OnHourCreated(entity.HourCreated) returns (google.protobuf.Empty) {
+    option (akkaserverless.method).eventing.in = {
+      event_sourced_entity : "hour"
+    };
+  }
+
+  rpc OnHourAggregated(entity.HourAggregated) returns (google.protobuf.Empty) {
+    option (akkaserverless.method).eventing.in = {
+      event_sourced_entity : "hour"
+    };
+  }
+
+  rpc IgnoreOtherEvents(google.protobuf.Any) returns (google.protobuf.Empty) {
+    option (akkaserverless.method).eventing.in = {
+      event_sourced_entity : "hour"
+    };
+  }
+}

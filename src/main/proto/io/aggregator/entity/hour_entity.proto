@@ -44,9 +44,10 @@ message HourAggregationRequested {
 message HourState {
   string merchant_id = 1;
   int64 epoch_hour = 2;
-  repeated ActiveMinute activeMinutes = 3;
-  google.protobuf.Timestamp last_update_timestamp = 4;
-  google.protobuf.Timestamp aggregateRequestTimestamp = 6;
+  int64 epoch_day = 3;
+  repeated ActiveMinute activeMinutes = 4;
+  google.protobuf.Timestamp last_update_timestamp = 5;
+  google.protobuf.Timestamp aggregateRequestTimestamp = 7;
 }
 
 message ActiveMinute {

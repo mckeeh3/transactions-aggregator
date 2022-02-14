@@ -97,6 +97,7 @@ public class Hour extends AbstractHour {
     return state.toBuilder()
         .setMerchantId(event.getMerchantId())
         .setEpochHour(event.getEpochHour())
+        .setEpochDay(TimeTo.epochDayFor(event.getEpochHour()))
         .build();
   }
 

@@ -8,6 +8,7 @@ import com.google.protobuf.Empty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.aggregator.TimeTo;
 import io.aggregator.api.SecondApi;
 
 // This class was initially generated based on the .proto definition by Akka Serverless tooling.
@@ -70,8 +71,11 @@ public class Second extends AbstractSecond {
 
   static SecondEntity.SecondState handle(SecondEntity.SecondState state, SecondEntity.SecondCreated event) {
     return state.toBuilder()
-        .setMerchandId(event.getMerchandId())
+        .setMerchantId(event.getMerchantId())
         .setEpochSecond(event.getEpochSecond())
+        .setEpochMinute(TimeTo.epochMinuteFor(event.getEpochSecond()))
+        .setEpochHour(TimeTo.epochHourFor(event.getEpochSecond()))
+        .setEpochDay(TimeTo.epochDayFor(event.getEpochSecond()))
         .build();
   }
 
@@ -85,7 +89,7 @@ public class Second extends AbstractSecond {
       return state.toBuilder()
           .addTransactions(
               SecondEntity.Transaction.newBuilder()
-                  .setMerchandId(event.getMerchandId())
+                  .setMerchantId(event.getMerchantId())
                   .setEpochSecond(event.getEpochSecond())
                   .setTransactionId(event.getTransactionId())
                   .setAmount(event.getAmount())
@@ -101,16 +105,16 @@ public class Second extends AbstractSecond {
 
   static List<?> eventsFor(SecondEntity.SecondState state, SecondApi.AddTransactionCommand command) {
     var transactionAdded = SecondEntity.SecondTransactionAdded.newBuilder()
-        .setMerchandId(command.getMerchandId())
+        .setMerchantId(command.getMerchantId())
         .setEpochSecond(command.getEpochSecond())
         .setTransactionId(command.getTransactionId())
         .setAmount(command.getAmount())
         .setTimestamp(command.getTimestamp())
         .build();
 
-    if (state.getMerchandId().isEmpty()) {
+    if (state.getMerchantId().isEmpty()) {
       var secondCreated = SecondEntity.SecondCreated.newBuilder()
-          .setMerchandId(command.getMerchandId())
+          .setMerchantId(command.getMerchantId())
           .setEpochSecond(command.getEpochSecond())
           .build();
 
@@ -125,7 +129,7 @@ public class Second extends AbstractSecond {
 
     return SecondEntity.SecondAggregated
         .newBuilder()
-        .setMerchandId(state.getMerchandId())
+        .setMerchantId(state.getMerchantId())
         .setEpochSecond(state.getEpochSecond())
         .setTransactionTotalAmount(total)
         .setTransactionCount(state.getTransactionsCount())

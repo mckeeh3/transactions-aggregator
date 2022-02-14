@@ -1,6 +1,12 @@
 package io.aggregator;
 
 import com.akkaserverless.javasdk.AkkaServerless;
+import io.aggregator.action.DayToHourAction;
+import io.aggregator.action.HourToDayAction;
+import io.aggregator.action.HourToMinuteAction;
+import io.aggregator.action.MinuteToHourAction;
+import io.aggregator.action.MinuteToSecondAction;
+import io.aggregator.action.SecondToMinuteAction;
 import io.aggregator.entity.Day;
 import io.aggregator.entity.Hour;
 import io.aggregator.entity.Minute;
@@ -26,7 +32,13 @@ public final class Main {
       Day::new,
       Hour::new,
       Minute::new,
-      Second::new);
+      Second::new,
+      DayToHourAction::new,
+      HourToDayAction::new,
+      HourToMinuteAction::new,
+      MinuteToHourAction::new,
+      MinuteToSecondAction::new,
+      SecondToMinuteAction::new);
   }
 
   public static void main(String[] args) throws Exception {

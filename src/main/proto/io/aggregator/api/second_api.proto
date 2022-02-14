@@ -25,21 +25,21 @@ service Second {
 
   rpc AddTransaction(AddTransactionCommand) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      post : "/second/{merchand_id}/{epoch_second}/transactions"
+      post : "/second/{merchant_id}/{epoch_second}/transactions"
       body : "*"
     };
   }
 
   rpc Aggregate(AggregateSecondCommand) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      post : "/second/{merchand_id}/{epoch_second}/aggregate"
+      post : "/second/{merchant_id}/{epoch_second}/aggregate"
       body : "*"
     };
   }
 }
 
 message AddTransactionCommand {
-  string merchand_id = 1 [ (akkaserverless.field).entity_key = true ];
+  string merchant_id = 1 [ (akkaserverless.field).entity_key = true ];
   int64 epoch_second = 2 [ (akkaserverless.field).entity_key = true ];
   string transaction_id = 3;
   double amount = 4;
@@ -47,7 +47,7 @@ message AddTransactionCommand {
 }
 
 message AggregateSecondCommand {
-  string merchand_id = 1 [ (akkaserverless.field).entity_key = true ];
+  string merchant_id = 1 [ (akkaserverless.field).entity_key = true ];
   int64 epoch_second = 2 [ (akkaserverless.field).entity_key = true ];
   google.protobuf.Timestamp aggregateRequestTimestamp = 3;
 }
