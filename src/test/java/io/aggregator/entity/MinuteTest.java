@@ -64,9 +64,9 @@ public class MinuteTest {
 
     assertEquals(epochSecond, activeSecond.getEpochSecond());
 
-    var nextEpochSecond = TimeTo.epochMinute(epochSecond + 1) == epochMinute
-        ? TimeTo.epochMinute(epochSecond + 1)
-        : TimeTo.epochMinute(epochSecond - 1);
+    var nextEpochSecond = TimeTo.epochMinuteFor(epochSecond + 1) == epochMinute
+        ? TimeTo.epochMinuteFor(epochSecond + 1)
+        : TimeTo.epochMinuteFor(epochSecond - 1);
 
     response = testKit.addSecond(
         MinuteApi.AddSecondCommand
@@ -108,9 +108,9 @@ public class MinuteTest {
             .setEpochSecond(epochSecond)
             .build());
 
-    var nextEpochSecond = TimeTo.epochMinute(epochSecond + 1) == epochMinute
-        ? TimeTo.epochMinute(epochSecond + 1)
-        : TimeTo.epochMinute(epochSecond - 1);
+    var nextEpochSecond = TimeTo.epochMinuteFor(epochSecond + 1) == epochMinute
+        ? TimeTo.epochMinuteFor(epochSecond + 1)
+        : TimeTo.epochMinuteFor(epochSecond - 1);
 
     testKit.addSecond(
         MinuteApi.AddSecondCommand
@@ -158,9 +158,9 @@ public class MinuteTest {
             .setEpochSecond(epochSecond)
             .build());
 
-    var nextEpochSecond = TimeTo.epochMinute(epochSecond + 1) == epochMinute
-        ? TimeTo.epochMinute(epochSecond + 1)
-        : TimeTo.epochMinute(epochSecond - 1);
+    var nextEpochSecond = TimeTo.epochMinuteFor(epochSecond + 1) == epochMinute
+        ? TimeTo.epochMinuteFor(epochSecond + 1)
+        : TimeTo.epochMinuteFor(epochSecond - 1);
 
     testKit.addSecond(
         MinuteApi.AddSecondCommand

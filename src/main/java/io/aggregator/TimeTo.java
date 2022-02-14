@@ -31,8 +31,24 @@ public class TimeTo {
     return timestamp.getSeconds() / 60;
   }
 
-  public static long epochMinute(Long second) {
+  public static long epochHourFor(Timestamp timestamp) {
+    return timestamp.getSeconds() / 60 / 60;
+  }
+
+  public static long epochDayFor(Timestamp timestamp) {
+    return timestamp.getSeconds() / 60 / 60 / 24;
+  }
+
+  public static long epochMinuteFor(Long second) {
     return second / 60;
+  }
+
+  public static long epochHourFor(Long second) {
+    return second / 60 / 60;
+  }
+
+  public static long epochDayFor(Long second) {
+    return second / 60 / 60 / 24;
   }
 
   public static int compare(Timestamp timestamp1, Timestamp timestamp2) {

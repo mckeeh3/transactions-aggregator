@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+import "akkaserverless/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+package io.aggregator.api;
+
+option java_outer_classname = "HourApi";
+
+service Hour {
+  option (akkaserverless.codegen) = {
+    event_sourced_entity : {
+      name : "io.aggregator.entity.Hour"
+      entity_type : "hour"
+      state : "io.aggregator.entity.HourState"
+      events : [
+        "io.aggregator.entity.HourCreated",
+        "io.aggregator.entity.MinuteAdded",
+        "io.aggregator.entity.HourAggregationRequested",
+        "io.aggregator.entity.HourAggregated",
+        "io.aggregator.entity.ActiveMinuteAggregated" //
+      ]
+    }
+  };
+
+  rpc AddMinute(AddMinuteCommand) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post : "/hour/{merchant_id}/{epoch_hour}/minutes"
+      body : "*"
+    };
+  }
+
+  rpc AggregateHour(AggregateHourCommand) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post : "/hour/{merchant_id}/{epoch_hour}/aggregate"
+      body : "*"
+    };
+  }
+
+  rpc MinuteAggregation(MinuteAggregationCommand)
+      returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post : "/hour/{merchant_id}/{epoch_hour}/minute-aggregation"
+      body : "*"
+    };
+  }
+}
+
+message AddMinuteCommand {
+  string merchant_id = 1 [ (akkaserverless.field).entity_key = true ];
+  int64 epoch_hour = 2 [ (akkaserverless.field).entity_key = true ];
+  int64 epoch_minute = 3;
+}
+
+message AggregateHourCommand {
+  string merchant_id = 1 [ (akkaserverless.field).entity_key = true ];
+  int64 epoch_hour = 2 [ (akkaserverless.field).entity_key = true ];
+  google.protobuf.Timestamp aggregateRequestTimestamp = 3;
+}
+
+message MinuteAggregationCommand {
+  string merchant_id = 1 [ (akkaserverless.field).entity_key = true ];
+  int64 epoch_hour = 2 [ (akkaserverless.field).entity_key = true ];
+  int64 epoch_minute = 3;
+  double transaction_total_amount = 4;
+  int32 transaction_count = 5;
+  google.protobuf.Timestamp last_update_timestamp = 6;
+  google.protobuf.Timestamp aggregateRequestTimestamp = 7;
+}
