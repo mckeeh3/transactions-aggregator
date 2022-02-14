@@ -30,7 +30,7 @@ service Second {
     };
   }
 
-  rpc Aggregate(AggregateCommand) returns (google.protobuf.Empty) {
+  rpc Aggregate(AggregateSecondCommand) returns (google.protobuf.Empty) {
     option (google.api.http) = {
       post : "/second/{merchand_id}/{epoch_second}/aggregate"
       body : "*"
@@ -46,7 +46,7 @@ message AddTransactionCommand {
   google.protobuf.Timestamp timestamp = 5;
 }
 
-message AggregateCommand {
+message AggregateSecondCommand {
   string merchand_id = 1 [ (akkaserverless.field).entity_key = true ];
   int64 epoch_second = 2 [ (akkaserverless.field).entity_key = true ];
   google.protobuf.Timestamp aggregateRequestTimestamp = 3;

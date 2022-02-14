@@ -9,8 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.aggregator.api.SecondApi;
-import io.aggregator.api.SecondApi.AddTransactionCommand;
-import io.aggregator.api.SecondApi.AggregateCommand;
 
 // This class was initially generated based on the .proto definition by Akka Serverless tooling.
 //
@@ -35,7 +33,7 @@ public class Second extends AbstractSecond {
   }
 
   @Override
-  public Effect<Empty> aggregate(SecondEntity.SecondState state, SecondApi.AggregateCommand command) {
+  public Effect<Empty> aggregate(SecondEntity.SecondState state, SecondApi.AggregateSecondCommand command) {
     return handle(state, command);
   }
 
@@ -54,7 +52,7 @@ public class Second extends AbstractSecond {
     return handle(state, event);
   }
 
-  private Effect<Empty> handle(SecondEntity.SecondState state, AddTransactionCommand command) {
+  private Effect<Empty> handle(SecondEntity.SecondState state, SecondApi.AddTransactionCommand command) {
     log.info("state: {}\nAddTransactionCommand: {}", state, command);
 
     return effects()
@@ -62,7 +60,7 @@ public class Second extends AbstractSecond {
         .thenReply(newState -> Empty.getDefaultInstance());
   }
 
-  private Effect<Empty> handle(SecondEntity.SecondState state, AggregateCommand command) {
+  private Effect<Empty> handle(SecondEntity.SecondState state, SecondApi.AggregateSecondCommand command) {
     log.info("state: {}\nAggregateCommand: {}", state, command);
 
     return effects()
@@ -101,7 +99,7 @@ public class Second extends AbstractSecond {
     return state; // this is a non-state changing event
   }
 
-  private List<?> eventsFor(SecondEntity.SecondState state, AddTransactionCommand command) {
+  private List<?> eventsFor(SecondEntity.SecondState state, SecondApi.AddTransactionCommand command) {
     var transactionAdded = SecondEntity.SecondTransactionAdded.newBuilder()
         .setMerchandId(command.getMerchandId())
         .setEpochSecond(command.getEpochSecond())
@@ -122,7 +120,7 @@ public class Second extends AbstractSecond {
     }
   }
 
-  private SecondEntity.SecondAggregated eventFor(SecondEntity.SecondState state, AggregateCommand command) {
+  private SecondEntity.SecondAggregated eventFor(SecondEntity.SecondState state, SecondApi.AggregateSecondCommand command) {
     var total = state.getTransactionsList().stream().reduce(0.0, (a, b) -> a + b.getAmount(), (a, b) -> a + b);
 
     return SecondEntity.SecondAggregated

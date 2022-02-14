@@ -9,9 +9,8 @@ import com.google.protobuf.Empty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.aggregator.TimeTo;
 import io.aggregator.api.MinuteApi;
-import io.aggregator.entity.MinuteEntity.ActiveSecondAggregated;
-import io.aggregator.entity.MinuteEntity.MinuteState;
 
 // This class was initially generated based on the .proto definition by Akka Serverless tooling.
 //
@@ -56,12 +55,17 @@ public class Minute extends AbstractMinute {
   }
 
   @Override
+  public MinuteEntity.MinuteState minuteAggregationRequested(MinuteEntity.MinuteState state, MinuteEntity.MinuteAggregationRequested event) {
+    return handle(state, event);
+  }
+
+  @Override
   public MinuteEntity.MinuteState minuteAggregated(MinuteEntity.MinuteState state, MinuteEntity.MinuteAggregated event) {
     return handle(state, event);
   }
 
   @Override
-  public MinuteState activeSecondAggregated(MinuteState state, ActiveSecondAggregated event) {
+  public MinuteEntity.MinuteState activeSecondAggregated(MinuteEntity.MinuteState state, MinuteEntity.ActiveSecondAggregated event) {
     return handle(state, event);
   }
 
@@ -113,6 +117,12 @@ public class Minute extends AbstractMinute {
     }
   }
 
+  private MinuteEntity.MinuteState handle(MinuteEntity.MinuteState state, MinuteEntity.MinuteAggregationRequested event) {
+    return state.toBuilder()
+        .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
+        .build();
+  }
+
   private MinuteEntity.MinuteState handle(MinuteEntity.MinuteState state, MinuteEntity.MinuteAggregated event) {
     return state; // no state change event
   }
@@ -141,12 +151,15 @@ public class Minute extends AbstractMinute {
   private List<?> eventsFor(MinuteEntity.MinuteState state, MinuteApi.AddSecondCommand command) {
     var secondAdded = MinuteEntity.SecondAdded
         .newBuilder()
+        .setMerchantId(command.getMerchantId())
+        .setEpochSecond(command.getEpochSecond())
         .build();
 
     if (state.getMerchantId().isEmpty()) {
       var minuteCreated = MinuteEntity.MinuteCreated
           .newBuilder()
           .setMerchantId(command.getMerchantId())
+          .setEpochMinute(command.getEpochMinute())
           .build();
 
       return List.of(minuteCreated, secondAdded);
@@ -169,27 +182,51 @@ public class Minute extends AbstractMinute {
   }
 
   private List<?> eventsFor(MinuteEntity.MinuteState state, MinuteApi.SecondAggregationCommand command) {
-    var alreadyInList = state.getActiveSecondsList().stream()
+    var activeSeconds = state.getActiveSecondsList();
+
+    var alreadyInList = activeSeconds.stream()
         .anyMatch(activeSecond -> activeSecond.getEpochSecond() == command.getEpochSecond());
 
     if (!alreadyInList) {
-      state = state.toBuilder()
-          .addActiveSeconds(
-              MinuteEntity.ActiveSecond.newBuilder()
-                  .setEpochSecond(command.getEpochSecond())
-                  .setTransactionTotalAmount(command.getTransactionTotalAmount())
-                  .setTransactionCount(command.getTransactionCount())
-                  .setLastUpdateTimestamp(command.getLastUpdateTimestamp())
-                  .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
-                  .build())
-          .build();
+      activeSeconds.add(
+          MinuteEntity.ActiveSecond.newBuilder()
+              .setEpochSecond(command.getEpochSecond())
+              .build());
     }
+
+    activeSeconds = updateActiveSeconds(command, activeSeconds);
 
     final var aggregateRequestTimestamp = state.getAggregateRequestTimestamp();
 
-    var allAggregated = state.getActiveSecondsList().stream()
+    var allSecondsAggregated = activeSeconds.stream()
         .allMatch(activeSecond -> activeSecond.getAggregateRequestTimestamp().equals(aggregateRequestTimestamp));
 
+    if (allSecondsAggregated) {
+      return List.of(toMinuteAggregated(command, activeSeconds), toActiveSecondAggregated(command));
+    } else {
+      return List.of(toActiveSecondAggregated(command));
+    }
+  }
+
+  private List<MinuteEntity.ActiveSecond> updateActiveSeconds(MinuteApi.SecondAggregationCommand command, List<MinuteEntity.ActiveSecond> activeSeconds) {
+    return activeSeconds.stream()
+        .map(activeSecond -> {
+          if (activeSecond.getEpochSecond() == command.getEpochSecond()) {
+            return activeSecond
+                .toBuilder()
+                .setTransactionTotalAmount(command.getTransactionTotalAmount())
+                .setTransactionCount(command.getTransactionCount())
+                .setLastUpdateTimestamp(command.getLastUpdateTimestamp())
+                .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
+                .build();
+          } else {
+            return activeSecond;
+          }
+        })
+        .collect(Collectors.toList());
+  }
+
+  static MinuteEntity.ActiveSecondAggregated toActiveSecondAggregated(MinuteApi.SecondAggregationCommand command) {
     var activeSecondAggregated = MinuteEntity.ActiveSecondAggregated
         .newBuilder()
         .setMerchantId(command.getMerchantId())
@@ -199,18 +236,29 @@ public class Minute extends AbstractMinute {
         .setLastUpdateTimestamp(command.getLastUpdateTimestamp())
         .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
         .build();
+    return activeSecondAggregated;
+  }
 
-    if (allAggregated) {
-      var minuteAggregated = MinuteEntity.MinuteAggregated
-          .newBuilder()
-          .setMerchantId(command.getMerchantId())
-          .setEpochMinute(command.getEpochMinute())
-          .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
-          .build();
+  static MinuteEntity.MinuteAggregated toMinuteAggregated(MinuteApi.SecondAggregationCommand command, List<MinuteEntity.ActiveSecond> activeSeconds) {
+    var transactionTotalAmount = activeSeconds.stream()
+        .reduce(0.0, (amount, activeSecond) -> amount + activeSecond.getTransactionTotalAmount(), Double::sum);
 
-      return List.of(minuteAggregated, activeSecondAggregated);
-    } else {
-      return List.of(activeSecondAggregated);
-    }
+    var transactionCount = activeSeconds.stream()
+        .reduce(0, (count, activeSecond) -> count + activeSecond.getTransactionCount(), Integer::sum);
+
+    var lastUpdateTimestamp = activeSeconds.stream()
+        .map(activeSecond -> activeSecond.getLastUpdateTimestamp())
+        .max(TimeTo.comparator())
+        .get();
+
+    return MinuteEntity.MinuteAggregated
+        .newBuilder()
+        .setMerchantId(command.getMerchantId())
+        .setEpochMinute(command.getEpochMinute())
+        .setTransactionTotalAmount(transactionTotalAmount)
+        .setTransactionCount(transactionCount)
+        .setLastUpdateTimestamp(lastUpdateTimestamp)
+        .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
+        .build();
   }
 }

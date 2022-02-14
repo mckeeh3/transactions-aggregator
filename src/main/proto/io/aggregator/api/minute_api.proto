@@ -18,6 +18,7 @@ service Minute {
       events : [
         "io.aggregator.entity.MinuteCreated",
         "io.aggregator.entity.SecondAdded",
+        "io.aggregator.entity.MinuteAggregationRequested",
         "io.aggregator.entity.MinuteAggregated",
         "io.aggregator.entity.ActiveSecondAggregated" //
       ]

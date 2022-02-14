@@ -156,7 +156,7 @@ public class SecondTest {
             .build());
 
     var response = testKit.aggregate(
-        SecondApi.AggregateCommand
+        SecondApi.AggregateSecondCommand
             .newBuilder()
             .setMerchandId("merchant-1")
             .setEpochSecond(epochSecond)
