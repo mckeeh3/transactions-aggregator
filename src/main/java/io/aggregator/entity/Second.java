@@ -68,14 +68,14 @@ public class Second extends AbstractSecond {
         .thenReply(newState -> Empty.getDefaultInstance());
   }
 
-  private SecondEntity.SecondState handle(SecondEntity.SecondState state, SecondEntity.SecondCreated event) {
+  static SecondEntity.SecondState handle(SecondEntity.SecondState state, SecondEntity.SecondCreated event) {
     return state.toBuilder()
         .setMerchandId(event.getMerchandId())
         .setEpochSecond(event.getEpochSecond())
         .build();
   }
 
-  private SecondEntity.SecondState handle(SecondEntity.SecondState state, SecondEntity.SecondTransactionAdded event) {
+  static SecondEntity.SecondState handle(SecondEntity.SecondState state, SecondEntity.SecondTransactionAdded event) {
     var transactionAlreadyAdded = state.getTransactionsList().stream()
         .anyMatch(transaction -> transaction.getTransactionId().equals(event.getTransactionId()));
 
@@ -95,11 +95,11 @@ public class Second extends AbstractSecond {
     }
   }
 
-  private SecondEntity.SecondState handle(SecondEntity.SecondState state, SecondEntity.SecondAggregated event) {
+  static SecondEntity.SecondState handle(SecondEntity.SecondState state, SecondEntity.SecondAggregated event) {
     return state; // this is a non-state changing event
   }
 
-  private List<?> eventsFor(SecondEntity.SecondState state, SecondApi.AddTransactionCommand command) {
+  static List<?> eventsFor(SecondEntity.SecondState state, SecondApi.AddTransactionCommand command) {
     var transactionAdded = SecondEntity.SecondTransactionAdded.newBuilder()
         .setMerchandId(command.getMerchandId())
         .setEpochSecond(command.getEpochSecond())
@@ -120,7 +120,7 @@ public class Second extends AbstractSecond {
     }
   }
 
-  private SecondEntity.SecondAggregated eventFor(SecondEntity.SecondState state, SecondApi.AggregateSecondCommand command) {
+  static SecondEntity.SecondAggregated eventFor(SecondEntity.SecondState state, SecondApi.AggregateSecondCommand command) {
     var total = state.getTransactionsList().stream().reduce(0.0, (a, b) -> a + b.getAmount(), (a, b) -> a + b);
 
     return SecondEntity.SecondAggregated

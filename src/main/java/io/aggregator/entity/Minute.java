@@ -93,14 +93,14 @@ public class Minute extends AbstractMinute {
         .thenReply(newState -> Empty.getDefaultInstance());
   }
 
-  private MinuteEntity.MinuteState handle(MinuteEntity.MinuteState state, MinuteEntity.MinuteCreated event) {
+  static MinuteEntity.MinuteState handle(MinuteEntity.MinuteState state, MinuteEntity.MinuteCreated event) {
     return state.toBuilder()
         .setMerchantId(event.getMerchantId())
         .setEpochMinute(event.getEpochMinute())
         .build();
   }
 
-  private MinuteEntity.MinuteState handle(MinuteEntity.MinuteState state, MinuteEntity.SecondAdded event) {
+  static MinuteEntity.MinuteState handle(MinuteEntity.MinuteState state, MinuteEntity.SecondAdded event) {
     var alreadyAdded = state.getActiveSecondsList().stream()
         .anyMatch(activeSecond -> activeSecond.getEpochSecond() == event.getEpochSecond());
 
@@ -117,17 +117,17 @@ public class Minute extends AbstractMinute {
     }
   }
 
-  private MinuteEntity.MinuteState handle(MinuteEntity.MinuteState state, MinuteEntity.MinuteAggregationRequested event) {
+  static MinuteEntity.MinuteState handle(MinuteEntity.MinuteState state, MinuteEntity.MinuteAggregationRequested event) {
     return state.toBuilder()
         .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
         .build();
   }
 
-  private MinuteEntity.MinuteState handle(MinuteEntity.MinuteState state, MinuteEntity.MinuteAggregated event) {
+  static MinuteEntity.MinuteState handle(MinuteEntity.MinuteState state, MinuteEntity.MinuteAggregated event) {
     return state; // no state change event
   }
 
-  private MinuteEntity.MinuteState handle(MinuteEntity.MinuteState state, MinuteEntity.ActiveSecondAggregated event) {
+  static MinuteEntity.MinuteState handle(MinuteEntity.MinuteState state, MinuteEntity.ActiveSecondAggregated event) {
     return state.toBuilder()
         .clearActiveSeconds()
         .addAllActiveSeconds(state.getActiveSecondsList().stream()
@@ -148,7 +148,7 @@ public class Minute extends AbstractMinute {
         .build();
   }
 
-  private List<?> eventsFor(MinuteEntity.MinuteState state, MinuteApi.AddSecondCommand command) {
+  static List<?> eventsFor(MinuteEntity.MinuteState state, MinuteApi.AddSecondCommand command) {
     var secondAdded = MinuteEntity.SecondAdded
         .newBuilder()
         .setMerchantId(command.getMerchantId())
@@ -168,7 +168,7 @@ public class Minute extends AbstractMinute {
     }
   }
 
-  private MinuteEntity.MinuteAggregationRequested eventFor(MinuteEntity.MinuteState state, MinuteApi.AggregateMinuteCommand command) {
+  static MinuteEntity.MinuteAggregationRequested eventFor(MinuteEntity.MinuteState state, MinuteApi.AggregateMinuteCommand command) {
     return MinuteEntity.MinuteAggregationRequested
         .newBuilder()
         .setMerchantId(command.getMerchantId())
@@ -181,7 +181,7 @@ public class Minute extends AbstractMinute {
         .build();
   }
 
-  private List<?> eventsFor(MinuteEntity.MinuteState state, MinuteApi.SecondAggregationCommand command) {
+  static List<?> eventsFor(MinuteEntity.MinuteState state, MinuteApi.SecondAggregationCommand command) {
     var activeSeconds = state.getActiveSecondsList();
 
     var alreadyInList = activeSeconds.stream()
@@ -208,7 +208,7 @@ public class Minute extends AbstractMinute {
     }
   }
 
-  private List<MinuteEntity.ActiveSecond> updateActiveSeconds(MinuteApi.SecondAggregationCommand command, List<MinuteEntity.ActiveSecond> activeSeconds) {
+  static List<MinuteEntity.ActiveSecond> updateActiveSeconds(MinuteApi.SecondAggregationCommand command, List<MinuteEntity.ActiveSecond> activeSeconds) {
     return activeSeconds.stream()
         .map(activeSecond -> {
           if (activeSecond.getEpochSecond() == command.getEpochSecond()) {
