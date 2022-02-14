@@ -24,7 +24,9 @@ public class HourToMinuteAction extends AbstractHourToMinuteAction {
   public Effect<Empty> onHourAggregationRequested(HourEntity.HourAggregationRequested hourAggregationRequested) {
     var results = hourAggregationRequested.getEpochMinutesList().stream()
         .map(epochMinute -> MinuteApi.AggregateMinuteCommand.newBuilder()
+            .setMerchantId(hourAggregationRequested.getMerchantId())
             .setEpochMinute(epochMinute)
+            .setAggregateRequestTimestamp(hourAggregationRequested.getAggregateRequestTimestamp())
             .build())
         .map(command -> components().minute().aggregateMinute(command).execute())
         .collect(Collectors.toList());
