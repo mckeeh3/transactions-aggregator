@@ -11,6 +11,7 @@ import io.aggregator.entity.Day;
 import io.aggregator.entity.Hour;
 import io.aggregator.entity.Minute;
 import io.aggregator.entity.Second;
+import io.aggregator.view.DailyTotalsByMerchantView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +34,7 @@ public final class Main {
       Hour::new,
       Minute::new,
       Second::new,
+      DailyTotalsByMerchantView::new,
       DayToHourAction::new,
       HourToDayAction::new,
       HourToMinuteAction::new,

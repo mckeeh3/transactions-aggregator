@@ -68,4 +68,12 @@ public class TimeTo {
   public static Comparator<Timestamp> comparator() {
     return (timestamp1, timestamp2) -> compare(timestamp1, timestamp2);
   }
+
+  public static Timestamp dayTimeStampFromDay(long epochDay) {
+    return Timestamp
+        .newBuilder()
+        .setSeconds(epochDay * 60 * 60 * 24)
+        .setNanos(0)
+        .build();
+  }
 }

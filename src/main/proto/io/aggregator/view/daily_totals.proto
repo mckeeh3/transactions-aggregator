@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package io.aggregator.view;
+
+import "google/protobuf/timestamp.proto";
+
+option java_outer_classname = "DailyTotalsModel";
+
+message DailyTotal {
+  string merchant_id = 1;
+  int64 epoch_day = 2;
+  double transaction_total_amount = 3;
+  int32 transaction_count = 4;
+  google.protobuf.Timestamp day = 5;
+  google.protobuf.Timestamp last_update_timestamp = 6;
+}
