@@ -11,19 +11,18 @@ option java_outer_classname = "MinuteToSecondService";
 
 service MinuteToSecond {
   option (akkaserverless.codegen) = {
-    action : {}
+    action: {}
   };
 
-  rpc OnMinuteAggregationRequested(entity.MinuteAggregationRequested)
-      returns (google.protobuf.Empty) {
+  rpc OnMinuteAggregationRequested(entity.MinuteAggregationRequested) returns (google.protobuf.Empty) {
     option (akkaserverless.method).eventing.in = {
-      event_sourced_entity : "minute"
+      event_sourced_entity: "minute"
     };
   }
 
   rpc IgnoreOtherEvents(google.protobuf.Any) returns (google.protobuf.Empty) {
     option (akkaserverless.method).eventing.in = {
-      event_sourced_entity : "minute"
+      event_sourced_entity: "minute"
     };
   }
 }

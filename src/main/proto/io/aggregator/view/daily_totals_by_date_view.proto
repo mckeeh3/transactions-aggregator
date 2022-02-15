@@ -9,21 +9,22 @@ import "google/protobuf/timestamp.proto";
 import "io/aggregator/entity/day_entity.proto";
 import "io/aggregator/view/daily_totals.proto";
 
-option java_outer_classname = "DailyTotalsByMerchantModel";
+option java_outer_classname = "DailyTotalsByDateModel";
 
-service DailyTotalsByMerchant {
+service DailyTotalsByDate {
   option (akkaserverless.codegen) = {
     view: {}
   };
 
-  rpc GetDailyTotalsByMerchant(DailyTotalsByMerchantRequest) returns (DailyTotalsByMerchantResponse) {
+  rpc GetDailyTotalsByDate(DailyTotalsByDateRequest) returns (DailyTotalsByDateResponse) {
     option (akkaserverless.method).view.query = {
       query: "SELECT * AS daily_totals"
-             "  FROM daily_totals_by_merchant"
-             " WHERE merchant_id = :merchant_id"
+             "  FROM daily_totals_by_date"
+             " WHERE day.seconds >= :`from_date.seconds`"
+             "   AND day.seconds < :`to_date.seconds`"
     };
     option (google.api.http) = {
-      get: "/daily-totals-by-merchant"
+      get: "/daily-totals-by-date"
     };
   }
 
@@ -32,7 +33,7 @@ service DailyTotalsByMerchant {
       value_entity: "day"
     };
     option (akkaserverless.method).view.update = {
-      table: "daily_totals_by_merchant"
+      table: "daily_totals_by_date"
       transform_updates: true
     };
   }
@@ -42,7 +43,7 @@ service DailyTotalsByMerchant {
       value_entity: "day"
     };
     option (akkaserverless.method).view.update = {
-      table: "daily_totals_by_merchant"
+      table: "daily_totals_by_date"
       transform_updates: true
     };
   }
@@ -52,16 +53,17 @@ service DailyTotalsByMerchant {
       value_entity: "day"
     };
     option (akkaserverless.method).view.update = {
-      table: "daily_totals_by_merchant"
+      table: "daily_totals_by_date"
       transform_updates: true
     };
   }
 }
 
-message DailyTotalsByMerchantRequest {
-  string merchant_id = 1;
+message DailyTotalsByDateRequest {
+  google.protobuf.Timestamp from_date = 1;
+  google.protobuf.Timestamp to_date = 2;
 }
 
-message DailyTotalsByMerchantResponse {
+message DailyTotalsByDateResponse {
   repeated DailyTotal daily_totals = 1;
 }

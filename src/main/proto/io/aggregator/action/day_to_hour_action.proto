@@ -11,19 +11,18 @@ option java_outer_classname = "DayToHourService";
 
 service DayToHour {
   option (akkaserverless.codegen) = {
-    action : {}
+    action: {}
   };
 
-  rpc OnDayAggregationRequested(entity.DayAggregationRequested)
-      returns (google.protobuf.Empty) {
+  rpc OnDayAggregationRequested(entity.DayAggregationRequested) returns (google.protobuf.Empty) {
     option (akkaserverless.method).eventing.in = {
-      event_sourced_entity : "day"
+      event_sourced_entity: "day"
     };
   }
 
   rpc IgnoreOtherEvents(google.protobuf.Any) returns (google.protobuf.Empty) {
     option (akkaserverless.method).eventing.in = {
-      event_sourced_entity : "day"
+      event_sourced_entity: "day"
     };
   }
 }

@@ -11,19 +11,18 @@ option java_outer_classname = "HourToMinuteService";
 
 service HourToMinute {
   option (akkaserverless.codegen) = {
-    action : {}
+    action: {}
   };
 
-  rpc OnHourAggregationRequested(entity.HourAggregationRequested)
-      returns (google.protobuf.Empty) {
+  rpc OnHourAggregationRequested(entity.HourAggregationRequested) returns (google.protobuf.Empty) {
     option (akkaserverless.method).eventing.in = {
-      event_sourced_entity : "hour"
+      event_sourced_entity: "hour"
     };
   }
 
   rpc IgnoreOtherEvents(google.protobuf.Any) returns (google.protobuf.Empty) {
     option (akkaserverless.method).eventing.in = {
-      event_sourced_entity : "hour"
+      event_sourced_entity: "hour"
     };
   }
 }

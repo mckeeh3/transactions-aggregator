@@ -3,7 +3,6 @@ package io.aggregator.view;
 import com.akkaserverless.javasdk.view.View;
 import com.akkaserverless.javasdk.view.ViewContext;
 import com.google.protobuf.Any;
-
 import io.aggregator.entity.DayEntity;
 
 // This class was initially generated based on the .proto definition by Akka Serverless tooling.
@@ -11,9 +10,9 @@ import io.aggregator.entity.DayEntity;
 // As long as this file exists it will not be overwritten: you can maintain it yourself,
 // or delete it so it is regenerated as needed.
 
-public class DailyTotalsByMerchantView extends AbstractDailyTotalsByMerchantView {
+public class DailyTotalsByDateView extends AbstractDailyTotalsByDateView {
 
-  public DailyTotalsByMerchantView(ViewContext context) {
+  public DailyTotalsByDateView(ViewContext context) {
   }
 
   @Override
@@ -22,7 +21,7 @@ public class DailyTotalsByMerchantView extends AbstractDailyTotalsByMerchantView
   }
 
   @Override
-  public UpdateEffect<DailyTotalsModel.DailyTotal> onDayCreated(DailyTotalsModel.DailyTotal state, DayEntity.DayCreated dayCreated) {
+  public View.UpdateEffect<DailyTotalsModel.DailyTotal> onDayCreated(DailyTotalsModel.DailyTotal state, DayEntity.DayCreated dayCreated) {
     return effects().updateState(DailyTotalsEventHandler.handle(state, dayCreated));
   }
 
