@@ -35,8 +35,8 @@ public class MinuteTest {
     MinuteTestKit testKit = MinuteTestKit.of(Minute::new);
 
     var now = TimeTo.now();
-    var epochSecond = TimeTo.epochSecondFor(now);
-    var epochMinute = TimeTo.epochMinuteFor(now);
+    var epochSecond = TimeTo.fromTimestamp(now).toEpochSecond();
+    var epochMinute = TimeTo.fromTimestamp(now).toEpochMinute();
 
     var response = testKit.addSecond(
         MinuteApi.AddSecondCommand
@@ -64,9 +64,7 @@ public class MinuteTest {
 
     assertEquals(epochSecond, activeSecond.getEpochSecond());
 
-    var nextEpochSecond = TimeTo.epochMinuteFor(epochSecond + 1) == epochMinute
-        ? TimeTo.epochMinuteFor(epochSecond + 1)
-        : TimeTo.epochMinuteFor(epochSecond - 1);
+    var nextEpochSecond = TimeTo.fromEpochSecond(epochSecond + 1).toEpochMinute() == epochMinute ? epochSecond + 1 : epochSecond - 1;
 
     response = testKit.addSecond(
         MinuteApi.AddSecondCommand
@@ -97,8 +95,8 @@ public class MinuteTest {
     MinuteTestKit testKit = MinuteTestKit.of(Minute::new);
 
     var now = TimeTo.now();
-    var epochSecond = TimeTo.epochSecondFor(now);
-    var epochMinute = TimeTo.epochMinuteFor(now);
+    var epochSecond = TimeTo.fromTimestamp(now).toEpochSecond();
+    var epochMinute = TimeTo.fromTimestamp(now).toEpochMinute();
 
     testKit.addSecond(
         MinuteApi.AddSecondCommand
@@ -108,9 +106,7 @@ public class MinuteTest {
             .setEpochSecond(epochSecond)
             .build());
 
-    var nextEpochSecond = TimeTo.epochMinuteFor(epochSecond + 1) == epochMinute
-        ? TimeTo.epochMinuteFor(epochSecond + 1)
-        : TimeTo.epochMinuteFor(epochSecond - 1);
+    var nextEpochSecond = TimeTo.fromEpochSecond(epochSecond + 1).toEpochMinute() == epochMinute ? epochSecond + 1 : epochSecond - 1;
 
     testKit.addSecond(
         MinuteApi.AddSecondCommand
@@ -147,8 +143,8 @@ public class MinuteTest {
     MinuteTestKit testKit = MinuteTestKit.of(Minute::new);
 
     var now = TimeTo.now();
-    var epochSecond = TimeTo.epochSecondFor(now);
-    var epochMinute = TimeTo.epochMinuteFor(now);
+    var epochSecond = TimeTo.fromTimestamp(now).toEpochSecond();
+    var epochMinute = TimeTo.fromTimestamp(now).toEpochMinute();
 
     testKit.addSecond(
         MinuteApi.AddSecondCommand
@@ -158,9 +154,7 @@ public class MinuteTest {
             .setEpochSecond(epochSecond)
             .build());
 
-    var nextEpochSecond = TimeTo.epochMinuteFor(epochSecond + 1) == epochMinute
-        ? TimeTo.epochMinuteFor(epochSecond + 1)
-        : TimeTo.epochMinuteFor(epochSecond - 1);
+    var nextEpochSecond = TimeTo.fromEpochSecond(epochSecond + 1).toEpochMinute() == epochMinute ? epochSecond + 1 : epochSecond - 1;
 
     testKit.addSecond(
         MinuteApi.AddSecondCommand

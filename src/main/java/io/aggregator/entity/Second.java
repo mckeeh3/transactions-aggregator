@@ -2,6 +2,8 @@ package io.aggregator.entity;
 
 import java.util.List;
 
+import javax.security.auth.x500.X500Principal;
+
 import com.akkaserverless.javasdk.eventsourcedentity.EventSourcedEntityContext;
 import com.google.protobuf.Empty;
 
@@ -73,9 +75,9 @@ public class Second extends AbstractSecond {
     return state.toBuilder()
         .setMerchantId(event.getMerchantId())
         .setEpochSecond(event.getEpochSecond())
-        .setEpochMinute(TimeTo.epochMinuteFor(event.getEpochSecond()))
-        .setEpochHour(TimeTo.epochHourFor(event.getEpochSecond()))
-        .setEpochDay(TimeTo.epochDayFor(event.getEpochSecond()))
+        .setEpochMinute(TimeTo.fromEpochSecond(event.getEpochSecond()).toEpochMinute())
+        .setEpochHour(TimeTo.fromEpochSecond(event.getEpochSecond()).toEpochHour())
+        .setEpochDay(TimeTo.fromEpochSecond(event.getEpochSecond()).toEpochDay())
         .build();
   }
 

@@ -30,7 +30,7 @@ service DailyTotalsByDate {
 
   rpc OnDayCreated(entity.DayCreated) returns (DailyTotal) {
     option (akkaserverless.method).eventing.in = {
-      value_entity: "day"
+      event_sourced_entity: "day"
     };
     option (akkaserverless.method).view.update = {
       table: "daily_totals_by_date"
@@ -40,7 +40,7 @@ service DailyTotalsByDate {
 
   rpc OnDayAggregated(entity.DayAggregated) returns (DailyTotal) {
     option (akkaserverless.method).eventing.in = {
-      value_entity: "day"
+      event_sourced_entity: "day"
     };
     option (akkaserverless.method).view.update = {
       table: "daily_totals_by_date"
@@ -50,7 +50,7 @@ service DailyTotalsByDate {
 
   rpc IgnoreOtherEvents(google.protobuf.Any) returns (DailyTotal) {
     option (akkaserverless.method).eventing.in = {
-      value_entity: "day"
+      event_sourced_entity: "day"
     };
     option (akkaserverless.method).view.update = {
       table: "daily_totals_by_date"

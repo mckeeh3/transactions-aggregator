@@ -10,7 +10,7 @@ class DailyTotalsEventHandler {
         .toBuilder()
         .setMerchantId(dayCreated.getMerchantId())
         .setEpochDay(dayCreated.getEpochDay())
-        .setDay(TimeTo.dayTimeStampFromDay(dayCreated.getEpochDay()))
+        .setDay(TimeTo.fromEpochDay(dayCreated.getEpochDay()).toTimestamp())
         .build();
   }
 

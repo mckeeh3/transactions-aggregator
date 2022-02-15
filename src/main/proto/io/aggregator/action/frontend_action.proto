@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package io.aggregator.action;
+
+import "akkaserverless/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+option java_outer_classname = "FrontendService";
+
+service Frontend {
+  option (akkaserverless.codegen) = {
+    action: {}
+  };
+
+  rpc GenerateTransactions(GenerateTransactionsRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/generate-transactions"
+      body: "*"
+    };
+  }
+
+  rpc CollectMerchantTotals(CollectMerchantTotalsRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/collect-merchant-totals"
+      body: "*"
+    };
+  }
+}
+
+message GenerateTransactionsRequest {
+  int32 merchant_id_range = 1;
+  int32 transaction_count = 2;
+  google.protobuf.Timestamp day = 3;
+}
+
+message CollectMerchantTotalsRequest {
+  google.protobuf.Timestamp day = 1;
+}

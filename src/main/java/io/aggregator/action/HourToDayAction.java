@@ -24,7 +24,7 @@ public class HourToDayAction extends AbstractHourToDayAction {
         DayApi.AddHourCommand
             .newBuilder()
             .setMerchantId(hourCreated.getMerchantId())
-            .setEpochDay(TimeTo.epochDayFor(hourCreated.getEpochHour()))
+            .setEpochDay(TimeTo.fromEpochHour(hourCreated.getEpochHour()).toEpochDay())
             .setEpochHour(hourCreated.getEpochHour())
             .build()));
   }
@@ -35,7 +35,7 @@ public class HourToDayAction extends AbstractHourToDayAction {
         DayApi.HourAggregationCommand
             .newBuilder()
             .setMerchantId(hourAggregated.getMerchantId())
-            .setEpochDay(TimeTo.epochDayFor(hourAggregated.getEpochHour()))
+            .setEpochDay(TimeTo.fromEpochHour(hourAggregated.getEpochHour()).toEpochDay())
             .setEpochHour(hourAggregated.getEpochHour())
             .setTransactionTotalAmount(hourAggregated.getTransactionTotalAmount())
             .setTransactionCount(hourAggregated.getTransactionCount())

@@ -24,7 +24,7 @@ public class SecondToMinuteAction extends AbstractSecondToMinuteAction {
         MinuteApi.AddSecondCommand
             .newBuilder()
             .setMerchantId(secondCreated.getMerchantId())
-            .setEpochMinute(TimeTo.epochMinuteFor(secondCreated.getEpochSecond()))
+            .setEpochMinute(TimeTo.fromEpochSecond(secondCreated.getEpochSecond()).toEpochMinute())
             .setEpochSecond(secondCreated.getEpochSecond())
             .build()));
   }
@@ -35,7 +35,7 @@ public class SecondToMinuteAction extends AbstractSecondToMinuteAction {
         MinuteApi.SecondAggregationCommand
             .newBuilder()
             .setMerchantId(secondAggregated.getMerchantId())
-            .setEpochMinute(TimeTo.epochMinuteFor(secondAggregated.getEpochSecond()))
+            .setEpochMinute(TimeTo.fromEpochSecond(secondAggregated.getEpochSecond()).toEpochMinute())
             .setEpochSecond(secondAggregated.getEpochSecond())
             .setTransactionTotalAmount(secondAggregated.getTransactionTotalAmount())
             .setTransactionCount(secondAggregated.getTransactionCount())

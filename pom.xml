@@ -4,14 +4,14 @@
 
   <groupId>io.aggregator</groupId>
   <artifactId>transactions-aggregator</artifactId>
-  <version>v1</version>
+  <version>v3</version>
   <packaging>jar</packaging>
 
   <name>transactions-aggregator</name>
     <properties>
 
     <!-- TODO Update to your own Docker repository or Docker Hub scope -->
-    <dockerImage>my-docker-repo/${project.artifactId}</dockerImage>
+    <dockerImage>mckeeh3/${project.artifactId}</dockerImage>
     <dockerTag>${project.version}</dockerTag>
     <mainClass>io.aggregator.Main</mainClass>
 

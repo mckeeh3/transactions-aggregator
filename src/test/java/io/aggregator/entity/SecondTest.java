@@ -35,7 +35,7 @@ public class SecondTest {
   public void addTransactionTest() {
     SecondTestKit testKit = SecondTestKit.of(Second::new);
 
-    var epochSecond = TimeTo.epochSecondFor(TimeTo.now());
+    var epochSecond = TimeTo.fromTimestamp(TimeTo.now()).toEpochSecond();
     var response = testKit.addTransaction(
         SecondApi.AddTransactionCommand
             .newBuilder()
@@ -113,7 +113,7 @@ public class SecondTest {
   public void aggregateTest() {
     SecondTestKit testKit = SecondTestKit.of(Second::new);
 
-    var epochSecond = TimeTo.epochSecondFor(TimeTo.now());
+    var epochSecond = TimeTo.fromTimestamp(TimeTo.now()).toEpochSecond();
 
     testKit.addTransaction(
         SecondApi.AddTransactionCommand

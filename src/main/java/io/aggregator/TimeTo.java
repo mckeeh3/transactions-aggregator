@@ -23,32 +23,12 @@ public class TimeTo {
         .build();
   }
 
-  public static long epochSecondFor(Timestamp timestamp) {
-    return timestamp.getSeconds();
-  }
-
-  public static long epochMinuteFor(Timestamp timestamp) {
-    return timestamp.getSeconds() / 60;
-  }
-
-  public static long epochHourFor(Timestamp timestamp) {
-    return timestamp.getSeconds() / 60 / 60;
-  }
-
-  public static long epochDayFor(Timestamp timestamp) {
-    return timestamp.getSeconds() / 60 / 60 / 24;
-  }
-
-  public static long epochMinuteFor(Long second) {
-    return second / 60;
-  }
-
-  public static long epochHourFor(Long second) {
-    return second / 60 / 60;
-  }
-
-  public static long epochDayFor(Long second) {
-    return second / 60 / 60 / 24;
+  public static Timestamp timestampForEpochDayX(long epochDay) {
+    return Timestamp
+        .newBuilder()
+        .setSeconds(epochDay * 60 * 60 * 24)
+        .setNanos(0)
+        .build();
   }
 
   public static int compare(Timestamp timestamp1, Timestamp timestamp2) {
@@ -69,11 +49,67 @@ public class TimeTo {
     return (timestamp1, timestamp2) -> compare(timestamp1, timestamp2);
   }
 
-  public static Timestamp dayTimeStampFromDay(long epochDay) {
-    return Timestamp
+  public static From fromEpochSecond(long epochSecond) {
+    return new From(Timestamp
+        .newBuilder()
+        .setSeconds(epochSecond)
+        .setNanos(0)
+        .build());
+  }
+
+  public static From fromEpochMinute(long epochMinute) {
+    return new From(Timestamp
+        .newBuilder()
+        .setSeconds(epochMinute * 60)
+        .setNanos(0)
+        .build());
+  }
+
+  public static From fromEpochHour(long epochHour) {
+    return new From(Timestamp
+        .newBuilder()
+        .setSeconds(epochHour * 60 * 60)
+        .setNanos(0)
+        .build());
+  }
+
+  public static From fromEpochDay(long epochDay) {
+    return new From(Timestamp
         .newBuilder()
         .setSeconds(epochDay * 60 * 60 * 24)
         .setNanos(0)
-        .build();
+        .build());
+  }
+
+  public static From fromTimestamp(Timestamp timestamp) {
+    return new From(timestamp);
+  }
+
+  public static class From {
+    private final Timestamp timestamp;
+
+    private From(Timestamp timestamp) {
+      this.timestamp = timestamp;
+    }
+
+    public long toEpochSecond() {
+      return timestamp.getSeconds();
+    }
+
+    public long toEpochMinute() {
+      return timestamp.getSeconds() / 60;
+    }
+
+    public long toEpochHour() {
+      return timestamp.getSeconds() / 60 / 60;
+    }
+
+    public long toEpochDay() {
+      return timestamp.getSeconds() / 60 / 60 / 24;
+    }
+
+    public Timestamp toTimestamp() {
+      return timestamp;
+    }
   }
 }

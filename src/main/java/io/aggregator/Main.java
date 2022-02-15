@@ -2,6 +2,7 @@ package io.aggregator;
 
 import com.akkaserverless.javasdk.AkkaServerless;
 import io.aggregator.action.DayToHourAction;
+import io.aggregator.action.FrontendAction;
 import io.aggregator.action.HourToDayAction;
 import io.aggregator.action.HourToMinuteAction;
 import io.aggregator.action.MinuteToHourAction;
@@ -38,6 +39,7 @@ public final class Main {
       DailyTotalsByDateView::new,
       DailyTotalsByMerchantView::new,
       DayToHourAction::new,
+      FrontendAction::new,
       HourToDayAction::new,
       HourToMinuteAction::new,
       MinuteToHourAction::new,
