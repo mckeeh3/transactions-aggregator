@@ -72,6 +72,9 @@ public class FrontendAction extends AbstractFrontendAction {
     var fromDate = TimeTo.fromEpochDay(epochDay).toTimestamp();
     var toDate = TimeTo.fromEpochDay(epochDay + 1).toTimestamp();
 
+    log.info("epochDay: {}, fromDate: {}, toDate: {}",
+        TimeTo.fromEpochDay(epochDay).format(), TimeTo.fromTimestamp(fromDate).format(), TimeTo.fromTimestamp(toDate).format());
+
     return components().dailyTotalsByDateView().getDailyTotalsByDate(
         DailyTotalsByDateRequest
             .newBuilder()
@@ -83,6 +86,8 @@ public class FrontendAction extends AbstractFrontendAction {
   }
 
   private CompletionStage<Empty> aggregateMerchants(DailyTotalsByDateResponse response, Timestamp day) {
+    log.info("aggregateMerchants: ({}) {}", response.getDailyTotalsCount(), response);
+
     var results = response.getDailyTotalsList().stream()
         .map(dailyTotal -> toAggregateDayCommand(dailyTotal, day))
         .collect(Collectors.toList());

@@ -1,6 +1,8 @@
 package io.aggregator;
 
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 
 import com.google.protobuf.Timestamp;
@@ -110,6 +112,14 @@ public class TimeTo {
 
     public Timestamp toTimestamp() {
       return timestamp;
+    }
+
+    public Instant toInstant() {
+      return Instant.ofEpochSecond(timestamp.getSeconds(), timestamp.getNanos());
+    }
+
+    public String format() {
+      return toInstant().atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ISO_DATE_TIME);
     }
   }
 }

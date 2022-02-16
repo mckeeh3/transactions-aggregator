@@ -133,6 +133,7 @@ public class Second extends AbstractSecond {
         .setEpochSecond(state.getEpochSecond())
         .setTransactionTotalAmount(total)
         .setTransactionCount(state.getTransactionsCount())
+        .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
         .build();
   }
 }
