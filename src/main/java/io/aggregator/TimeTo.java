@@ -25,12 +25,18 @@ public class TimeTo {
         .build();
   }
 
-  public static Timestamp timestampForEpochDayX(long epochDay) {
-    return Timestamp
-        .newBuilder()
-        .setSeconds(epochDay * 60 * 60 * 24)
-        .setNanos(0)
-        .build();
+  public static Timestamp max(Timestamp a, Timestamp b) {
+    if (a.getSeconds() > b.getSeconds()) {
+      return a;
+    } else if (a.getSeconds() < b.getSeconds()) {
+      return b;
+    } else {
+      if (a.getNanos() > b.getNanos()) {
+        return a;
+      } else {
+        return b;
+      }
+    }
   }
 
   public static int compare(Timestamp timestamp1, Timestamp timestamp2) {
@@ -87,6 +93,14 @@ public class TimeTo {
     return new From(timestamp);
   }
 
+  public static From fromZero() {
+    return fromEpochSecond(0);
+  }
+
+  public static From fromNow() {
+    return fromTimestamp(now());
+  }
+
   public static class From {
     private final Timestamp timestamp;
 
@@ -120,6 +134,80 @@ public class TimeTo {
 
     public String format() {
       return toInstant().atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ISO_DATE_TIME);
+    }
+
+    public MathOp plus() {
+      return new MathOp(timestamp, false);
+    }
+
+    public MathOp minus() {
+      return new MathOp(timestamp, true);
+    }
+  }
+
+  public static class MathOp {
+    private final Timestamp timestamp;
+    private final boolean subtract;
+
+    public MathOp(Timestamp timestamp, boolean subtract) {
+      this.timestamp = timestamp;
+      this.subtract = subtract;
+    }
+
+    public From nanos(int nanos) {
+      var nanosAdjusted = subtract ? timestamp.getNanos() - nanos : timestamp.getNanos() + nanos;
+      if (nanosAdjusted < 0) {
+        return new From(Timestamp
+            .newBuilder()
+            .setSeconds(timestamp.getSeconds() - 1)
+            .setNanos(1_000_000_000 + nanosAdjusted)
+            .build());
+      } else if (nanosAdjusted >= 1000000000) {
+        return new From(Timestamp
+            .newBuilder()
+            .setSeconds(timestamp.getSeconds() + 1)
+            .setNanos(nanosAdjusted - 1_000_000_000)
+            .build());
+      } else {
+        return new From(Timestamp
+            .newBuilder()
+            .setSeconds(timestamp.getSeconds())
+            .setNanos(subtract ? timestamp.getNanos() - nanos : timestamp.getNanos() + nanos)
+            .build());
+      }
+
+    }
+
+    public From seconds(long seconds) {
+      return fromTimestamp(Timestamp
+          .newBuilder()
+          .setSeconds(timestamp.getSeconds() + seconds * (subtract ? -1 : 1))
+          .setNanos(timestamp.getNanos())
+          .build());
+    }
+
+    public From minutes(long minutes) {
+      return fromTimestamp(Timestamp
+          .newBuilder()
+          .setSeconds(timestamp.getSeconds() + minutes * 60 * (subtract ? -1 : 1))
+          .setNanos(timestamp.getNanos())
+          .build());
+    }
+
+    public From hours(long hours) {
+      return fromTimestamp(Timestamp
+          .newBuilder()
+          .setSeconds(timestamp.getSeconds() + hours * 60 * 60 * (subtract ? -1 : 1))
+          .setNanos(timestamp.getNanos())
+          .build());
+    }
+
+    public From days(long days) {
+      return fromTimestamp(Timestamp
+          .newBuilder()
+          .setSeconds(timestamp.getSeconds() + days * 60 * 60 * 24 * (subtract ? -1 : 1))
+          .setNanos(timestamp.getNanos())
+          .build());
     }
   }
 }

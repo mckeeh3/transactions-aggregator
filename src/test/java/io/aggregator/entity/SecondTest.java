@@ -113,7 +113,7 @@ public class SecondTest {
   public void aggregateTest() {
     SecondTestKit testKit = SecondTestKit.of(Second::new);
 
-    var epochSecond = TimeTo.fromTimestamp(TimeTo.now()).toEpochSecond();
+    var epochSecond = TimeTo.fromNow().toEpochSecond();
 
     testKit.addTransaction(
         SecondApi.AddTransactionCommand
@@ -122,7 +122,7 @@ public class SecondTest {
             .setEpochSecond(epochSecond)
             .setTransactionId("transaction-1")
             .setAmount(1.23)
-            .setTimestamp(TimeTo.now())
+            .setTimestamp(TimeTo.fromEpochSecond(epochSecond).toTimestamp())
             .build());
 
     testKit.addTransaction(
@@ -132,7 +132,7 @@ public class SecondTest {
             .setEpochSecond(epochSecond)
             .setTransactionId("transaction-2")
             .setAmount(4.56)
-            .setTimestamp(TimeTo.now())
+            .setTimestamp(TimeTo.fromEpochSecond(epochSecond).plus().nanos(10).toTimestamp())
             .build());
 
     testKit.addTransaction( // try adding the same transaction again - should be idempotent
@@ -141,8 +141,8 @@ public class SecondTest {
             .setMerchantId("merchant-1")
             .setEpochSecond(epochSecond)
             .setTransactionId("transaction-2")
-            .setAmount(6.54)
-            .setTimestamp(TimeTo.now())
+            .setAmount(4.56)
+            .setTimestamp(TimeTo.fromEpochSecond(epochSecond).plus().nanos(10).toTimestamp())
             .build());
 
     testKit.addTransaction(
@@ -152,7 +152,7 @@ public class SecondTest {
             .setEpochSecond(epochSecond)
             .setTransactionId("transaction-3")
             .setAmount(7.89)
-            .setTimestamp(TimeTo.now())
+            .setTimestamp(TimeTo.fromEpochSecond(epochSecond).plus().nanos(20).toTimestamp())
             .build());
 
     var response = testKit.aggregate(
@@ -160,6 +160,7 @@ public class SecondTest {
             .newBuilder()
             .setMerchantId("merchant-1")
             .setEpochSecond(epochSecond)
+            .setAggregateRequestTimestamp(TimeTo.fromEpochSecond(epochSecond).plus().hours(2).toTimestamp())
             .build());
 
     var aggregated = response.getNextEventOfType(SecondEntity.SecondAggregated.class);
@@ -169,5 +170,7 @@ public class SecondTest {
     assertEquals(epochSecond, aggregated.getEpochSecond());
     assertEquals(1.23 + 4.56 + 7.89, aggregated.getTransactionTotalAmount(), 0.0);
     assertEquals(3, aggregated.getTransactionCount());
+    assertEquals(TimeTo.fromEpochSecond(epochSecond).plus().hours(2).toTimestamp(), aggregated.getAggregateRequestTimestamp());
+    assertEquals(TimeTo.fromEpochSecond(epochSecond).plus().nanos(20).toTimestamp(), aggregated.getLastUpdateTimestamp());
   }
 }

@@ -34,9 +34,9 @@ public class DayTest {
   public void addHourTest() {
     DayTestKit testKit = DayTestKit.of(Day::new);
 
-    var now = TimeTo.now();
-    var epochHour = TimeTo.fromTimestamp(now).toEpochHour();
-    var epochDay = TimeTo.fromTimestamp(now).toEpochDay();
+    var epochDay = TimeTo.fromNow().toEpochDay();
+    var epochHour = TimeTo.fromEpochDay(epochDay).toEpochHour();
+    var nextEpochHour = TimeTo.fromEpochHour(epochHour).plus().hours(1).toEpochHour();
 
     var response = testKit.addHour(
         DayApi.AddHourCommand
@@ -63,8 +63,6 @@ public class DayTest {
     var activeHour = state.getActiveHours(0);
 
     assertEquals(epochHour, activeHour.getEpochHour());
-
-    var nextEpochHour = TimeTo.fromEpochHour(epochHour + 1).toEpochDay() == epochDay ? TimeTo.fromEpochHour(epochHour + 1).toEpochHour() : TimeTo.fromEpochHour(epochHour - 1).toEpochHour();
 
     response = testKit.addHour(
         DayApi.AddHourCommand
@@ -94,9 +92,10 @@ public class DayTest {
   public void aggregateDayTest() {
     DayTestKit testKit = DayTestKit.of(Day::new);
 
-    var now = TimeTo.now();
-    var epochHour = TimeTo.fromTimestamp(now).toEpochHour();
-    var epochDay = TimeTo.fromTimestamp(now).toEpochDay();
+    var epochDay = TimeTo.fromNow().toEpochDay();
+    var epochHour = TimeTo.fromEpochDay(epochDay).toEpochHour();
+    var nextEpochHour = TimeTo.fromEpochHour(epochHour).plus().hours(1).toEpochHour();
+    var now = TimeTo.fromEpochDay(epochDay).toTimestamp();
 
     testKit.addHour(
         DayApi.AddHourCommand
@@ -105,8 +104,6 @@ public class DayTest {
             .setEpochDay(epochDay)
             .setEpochHour(epochHour)
             .build());
-
-    var nextEpochHour = (TimeTo.fromEpochHour(epochHour + 1).toEpochDay() == epochDay) ? TimeTo.fromEpochHour(epochHour + 1).toEpochHour() : TimeTo.fromEpochHour(epochHour - 1).toEpochHour();
 
     testKit.addHour(
         DayApi.AddHourCommand
@@ -142,9 +139,10 @@ public class DayTest {
   public void hourAggregationTest() {
     DayTestKit testKit = DayTestKit.of(Day::new);
 
-    var now = TimeTo.now();
-    var epochHour = TimeTo.fromTimestamp(now).toEpochHour();
-    var epochDay = TimeTo.fromTimestamp(now).toEpochDay();
+    var epochDay = TimeTo.fromNow().toEpochDay();
+    var epochHour = TimeTo.fromEpochDay(epochDay).toEpochHour();
+    var nextEpochHour = TimeTo.fromEpochHour(epochHour).plus().hours(1).toEpochHour();
+    var now = TimeTo.fromEpochDay(epochDay).toTimestamp();
 
     testKit.addHour(
         DayApi.AddHourCommand
@@ -153,8 +151,6 @@ public class DayTest {
             .setEpochDay(epochDay)
             .setEpochHour(epochHour)
             .build());
-
-    var nextEpochHour = (TimeTo.fromEpochHour(epochHour + 1).toEpochDay() == epochDay) ? TimeTo.fromEpochHour(epochHour + 1).toEpochHour() : TimeTo.fromEpochHour(epochHour - 1).toEpochHour();
 
     testKit.addHour(
         DayApi.AddHourCommand

@@ -34,9 +34,9 @@ public class HourTest {
   public void addMinuteTest() {
     HourTestKit testKit = HourTestKit.of(Hour::new);
 
-    var now = TimeTo.now();
-    var epochMinute = TimeTo.fromTimestamp(now).toEpochMinute();
-    var epochHour = TimeTo.fromTimestamp(now).toEpochHour();
+    var epochHour = TimeTo.fromNow().toEpochHour();
+    var epochMinute = TimeTo.fromEpochHour(epochHour).toEpochMinute();
+    var nextEpochMinute = TimeTo.fromEpochMinute(epochMinute).plus().minutes(1).toEpochMinute();
 
     var response = testKit.addMinute(
         HourApi.AddMinuteCommand
@@ -63,8 +63,6 @@ public class HourTest {
     var activeMinute = state.getActiveMinutes(0);
 
     assertEquals(epochMinute, activeMinute.getEpochMinute());
-
-    var nextEpochMinute = TimeTo.fromEpochMinute(epochMinute + 1).toEpochHour() == epochHour ? epochMinute + 1 : epochMinute - 1;
 
     response = testKit.addMinute(
         HourApi.AddMinuteCommand
@@ -94,9 +92,10 @@ public class HourTest {
   public void aggregateHourTest() {
     HourTestKit testKit = HourTestKit.of(Hour::new);
 
-    var now = TimeTo.now();
-    var epochMinute = TimeTo.fromTimestamp(now).toEpochMinute();
-    var epochHour = TimeTo.fromTimestamp(now).toEpochHour();
+    var epochHour = TimeTo.fromNow().toEpochHour();
+    var epochMinute = TimeTo.fromEpochHour(epochHour).toEpochMinute();
+    var nextEpochMinute = TimeTo.fromEpochMinute(epochMinute).plus().minutes(1).toEpochMinute();
+    var now = TimeTo.fromEpochHour(epochHour).toTimestamp();
 
     testKit.addMinute(
         HourApi.AddMinuteCommand
@@ -105,8 +104,6 @@ public class HourTest {
             .setEpochHour(epochHour)
             .setEpochMinute(epochMinute)
             .build());
-
-    var nextEpochMinute = TimeTo.fromEpochMinute(epochMinute + 1).toEpochHour() == epochHour ? epochMinute + 1 : epochMinute - 1;
 
     testKit.addMinute(
         HourApi.AddMinuteCommand
@@ -142,9 +139,10 @@ public class HourTest {
   public void minuteAggregationTest() {
     HourTestKit testKit = HourTestKit.of(Hour::new);
 
-    var now = TimeTo.now();
-    var epochMinute = TimeTo.fromTimestamp(now).toEpochMinute();
-    var epochHour = TimeTo.fromTimestamp(now).toEpochHour();
+    var epochHour = TimeTo.fromNow().toEpochHour();
+    var epochMinute = TimeTo.fromEpochHour(epochHour).toEpochMinute();
+    var nextEpochMinute = TimeTo.fromEpochMinute(epochMinute).plus().minutes(1).toEpochMinute();
+    var now = TimeTo.fromEpochHour(epochHour).toTimestamp();
 
     testKit.addMinute(
         HourApi.AddMinuteCommand
@@ -153,8 +151,6 @@ public class HourTest {
             .setEpochHour(epochHour)
             .setEpochMinute(epochMinute)
             .build());
-
-    var nextEpochMinute = TimeTo.fromEpochMinute(epochMinute + 1).toEpochHour() == epochHour ? epochMinute + 1 : epochMinute - 1;
 
     testKit.addMinute(
         HourApi.AddMinuteCommand

@@ -126,6 +126,7 @@ public class Second extends AbstractSecond {
 
   static SecondEntity.SecondAggregated eventFor(SecondEntity.SecondState state, SecondApi.AggregateSecondCommand command) {
     var total = state.getTransactionsList().stream().reduce(0.0, (a, b) -> a + b.getAmount(), (a, b) -> a + b);
+    var lastUpdate = state.getTransactionsList().stream().max((a, b) -> TimeTo.compare(a.getTimestamp(), b.getTimestamp())).get();
 
     return SecondEntity.SecondAggregated
         .newBuilder()
@@ -134,6 +135,7 @@ public class Second extends AbstractSecond {
         .setTransactionTotalAmount(total)
         .setTransactionCount(state.getTransactionsCount())
         .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
+        .setLastUpdateTimestamp(lastUpdate.getTimestamp())
         .build();
   }
 }

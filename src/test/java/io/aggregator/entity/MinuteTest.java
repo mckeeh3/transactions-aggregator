@@ -34,9 +34,9 @@ public class MinuteTest {
   public void addSecondTest() {
     MinuteTestKit testKit = MinuteTestKit.of(Minute::new);
 
-    var now = TimeTo.now();
-    var epochSecond = TimeTo.fromTimestamp(now).toEpochSecond();
-    var epochMinute = TimeTo.fromTimestamp(now).toEpochMinute();
+    var epochSecond = TimeTo.fromNow().toEpochSecond();
+    var nextEpochSecond = TimeTo.fromEpochSecond(epochSecond).plus().seconds(1).toEpochSecond();
+    var epochMinute = TimeTo.fromEpochSecond(epochSecond).toEpochMinute();
 
     var response = testKit.addSecond(
         MinuteApi.AddSecondCommand
@@ -63,8 +63,6 @@ public class MinuteTest {
     var activeSecond = state.getActiveSeconds(0);
 
     assertEquals(epochSecond, activeSecond.getEpochSecond());
-
-    var nextEpochSecond = TimeTo.fromEpochSecond(epochSecond + 1).toEpochMinute() == epochMinute ? epochSecond + 1 : epochSecond - 1;
 
     response = testKit.addSecond(
         MinuteApi.AddSecondCommand
@@ -94,9 +92,10 @@ public class MinuteTest {
   public void aggregateMinuteTest() {
     MinuteTestKit testKit = MinuteTestKit.of(Minute::new);
 
-    var now = TimeTo.now();
-    var epochSecond = TimeTo.fromTimestamp(now).toEpochSecond();
-    var epochMinute = TimeTo.fromTimestamp(now).toEpochMinute();
+    var epochSecond = TimeTo.fromNow().toEpochSecond();
+    var nextEpochSecond = TimeTo.fromEpochSecond(epochSecond).plus().seconds(1).toEpochSecond();
+    var epochMinute = TimeTo.fromEpochSecond(epochSecond).toEpochMinute();
+    var now = TimeTo.fromEpochSecond(epochSecond).toTimestamp();
 
     testKit.addSecond(
         MinuteApi.AddSecondCommand
@@ -105,8 +104,6 @@ public class MinuteTest {
             .setEpochMinute(epochMinute)
             .setEpochSecond(epochSecond)
             .build());
-
-    var nextEpochSecond = TimeTo.fromEpochSecond(epochSecond + 1).toEpochMinute() == epochMinute ? epochSecond + 1 : epochSecond - 1;
 
     testKit.addSecond(
         MinuteApi.AddSecondCommand
@@ -142,9 +139,10 @@ public class MinuteTest {
   public void secondAggregationTest() {
     MinuteTestKit testKit = MinuteTestKit.of(Minute::new);
 
-    var now = TimeTo.now();
-    var epochSecond = TimeTo.fromTimestamp(now).toEpochSecond();
-    var epochMinute = TimeTo.fromTimestamp(now).toEpochMinute();
+    var epochSecond = TimeTo.fromNow().toEpochSecond();
+    var nextEpochSecond = TimeTo.fromEpochSecond(epochSecond).plus().seconds(1).toEpochSecond();
+    var epochMinute = TimeTo.fromEpochSecond(epochSecond).toEpochMinute();
+    var now = TimeTo.fromEpochSecond(epochSecond).toTimestamp();
 
     testKit.addSecond(
         MinuteApi.AddSecondCommand
@@ -153,8 +151,6 @@ public class MinuteTest {
             .setEpochMinute(epochMinute)
             .setEpochSecond(epochSecond)
             .build());
-
-    var nextEpochSecond = TimeTo.fromEpochSecond(epochSecond + 1).toEpochMinute() == epochMinute ? epochSecond + 1 : epochSecond - 1;
 
     testKit.addSecond(
         MinuteApi.AddSecondCommand
