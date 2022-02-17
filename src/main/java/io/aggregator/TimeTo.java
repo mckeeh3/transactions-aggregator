@@ -57,6 +57,14 @@ public class TimeTo {
     return (timestamp1, timestamp2) -> compare(timestamp1, timestamp2);
   }
 
+  public static From fromEpochSubSecond(long epochSubSecond) {
+    return new From(Timestamp
+        .newBuilder()
+        .setSeconds(epochSubSecond / 100)
+        .setNanos((int) (epochSubSecond % 100) * 10_000_000)
+        .build());
+  }
+
   public static From fromEpochSecond(long epochSecond) {
     return new From(Timestamp
         .newBuilder()
@@ -106,6 +114,10 @@ public class TimeTo {
 
     private From(Timestamp timestamp) {
       this.timestamp = timestamp;
+    }
+
+    public long toEpochSubSecond() {
+      return timestamp.getSeconds() * 100 + timestamp.getNanos() / 10_000_000;
     }
 
     public long toEpochSecond() {

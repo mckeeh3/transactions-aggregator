@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package io.aggregator.entity;
+
+option java_outer_classname = "SubSecondEntity";
+
+message SubSecondCreated {
+  string merchant_id = 1;
+  int64 epoch_sub_second = 2;
+}
+
+message SubSecondTransactionAdded {
+  string merchant_id = 1;
+  int64 epoch_sub_second = 2;
+  string transaction_id = 3;
+  double amount = 4;
+  google.protobuf.Timestamp timestamp = 5;
+}
+
+message SubSecondAggregated {
+  string merchant_id = 1;
+  int64 epoch_sub_second = 2;
+  double transaction_total_amount = 4;
+  int32 transaction_count = 5;
+  google.protobuf.Timestamp last_update_timestamp = 6;
+  google.protobuf.Timestamp aggregateRequestTimestamp = 7;
+}
+
+message SubSecondState {
+  string merchant_id = 1;
+  int64 epoch_sub_second = 2;
+  int64 epoch_second = 3;
+  int64 epoch_minute = 4;
+  int64 epoch_hour = 5;
+  int64 epoch_day = 6;
+  repeated Transaction2 transactions = 7;
+  google.protobuf.Timestamp last_update_timestamp = 8;
+}
+
+message Transaction2 {
+  string merchant_id = 1;
+  int64 epoch_sub_second = 2;
+  string transaction_id = 3;
+  double amount = 4;
+  google.protobuf.Timestamp timestamp = 5;
+}

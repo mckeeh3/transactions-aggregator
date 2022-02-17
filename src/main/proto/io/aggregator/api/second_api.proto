@@ -17,37 +17,54 @@ service Second {
       state: "io.aggregator.entity.SecondState"
       events: [
         "io.aggregator.entity.SecondCreated",
-        "io.aggregator.entity.SecondTransactionAdded",
-        "io.aggregator.entity.SecondAggregated"  //
+        "io.aggregator.entity.SubSecondAdded",
+        "io.aggregator.entity.SecondAggregationRequested",
+        "io.aggregator.entity.SecondAggregated",
+        "io.aggregator.entity.ActiveSubSecondAggregated"  //
       ]
     }
   };
 
-  rpc AddTransaction(AddTransactionCommand) returns (google.protobuf.Empty) {
+  rpc AddSubSecond(AddSubSecondCommand) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      post: "/second/{merchant_id}/{epoch_second}/transactions"
+      post: "/second/{merchant_id}/{epoch_second}/seconds"
       body: "*"
     };
   }
 
-  rpc Aggregate(AggregateSecondCommand) returns (google.protobuf.Empty) {
+  rpc AggregateSecond(AggregateSecondCommand) returns (google.protobuf.Empty) {
     option (google.api.http) = {
       post: "/second/{merchant_id}/{epoch_second}/aggregate"
       body: "*"
     };
   }
+
+  rpc SubSecondAggregation(SubSecondAggregationCommand) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/second/{merchant_id}/{epoch_second}/second-aggregation"
+      body: "*"
+    };
+  }
 }
 
-message AddTransactionCommand {
+message AddSubSecondCommand {
   string merchant_id = 1 [(akkaserverless.field).entity_key = true];
   int64 epoch_second = 2 [(akkaserverless.field).entity_key = true];
-  string transaction_id = 3;
-  double amount = 4;
-  google.protobuf.Timestamp timestamp = 5;
+  int64 epoch_sub_second = 3;
 }
 
 message AggregateSecondCommand {
   string merchant_id = 1 [(akkaserverless.field).entity_key = true];
   int64 epoch_second = 2 [(akkaserverless.field).entity_key = true];
   google.protobuf.Timestamp aggregateRequestTimestamp = 3;
+}
+
+message SubSecondAggregationCommand {
+  string merchant_id = 1 [(akkaserverless.field).entity_key = true];
+  int64 epoch_second = 2 [(akkaserverless.field).entity_key = true];
+  int64 epoch_sub_second = 3;
+  double transaction_total_amount = 4;
+  int32 transaction_count = 5;
+  google.protobuf.Timestamp last_update_timestamp = 6;
+  google.protobuf.Timestamp aggregateRequestTimestamp = 7;
 }

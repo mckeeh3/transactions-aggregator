@@ -8,10 +8,13 @@ import io.aggregator.action.HourToMinuteAction;
 import io.aggregator.action.MinuteToHourAction;
 import io.aggregator.action.MinuteToSecondAction;
 import io.aggregator.action.SecondToMinuteAction;
+import io.aggregator.action.SecondToSubSecondAction;
+import io.aggregator.action.SubSecondToSecondAction;
 import io.aggregator.entity.Day;
 import io.aggregator.entity.Hour;
 import io.aggregator.entity.Minute;
 import io.aggregator.entity.Second;
+import io.aggregator.entity.SubSecond;
 import io.aggregator.view.DailyTotalsByDateView;
 import io.aggregator.view.DailyTotalsByMerchantView;
 import org.slf4j.Logger;
@@ -36,6 +39,7 @@ public final class Main {
       Hour::new,
       Minute::new,
       Second::new,
+      SubSecond::new,
       DailyTotalsByDateView::new,
       DailyTotalsByMerchantView::new,
       DayToHourAction::new,
@@ -44,7 +48,9 @@ public final class Main {
       HourToMinuteAction::new,
       MinuteToHourAction::new,
       MinuteToSecondAction::new,
-      SecondToMinuteAction::new);
+      SecondToMinuteAction::new,
+      SecondToSubSecondAction::new,
+      SubSecondToSecondAction::new);
   }
 
   public static void main(String[] args) throws Exception {

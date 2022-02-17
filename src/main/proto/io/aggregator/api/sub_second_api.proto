@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+import "akkaserverless/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+package io.aggregator.api;
+
+option java_outer_classname = "SubSecondApi";
+
+service SubSecond {
+  option (akkaserverless.codegen) = {
+    event_sourced_entity: {
+      name: "io.aggregator.entity.SubSecond"
+      entity_type: "sub_second"
+      state: "io.aggregator.entity.SubSecondState"
+      events: [
+        "io.aggregator.entity.SubSecondCreated",
+        "io.aggregator.entity.SubSecondTransactionAdded",
+        "io.aggregator.entity.SubSecondAggregated"  //
+      ]
+    }
+  };
+
+  rpc AddTransaction(AddTransaction2Command) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/sub_second/{merchant_id}/{epoch_sub_second}/transactions"
+      body: "*"
+    };
+  }
+
+  rpc AggregateSubSecond(AggregateSubSecondCommand) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/sub_second/{merchant_id}/{epoch_sub_second}/aggregate"
+      body: "*"
+    };
+  }
+}
+
+message AddTransaction2Command {
+  string merchant_id = 1 [(akkaserverless.field).entity_key = true];
+  int64 epoch_sub_second = 2 [(akkaserverless.field).entity_key = true];
+  string transaction_id = 3;
+  double amount = 4;
+  google.protobuf.Timestamp timestamp = 5;
+}
+
+message AggregateSubSecondCommand {
+  string merchant_id = 1 [(akkaserverless.field).entity_key = true];
+  int64 epoch_sub_second = 2 [(akkaserverless.field).entity_key = true];
+  google.protobuf.Timestamp aggregateRequestTimestamp = 3;
+}

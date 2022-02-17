@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import io.aggregator.TimeTo;
 import io.aggregator.api.DayApi;
-import io.aggregator.api.SecondApi;
+import io.aggregator.api.SubSecondApi;
 import io.aggregator.view.DailyTotalsByDateModel.DailyTotalsByDateRequest;
 import io.aggregator.view.DailyTotalsByDateModel.DailyTotalsByDateResponse;
 import io.aggregator.view.DailyTotalsModel.DailyTotal;
@@ -40,18 +40,18 @@ public class FrontendAction extends AbstractFrontendAction {
     var results = IntStream.range(0, generateTransactionsRequest.getTransactionCount())
         .mapToObj(i -> {
           var timestamp = TimeTo.now();
-          var epochSecond = TimeTo.fromTimestamp(timestamp).toEpochSecond();
+          var epochSubSecond = TimeTo.fromTimestamp(timestamp).toEpochSubSecond();
 
-          return SecondApi.AddTransactionCommand
+          return SubSecondApi.AddTransaction2Command
               .newBuilder()
               .setMerchantId("merchant-" + random.nextInt(generateTransactionsRequest.getMerchantIdRange()))
-              .setEpochSecond(epochSecond)
+              .setEpochSubSecond(epochSubSecond)
               .setTransactionId(UUID.randomUUID().toString())
               .setAmount(random.nextInt(100) / 100.0)
               .setTimestamp(timestamp)
               .build();
         })
-        .map(command -> components().second().addTransaction(command).execute())
+        .map(command -> components().subSecond().addTransaction(command).execute())
         .collect(Collectors.toList());
 
     var result = CompletableFuture.allOf(results.toArray(new CompletableFuture[results.size()]))

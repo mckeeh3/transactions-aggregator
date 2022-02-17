@@ -23,12 +23,13 @@ public class MinuteToSecondAction extends AbstractMinuteToSecondAction {
   @Override
   public Effect<Empty> onMinuteAggregationRequested(MinuteEntity.MinuteAggregationRequested minuteAggregationRequested) {
     var results = minuteAggregationRequested.getEpochSecondsList().stream()
-        .map(epochSecond -> SecondApi.AggregateSecondCommand.newBuilder()
+        .map(epochSecond -> SecondApi.AggregateSecondCommand
+            .newBuilder()
             .setMerchantId(minuteAggregationRequested.getMerchantId())
             .setEpochSecond(epochSecond)
             .setAggregateRequestTimestamp(minuteAggregationRequested.getAggregateRequestTimestamp())
             .build())
-        .map(command -> components().second().aggregate(command).execute())
+        .map(command -> components().second().aggregateSecond(command).execute())
         .collect(Collectors.toList());
 
     var result = CompletableFuture.allOf(results.toArray(new CompletableFuture[results.size()]))
