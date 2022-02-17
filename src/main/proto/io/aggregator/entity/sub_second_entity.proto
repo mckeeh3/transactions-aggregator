@@ -35,11 +35,11 @@ message SubSecondState {
   int64 epoch_minute = 4;
   int64 epoch_hour = 5;
   int64 epoch_day = 6;
-  repeated Transaction2 transactions = 7;
+  repeated Transaction transactions = 7;
   google.protobuf.Timestamp last_update_timestamp = 8;
 }
 
-message Transaction2 {
+message Transaction {
   string merchant_id = 1;
   int64 epoch_sub_second = 2;
   string transaction_id = 3;

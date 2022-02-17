@@ -189,7 +189,8 @@ public class Day extends AbstractDay {
 
     if (!alreadyInList) {
       activeHours.add(
-          DayEntity.ActiveHour.newBuilder()
+          DayEntity.ActiveHour
+              .newBuilder()
               .setEpochHour(command.getEpochHour())
               .build());
     }

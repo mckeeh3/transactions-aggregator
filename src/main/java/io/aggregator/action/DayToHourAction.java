@@ -23,7 +23,8 @@ public class DayToHourAction extends AbstractDayToHourAction {
   @Override
   public Effect<Empty> onDayAggregationRequested(DayEntity.DayAggregationRequested dayAggregationRequested) {
     var results = dayAggregationRequested.getEpochHoursList().stream()
-        .map(epochHour -> HourApi.AggregateHourCommand.newBuilder()
+        .map(epochHour -> HourApi.AggregateHourCommand
+            .newBuilder()
             .setMerchantId(dayAggregationRequested.getMerchantId())
             .setEpochHour(epochHour)
             .setAggregateRequestTimestamp(dayAggregationRequested.getAggregateRequestTimestamp())

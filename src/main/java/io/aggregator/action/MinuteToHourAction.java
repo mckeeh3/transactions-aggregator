@@ -21,7 +21,8 @@ public class MinuteToHourAction extends AbstractMinuteToHourAction {
   @Override
   public Effect<Empty> onMinuteCreated(MinuteEntity.MinuteCreated minuteCreated) {
     return effects().forward(components().hour().addMinute(
-        HourApi.AddMinuteCommand.newBuilder()
+        HourApi.AddMinuteCommand
+            .newBuilder()
             .setMerchantId(minuteCreated.getMerchantId())
             .setEpochHour(TimeTo.fromEpochMinute(minuteCreated.getEpochMinute()).toEpochHour())
             .setEpochMinute(minuteCreated.getEpochMinute())
@@ -31,7 +32,8 @@ public class MinuteToHourAction extends AbstractMinuteToHourAction {
   @Override
   public Effect<Empty> onMinuteAggregated(MinuteEntity.MinuteAggregated minuteAggregated) {
     return effects().forward(components().hour().minuteAggregation(
-        HourApi.MinuteAggregationCommand.newBuilder()
+        HourApi.MinuteAggregationCommand
+            .newBuilder()
             .setMerchantId(minuteAggregated.getMerchantId())
             .setEpochHour(TimeTo.fromEpochMinute(minuteAggregated.getEpochMinute()).toEpochHour())
             .setEpochMinute(minuteAggregated.getEpochMinute())

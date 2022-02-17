@@ -3,6 +3,9 @@ package io.aggregator.action;
 import com.akkaserverless.javasdk.action.ActionCreationContext;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
+
+import io.aggregator.TimeTo;
+import io.aggregator.api.SecondApi;
 import io.aggregator.entity.SubSecondEntity;
 
 // This class was initially generated based on the .proto definition by Akka Serverless tooling.
@@ -10,24 +13,39 @@ import io.aggregator.entity.SubSecondEntity;
 // As long as this file exists it will not be overwritten: you can maintain it yourself,
 // or delete it so it is regenerated as needed.
 
-/** An action. */
 public class SubSecondToSecondAction extends AbstractSubSecondToSecondAction {
 
-  public SubSecondToSecondAction(ActionCreationContext creationContext) {}
+  public SubSecondToSecondAction(ActionCreationContext creationContext) {
+  }
 
-  /** Handler for "OnSubSecondCreated". */
   @Override
   public Effect<Empty> onSubSecondCreated(SubSecondEntity.SubSecondCreated subSecondCreated) {
-    throw new RuntimeException("The command handler for `OnSubSecondCreated` is not implemented, yet");
+    return effects().forward(components().second().addSubSecond(
+        SecondApi.AddSubSecondCommand
+            .newBuilder()
+            .setMerchantId(subSecondCreated.getMerchantId())
+            .setEpochSecond(TimeTo.fromEpochSubSecond(subSecondCreated.getEpochSubSecond()).toEpochSecond())
+            .setEpochSubSecond(subSecondCreated.getEpochSubSecond())
+            .build()));
   }
-  /** Handler for "OnSubSecondAggregated". */
+
   @Override
   public Effect<Empty> onSubSecondAggregated(SubSecondEntity.SubSecondAggregated subSecondAggregated) {
-    throw new RuntimeException("The command handler for `OnSubSecondAggregated` is not implemented, yet");
+    return effects().forward(components().second().subSecondAggregation(
+        SecondApi.SubSecondAggregationCommand
+            .newBuilder()
+            .setMerchantId(subSecondAggregated.getMerchantId())
+            .setEpochSecond(TimeTo.fromEpochSecond(subSecondAggregated.getEpochSubSecond()).toEpochSecond())
+            .setEpochSubSecond(subSecondAggregated.getEpochSubSecond())
+            .setTransactionTotalAmount(subSecondAggregated.getTransactionTotalAmount())
+            .setTransactionCount(subSecondAggregated.getTransactionCount())
+            .setLastUpdateTimestamp(subSecondAggregated.getLastUpdateTimestamp())
+            .setAggregateRequestTimestamp(subSecondAggregated.getAggregateRequestTimestamp())
+            .build()));
   }
-  /** Handler for "IgnoreOtherEvents". */
+
   @Override
   public Effect<Empty> ignoreOtherEvents(Any any) {
-    throw new RuntimeException("The command handler for `IgnoreOtherEvents` is not implemented, yet");
+    return effects().reply(Empty.getDefaultInstance());
   }
 }

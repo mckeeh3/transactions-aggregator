@@ -191,7 +191,8 @@ public class Second extends AbstractSecond {
 
     if (!alreadyInList) {
       activeSubSeconds.add(
-          SecondEntity.ActiveSubSecond.newBuilder()
+          SecondEntity.ActiveSubSecond
+              .newBuilder()
               .setEpochSubSecond(command.getEpochSubSecond())
               .build());
     }

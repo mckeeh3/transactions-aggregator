@@ -190,7 +190,8 @@ public class Hour extends AbstractHour {
 
     if (!alreadyInList) {
       activeMinutes.add(
-          HourEntity.ActiveMinute.newBuilder()
+          HourEntity.ActiveMinute
+              .newBuilder()
               .setEpochMinute(command.getEpochMinute())
               .build());
     }

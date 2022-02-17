@@ -191,7 +191,8 @@ public class Minute extends AbstractMinute {
 
     if (!alreadyInList) {
       activeSeconds.add(
-          MinuteEntity.ActiveSecond.newBuilder()
+          MinuteEntity.ActiveSecond
+              .newBuilder()
               .setEpochSecond(command.getEpochSecond())
               .build());
     }

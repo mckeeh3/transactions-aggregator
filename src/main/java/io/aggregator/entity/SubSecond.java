@@ -88,7 +88,8 @@ public class SubSecond extends AbstractSubSecond {
     } else {
       return state.toBuilder()
           .addTransactions(
-              SubSecondEntity.Transaction2.newBuilder()
+              SubSecondEntity.Transaction
+                  .newBuilder()
                   .setMerchantId(event.getMerchantId())
                   .setEpochSubSecond(event.getEpochSubSecond())
                   .setTransactionId(event.getTransactionId())
@@ -104,7 +105,8 @@ public class SubSecond extends AbstractSubSecond {
   }
 
   static List<?> eventsFor(SubSecondEntity.SubSecondState state, SubSecondApi.AddTransaction2Command command) {
-    var transactionAdded = SubSecondEntity.SubSecondTransactionAdded.newBuilder()
+    var transactionAdded = SubSecondEntity.SubSecondTransactionAdded
+        .newBuilder()
         .setMerchantId(command.getMerchantId())
         .setEpochSubSecond(command.getEpochSubSecond())
         .setTransactionId(command.getTransactionId())
@@ -113,7 +115,8 @@ public class SubSecond extends AbstractSubSecond {
         .build();
 
     if (state.getMerchantId().isEmpty()) {
-      var secondCreated = SubSecondEntity.SubSecondCreated.newBuilder()
+      var secondCreated = SubSecondEntity.SubSecondCreated
+          .newBuilder()
           .setMerchantId(command.getMerchantId())
           .setEpochSubSecond(command.getEpochSubSecond())
           .build();
