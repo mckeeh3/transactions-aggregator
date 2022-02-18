@@ -70,7 +70,7 @@ public class FrontendAction extends AbstractFrontendAction {
   private CompletionStage<Empty> queryMerchants(Timestamp day) {
     var epochDay = TimeTo.fromTimestamp(day).toEpochDay();
     var fromDate = TimeTo.fromEpochDay(epochDay).toTimestamp();
-    var toDate = TimeTo.fromEpochDay(epochDay + 1).toTimestamp();
+    var toDate = TimeTo.fromEpochDay(epochDay).plus().days(1).toTimestamp();
 
     log.info("epochDay: {}, fromDate: {}, toDate: {}",
         TimeTo.fromEpochDay(epochDay).format(), TimeTo.fromTimestamp(fromDate).format(), TimeTo.fromTimestamp(toDate).format());

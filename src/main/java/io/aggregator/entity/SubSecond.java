@@ -129,7 +129,10 @@ public class SubSecond extends AbstractSubSecond {
 
   static SubSecondEntity.SubSecondAggregated eventFor(SubSecondEntity.SubSecondState state, SubSecondApi.AggregateSubSecondCommand command) {
     var total = state.getTransactionsList().stream().reduce(0.0, (a, b) -> a + b.getAmount(), (a, b) -> a + b);
-    var lastUpdate = state.getTransactionsList().stream().max((a, b) -> TimeTo.compare(a.getTimestamp(), b.getTimestamp())).get();
+    var lastUpdate = state.getTransactionsList().stream()
+        .map(transaction -> transaction.getTimestamp())
+        .max(TimeTo.comparator())
+        .get();
 
     return SubSecondEntity.SubSecondAggregated
         .newBuilder()
@@ -138,7 +141,7 @@ public class SubSecond extends AbstractSubSecond {
         .setTransactionTotalAmount(total)
         .setTransactionCount(state.getTransactionsCount())
         .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
-        .setLastUpdateTimestamp(lastUpdate.getTimestamp())
+        .setLastUpdateTimestamp(lastUpdate)
         .build();
   }
 }

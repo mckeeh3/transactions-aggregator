@@ -39,4 +39,19 @@ public class TimeToTest {
     assertEquals(epochSubSecond + 90, TimeTo.fromEpochSubSecond(epochSubSecond).plus().milliSeconds(90 * subSecondMs).toEpochSubSecond());
     assertEquals(epochSecond + 1, TimeTo.fromEpochSubSecond(epochSubSecond).plus().milliSeconds(1000).toEpochSecond());
   }
+
+  @Test
+  public void daysTest() {
+    var epochDay = TimeTo.fromNow().toEpochDay();
+    var timestamp = TimeTo.fromEpochDay(epochDay).toTimestamp();
+
+    assertEquals(epochDay, TimeTo.fromTimestamp(timestamp).toEpochDay());
+    assertEquals(timestamp, TimeTo.fromEpochDay(epochDay).toTimestamp());
+
+    assertEquals(epochDay + 1, TimeTo.fromTimestamp(timestamp).plus().days(1).toEpochDay());
+    assertEquals(epochDay - 1, TimeTo.fromTimestamp(timestamp).minus().days(1).toEpochDay());
+
+    assertEquals(epochDay + 123456, TimeTo.fromTimestamp(timestamp).plus().days(123456).toEpochDay());
+    assertEquals(epochDay - 654321, TimeTo.fromTimestamp(timestamp).minus().days(654321).toEpochDay());
+  }
 }
