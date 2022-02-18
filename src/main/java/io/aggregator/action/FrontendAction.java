@@ -37,9 +37,12 @@ public class FrontendAction extends AbstractFrontendAction {
   public Effect<Empty> generateTransactions(FrontendService.GenerateTransactionsRequest generateTransactionsRequest) {
     log.info("generateTransactions: {}", generateTransactionsRequest);
 
+    var transactionIntervalMs = generateTransactionsRequest.getTransactionIntervalMs();
+    var intervalMs = transactionIntervalMs == 0 ? 10 : transactionIntervalMs;
+
     var results = IntStream.range(0, generateTransactionsRequest.getTransactionCount())
         .mapToObj(i -> {
-          var timestamp = TimeTo.fromTimestamp(generateTransactionsRequest.getDay()).plus().milliSeconds(i).toTimestamp();
+          var timestamp = TimeTo.fromTimestamp(generateTransactionsRequest.getDay()).plus().milliSeconds(i * intervalMs).toTimestamp();
           var epochSubSecond = TimeTo.fromTimestamp(timestamp).toEpochSubSecond();
 
           return SubSecondApi.AddTransactionCommand

@@ -32,7 +32,8 @@ service Frontend {
 message GenerateTransactionsRequest {
   int32 merchant_id_range = 1;
   int32 transaction_count = 2;
-  google.protobuf.Timestamp day = 3;
+  int32 transaction_interval_ms = 3;
+  google.protobuf.Timestamp day = 4;
 }
 
 message CollectMerchantTotalsRequest {
