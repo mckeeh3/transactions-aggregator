@@ -37,7 +37,7 @@ public class TimeToTest {
     var subSecondMs = TimeTo.fromEpochSubSecond(epochSubSecond).plus().subSeconds(1).toEpochMilliSeconds() - TimeTo.fromEpochSubSecond(epochSubSecond).toEpochMilliSeconds();
 
     assertEquals(epochSubSecond + 90, TimeTo.fromEpochSubSecond(epochSubSecond).plus().milliSeconds(90 * subSecondMs).toEpochSubSecond());
-    assertEquals(epochSecond + 1, TimeTo.fromEpochSubSecond(epochSubSecond).plus().milliSeconds(1000).toEpochSecond());
+    assertEquals(epochSecond + 1, TimeTo.fromEpochSubSecond(epochSubSecond).plus().milliSeconds(1_000).toEpochSecond());
   }
 
   @Test
