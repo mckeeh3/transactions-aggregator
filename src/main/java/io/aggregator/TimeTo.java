@@ -65,6 +65,14 @@ public class TimeTo {
         .build());
   }
 
+  public static From fromEpochMilliSeconds(long epochMilliSeconds) {
+    return new From(Timestamp
+        .newBuilder()
+        .setSeconds(epochMilliSeconds / 1000)
+        .setNanos((int) (epochMilliSeconds % 1000) * 1_000_000)
+        .build());
+  }
+
   public static From fromEpochSecond(long epochSecond) {
     return new From(Timestamp
         .newBuilder()
@@ -114,6 +122,10 @@ public class TimeTo {
 
     private From(Timestamp timestamp) {
       this.timestamp = timestamp;
+    }
+
+    public long toEpochMilliSeconds() {
+      return timestamp.getSeconds() * 1000 + timestamp.getNanos() / 1_000_000;
     }
 
     public long toEpochSubSecond() {
@@ -166,28 +178,25 @@ public class TimeTo {
       this.subtract = subtract;
     }
 
-    public From nanos(int nanos) {
+    public From nanos(long nanos) {
       var nanosAdjusted = subtract ? timestamp.getNanos() - nanos : timestamp.getNanos() + nanos;
-      if (nanosAdjusted < 0) {
-        return new From(Timestamp
-            .newBuilder()
-            .setSeconds(timestamp.getSeconds() - 1)
-            .setNanos(1_000_000_000 + nanosAdjusted)
-            .build());
-      } else if (nanosAdjusted >= 1000000000) {
-        return new From(Timestamp
-            .newBuilder()
-            .setSeconds(timestamp.getSeconds() + 1)
-            .setNanos(nanosAdjusted - 1_000_000_000)
-            .build());
-      } else {
-        return new From(Timestamp
-            .newBuilder()
-            .setSeconds(timestamp.getSeconds())
-            .setNanos(subtract ? timestamp.getNanos() - nanos : timestamp.getNanos() + nanos)
-            .build());
-      }
+      var secondsAdjusted = timestamp.getSeconds() + nanosAdjusted / 1_000_000_000;
+      // var nanosAdjustedRemainder = nanosAdjusted < 0 ? 1_000_000 + nanosAdjusted % 1_000_000_000 : nanosAdjusted % 1_000_000_000;
+      var nanosAdjustedRemainder = nanosAdjusted % 1_000_000_000;
 
+      return new From(Timestamp
+          .newBuilder()
+          .setSeconds(secondsAdjusted)
+          .setNanos((int) nanosAdjustedRemainder)
+          .build());
+    }
+
+    public From milliSeconds(long milliSeconds) {
+      return nanos(milliSeconds * 1_000_000);
+    }
+
+    public From subSeconds(long subSeconds) {
+      return nanos(subSeconds * 10_000_000);
     }
 
     public From seconds(long seconds) {

@@ -35,7 +35,7 @@ public class SubSecondToSecondAction extends AbstractSubSecondToSecondAction {
         SecondApi.SubSecondAggregationCommand
             .newBuilder()
             .setMerchantId(subSecondAggregated.getMerchantId())
-            .setEpochSecond(TimeTo.fromEpochSecond(subSecondAggregated.getEpochSubSecond()).toEpochSecond())
+            .setEpochSecond(TimeTo.fromEpochSubSecond(subSecondAggregated.getEpochSubSecond()).toEpochSecond())
             .setEpochSubSecond(subSecondAggregated.getEpochSubSecond())
             .setTransactionTotalAmount(subSecondAggregated.getTransactionTotalAmount())
             .setTransactionCount(subSecondAggregated.getTransactionCount())

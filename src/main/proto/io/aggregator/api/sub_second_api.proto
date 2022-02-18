@@ -23,7 +23,7 @@ service SubSecond {
     }
   };
 
-  rpc AddTransaction(AddTransaction2Command) returns (google.protobuf.Empty) {
+  rpc AddTransaction(AddTransactionCommand) returns (google.protobuf.Empty) {
     option (google.api.http) = {
       post: "/sub_second/{merchant_id}/{epoch_sub_second}/transactions"
       body: "*"
@@ -38,7 +38,7 @@ service SubSecond {
   }
 }
 
-message AddTransaction2Command {
+message AddTransactionCommand {
   string merchant_id = 1 [(akkaserverless.field).entity_key = true];
   int64 epoch_sub_second = 2 [(akkaserverless.field).entity_key = true];
   string transaction_id = 3;

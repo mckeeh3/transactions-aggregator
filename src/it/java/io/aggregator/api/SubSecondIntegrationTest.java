@@ -37,7 +37,7 @@ public class SubSecondIntegrationTest {
   @Test
   public void addTransactionOnNonExistingEntity() throws Exception {
     // TODO: set fields in command, and provide assertions to match replies
-    // client.addTransaction(SubSecondApi.AddTransaction2Command.newBuilder().build())
+    // client.addTransaction(SubSecondApi.AddTransactionCommand.newBuilder().build())
     //         .toCompletableFuture().get(5, SECONDS);
   }
 

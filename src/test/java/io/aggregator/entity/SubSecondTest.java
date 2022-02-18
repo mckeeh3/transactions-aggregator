@@ -36,7 +36,7 @@ public class SubSecondTest {
 
     var epochSubSecond = TimeTo.fromTimestamp(TimeTo.now()).toEpochSubSecond();
     var response = testKit.addTransaction(
-        SubSecondApi.AddTransaction2Command
+        SubSecondApi.AddTransactionCommand
             .newBuilder()
             .setMerchantId("merchant-1")
             .setEpochSubSecond(epochSubSecond)
@@ -74,7 +74,7 @@ public class SubSecondTest {
     assertTrue(transaction.getTimestamp().getSeconds() > 0);
 
     testKit.addTransaction(
-        SubSecondApi.AddTransaction2Command
+        SubSecondApi.AddTransactionCommand
             .newBuilder()
             .setMerchantId("merchant-1")
             .setEpochSubSecond(epochSubSecond)
@@ -84,7 +84,7 @@ public class SubSecondTest {
             .build());
 
     response = testKit.addTransaction( // try adding the same transaction again - should be idempotent
-        SubSecondApi.AddTransaction2Command
+        SubSecondApi.AddTransactionCommand
             .newBuilder()
             .setMerchantId("merchant-1")
             .setEpochSubSecond(epochSubSecond)
@@ -115,7 +115,7 @@ public class SubSecondTest {
     var epochSubSecond = TimeTo.fromNow().toEpochSubSecond();
 
     testKit.addTransaction(
-        SubSecondApi.AddTransaction2Command
+        SubSecondApi.AddTransactionCommand
             .newBuilder()
             .setMerchantId("merchant-1")
             .setEpochSubSecond(epochSubSecond)
@@ -125,7 +125,7 @@ public class SubSecondTest {
             .build());
 
     testKit.addTransaction(
-        SubSecondApi.AddTransaction2Command
+        SubSecondApi.AddTransactionCommand
             .newBuilder()
             .setMerchantId("merchant-1")
             .setEpochSubSecond(epochSubSecond)
@@ -135,7 +135,7 @@ public class SubSecondTest {
             .build());
 
     testKit.addTransaction( // try adding the same transaction again - should be idempotent
-        SubSecondApi.AddTransaction2Command
+        SubSecondApi.AddTransactionCommand
             .newBuilder()
             .setMerchantId("merchant-1")
             .setEpochSubSecond(epochSubSecond)
@@ -145,7 +145,7 @@ public class SubSecondTest {
             .build());
 
     testKit.addTransaction(
-        SubSecondApi.AddTransaction2Command
+        SubSecondApi.AddTransactionCommand
             .newBuilder()
             .setMerchantId("merchant-1")
             .setEpochSubSecond(epochSubSecond)

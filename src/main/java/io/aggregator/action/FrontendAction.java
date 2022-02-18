@@ -39,15 +39,15 @@ public class FrontendAction extends AbstractFrontendAction {
 
     var results = IntStream.range(0, generateTransactionsRequest.getTransactionCount())
         .mapToObj(i -> {
-          var timestamp = TimeTo.now();
+          var timestamp = TimeTo.fromTimestamp(generateTransactionsRequest.getDay()).plus().milliSeconds(i).toTimestamp();
           var epochSubSecond = TimeTo.fromTimestamp(timestamp).toEpochSubSecond();
 
-          return SubSecondApi.AddTransaction2Command
+          return SubSecondApi.AddTransactionCommand
               .newBuilder()
               .setMerchantId("merchant-" + random.nextInt(generateTransactionsRequest.getMerchantIdRange()))
               .setEpochSubSecond(epochSubSecond)
               .setTransactionId(UUID.randomUUID().toString())
-              .setAmount(random.nextInt(100) / 100.0)
+              .setAmount(random.nextInt(100) / 10.0)
               .setTimestamp(timestamp)
               .build();
         })

@@ -28,7 +28,7 @@ public class SubSecond extends AbstractSubSecond {
   }
 
   @Override
-  public Effect<Empty> addTransaction(SubSecondEntity.SubSecondState state, SubSecondApi.AddTransaction2Command command) {
+  public Effect<Empty> addTransaction(SubSecondEntity.SubSecondState state, SubSecondApi.AddTransactionCommand command) {
     return handle(state, command);
   }
 
@@ -52,7 +52,7 @@ public class SubSecond extends AbstractSubSecond {
     return handle(state, event);
   }
 
-  private Effect<Empty> handle(SubSecondEntity.SubSecondState state, SubSecondApi.AddTransaction2Command command) {
+  private Effect<Empty> handle(SubSecondEntity.SubSecondState state, SubSecondApi.AddTransactionCommand command) {
     log.info("state: {}\nAddTransactionCommand: {}", state, command);
 
     return effects()
@@ -104,7 +104,7 @@ public class SubSecond extends AbstractSubSecond {
     return state; // this is a non-state changing event
   }
 
-  static List<?> eventsFor(SubSecondEntity.SubSecondState state, SubSecondApi.AddTransaction2Command command) {
+  static List<?> eventsFor(SubSecondEntity.SubSecondState state, SubSecondApi.AddTransactionCommand command) {
     var transactionAdded = SubSecondEntity.SubSecondTransactionAdded
         .newBuilder()
         .setMerchantId(command.getMerchantId())
