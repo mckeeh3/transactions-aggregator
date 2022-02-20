@@ -22,7 +22,9 @@ message DayAggregated {
   double transaction_total_amount = 3;
   int32 transaction_count = 4;
   google.protobuf.Timestamp last_update_timestamp = 5;
-  google.protobuf.Timestamp aggregateRequestTimestamp = 6;
+  google.protobuf.Timestamp aggregate_request_timestamp = 6;
+  google.protobuf.Timestamp aggregation_started_timestamp = 7;
+  google.protobuf.Timestamp aggregation_completed_timestamp = 8;
 }
 
 message ActiveHourAggregated {
@@ -31,14 +33,14 @@ message ActiveHourAggregated {
   double transaction_total_amount = 3;
   int32 transaction_count = 4;
   google.protobuf.Timestamp last_update_timestamp = 5;
-  google.protobuf.Timestamp aggregateRequestTimestamp = 6;
+  google.protobuf.Timestamp aggregate_request_timestamp = 6;
 }
 
 message DayAggregationRequested {
   string merchant_id = 1;
   int64 epoch_day = 2;
   repeated int64 epoch_hours = 3;
-  google.protobuf.Timestamp aggregateRequestTimestamp = 6;
+  google.protobuf.Timestamp aggregate_request_timestamp = 6;
 }
 
 message DayState {
@@ -46,7 +48,8 @@ message DayState {
   int64 epoch_day = 2;
   repeated ActiveHour activeHours = 3;
   google.protobuf.Timestamp last_update_timestamp = 4;
-  google.protobuf.Timestamp aggregateRequestTimestamp = 6;
+  google.protobuf.Timestamp aggregate_request_timestamp = 6;
+  google.protobuf.Timestamp aggregation_started_timestamp = 7;
 }
 
 message ActiveHour {
@@ -54,5 +57,5 @@ message ActiveHour {
   double transaction_total_amount = 2;
   int32 transaction_count = 3;
   google.protobuf.Timestamp last_update_timestamp = 4;
-  google.protobuf.Timestamp aggregateRequestTimestamp = 5;
+  google.protobuf.Timestamp aggregate_request_timestamp = 5;
 }

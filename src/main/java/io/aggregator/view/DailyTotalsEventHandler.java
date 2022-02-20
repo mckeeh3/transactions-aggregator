@@ -22,6 +22,9 @@ class DailyTotalsEventHandler {
         .setTransactionTotalAmount(dayAggregated.getTransactionTotalAmount())
         .setTransactionCount(dayAggregated.getTransactionCount())
         .setLastUpdateTimestamp(dayAggregated.getLastUpdateTimestamp())
+        .setAggregateRequestTimestamp(dayAggregated.getAggregateRequestTimestamp())
+        .setAggregationStartedTimestamp(dayAggregated.getAggregationStartedTimestamp())
+        .setAggregationCompletedTimestamp(dayAggregated.getAggregationCompletedTimestamp())
         .build();
   }
 }

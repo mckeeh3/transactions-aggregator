@@ -22,7 +22,7 @@ message SecondAggregated {
   double transaction_total_amount = 3;
   int32 transaction_count = 4;
   google.protobuf.Timestamp last_update_timestamp = 5;
-  google.protobuf.Timestamp aggregateRequestTimestamp = 6;
+  google.protobuf.Timestamp aggregate_request_timestamp = 6;
 }
 
 message ActiveSubSecondAggregated {
@@ -31,14 +31,14 @@ message ActiveSubSecondAggregated {
   double transaction_total_amount = 3;
   int32 transaction_count = 4;
   google.protobuf.Timestamp last_update_timestamp = 5;
-  google.protobuf.Timestamp aggregateRequestTimestamp = 6;
+  google.protobuf.Timestamp aggregate_request_timestamp = 6;
 }
 
 message SecondAggregationRequested {
   string merchant_id = 1;
   int64 epoch_second = 2;
   repeated int64 epoch_sub_seconds = 3;
-  google.protobuf.Timestamp aggregateRequestTimestamp = 6;
+  google.protobuf.Timestamp aggregate_request_timestamp = 6;
 }
 
 message SecondState {
@@ -49,7 +49,7 @@ message SecondState {
   int64 epoch_day = 5;
   repeated ActiveSubSecond activeSubSeconds = 6;
   google.protobuf.Timestamp last_update_timestamp = 7;
-  google.protobuf.Timestamp aggregateRequestTimestamp = 8;
+  google.protobuf.Timestamp aggregate_request_timestamp = 8;
 }
 
 message ActiveSubSecond {
@@ -57,5 +57,5 @@ message ActiveSubSecond {
   double transaction_total_amount = 2;
   int32 transaction_count = 3;
   google.protobuf.Timestamp last_update_timestamp = 4;
-  google.protobuf.Timestamp aggregateRequestTimestamp = 5;
+  google.protobuf.Timestamp aggregate_request_timestamp = 5;
 }

@@ -120,6 +120,7 @@ public class Day extends AbstractDay {
   static DayEntity.DayState handle(DayEntity.DayState state, DayEntity.DayAggregationRequested event) {
     return state.toBuilder()
         .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
+        .setAggregationStartedTimestamp(TimeTo.now())
         .build();
   }
 
@@ -203,7 +204,10 @@ public class Day extends AbstractDay {
         .allMatch(activeHour -> activeHour.getAggregateRequestTimestamp().equals(aggregateRequestTimestamp));
 
     if (allHoursAggregated) {
-      return List.of(toDayAggregated(command, activeHours), toActiveHourAggregated(command));
+      log.info("All hours aggregated, merchantId: {}\nstarted: {}\ncompleted: {}",
+          state.getMerchantId(), TimeTo.fromTimestamp(state.getAggregationStartedTimestamp()).format(), TimeTo.fromNow().format());
+
+      return List.of(toDayAggregated(state, command, activeHours), toActiveHourAggregated(command));
     } else {
       return List.of(toActiveHourAggregated(command));
     }
@@ -240,7 +244,7 @@ public class Day extends AbstractDay {
     return activeHourAggregated;
   }
 
-  static DayEntity.DayAggregated toDayAggregated(DayApi.HourAggregationCommand command, List<DayEntity.ActiveHour> activeHours) {
+  static DayEntity.DayAggregated toDayAggregated(DayEntity.DayState state, DayApi.HourAggregationCommand command, List<DayEntity.ActiveHour> activeHours) {
     var transactionTotalAmount = activeHours.stream()
         .reduce(0.0, (amount, activeHour) -> amount + activeHour.getTransactionTotalAmount(), Double::sum);
 
@@ -260,6 +264,8 @@ public class Day extends AbstractDay {
         .setTransactionCount(transactionCount)
         .setLastUpdateTimestamp(lastUpdateTimestamp)
         .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
+        .setAggregationStartedTimestamp(state.getAggregationStartedTimestamp())
+        .setAggregationCompletedTimestamp(TimeTo.now())
         .build();
   }
 }

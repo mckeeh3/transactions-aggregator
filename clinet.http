@@ -1,17 +1,19 @@
 
 @urlPrefix = https://lively-truth-3781.us-east1.akkaserverless.app
 @merchantIdRange = 100
-@transactionCount = 10_000
-@day = 2022-01-03T00:00:00.000Z
+@transactionCount = 10000
+@transactionIntervalMs = 5
+@day = 2022-01-01T00:00:00.000Z
 @merchantId = merchant-1
-@fromDate = 2022-01-03T00:00:00.000Z
-@toDate = 2022-01-04T00:00:00.000Z
+@fromDate = 2022-01-01T00:00:00.000Z
+@toDate = 2022-01-02T00:00:00.000Z
 
 ### io.aggregator.action.Frontend.GenerateTransactions
 
 curl -XPOST -H "Content-Type: application/json" -d '{
   "merchant_id_range":{{merchantIdRange}},
   "transaction_count":{{transactionCount}},
+  "transaction_interval_ms":{{transactionIntervalMs}},
   "day":"{{day}}"}'
   {{urlPrefix}}/generate-transactions
 

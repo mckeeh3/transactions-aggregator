@@ -56,7 +56,7 @@ message AddMinuteCommand {
 message AggregateHourCommand {
   string merchant_id = 1 [(akkaserverless.field).entity_key = true];
   int64 epoch_hour = 2 [(akkaserverless.field).entity_key = true];
-  google.protobuf.Timestamp aggregateRequestTimestamp = 3;
+  google.protobuf.Timestamp aggregate_request_timestamp = 3;
 }
 
 message MinuteAggregationCommand {
@@ -66,5 +66,5 @@ message MinuteAggregationCommand {
   double transaction_total_amount = 4;
   int32 transaction_count = 5;
   google.protobuf.Timestamp last_update_timestamp = 6;
-  google.protobuf.Timestamp aggregateRequestTimestamp = 7;
+  google.protobuf.Timestamp aggregate_request_timestamp = 7;
 }
