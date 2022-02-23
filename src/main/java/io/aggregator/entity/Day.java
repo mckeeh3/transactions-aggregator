@@ -81,7 +81,7 @@ public class Day extends AbstractDay {
     log.info("state: {}\nAggregateDayCommand: {}", state, command);
 
     return effects()
-        .emitEvent(eventFor(state, command))
+        .emitEvents(eventsFor(state, command))
         .thenReply(newState -> Empty.getDefaultInstance());
   }
 
@@ -169,17 +169,30 @@ public class Day extends AbstractDay {
     }
   }
 
-  static DayEntity.DayAggregationRequested eventFor(DayEntity.DayState state, DayApi.AggregateDayCommand command) {
-    return DayEntity.DayAggregationRequested
-        .newBuilder()
-        .setMerchantId(command.getMerchantId())
-        .setEpochDay(command.getEpochDay())
-        .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
-        .addAllEpochHours(
-            state.getActiveHoursList().stream()
-                .map(activeHour -> activeHour.getEpochHour())
-                .collect(Collectors.toList()))
-        .build();
+  static List<?> eventsFor(DayEntity.DayState state, DayApi.AggregateDayCommand command) {
+    if (state.getActiveHoursCount() == 0) {
+      var timestamp = command.getAggregateRequestTimestamp();
+      return List.of(DayEntity.DayAggregated
+          .newBuilder()
+          .setMerchantId(command.getMerchantId())
+          .setEpochDay(command.getEpochDay())
+          .setLastUpdateTimestamp(timestamp)
+          .setAggregateRequestTimestamp(timestamp)
+          .setAggregationStartedTimestamp(timestamp)
+          .setAggregationCompletedTimestamp(timestamp)
+          .build());
+    } else {
+      return List.of(DayEntity.DayAggregationRequested
+          .newBuilder()
+          .setMerchantId(command.getMerchantId())
+          .setEpochDay(command.getEpochDay())
+          .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
+          .addAllEpochHours(
+              state.getActiveHoursList().stream()
+                  .map(activeHour -> activeHour.getEpochHour())
+                  .collect(Collectors.toList()))
+          .build());
+    }
   }
 
   static List<?> eventsFor(DayEntity.DayState state, DayApi.HourAggregationCommand command) {

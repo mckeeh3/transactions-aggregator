@@ -136,6 +136,33 @@ public class DayTest {
   }
 
   @Test
+  public void aggregateDayWithNoHoursTest() {
+    DayTestKit testKit = DayTestKit.of(Day::new);
+
+    var epochDay = TimeTo.fromNow().toEpochDay();
+    var now = TimeTo.fromEpochDay(epochDay).toTimestamp();
+
+    var response = testKit.aggregateDay(
+        DayApi.AggregateDayCommand
+            .newBuilder()
+            .setMerchantId("merchant-1")
+            .setEpochDay(epochDay)
+            .setAggregateRequestTimestamp(now)
+            .build());
+
+    var dayAggregated = response.getNextEventOfType(DayEntity.DayAggregated.class);
+
+    assertEquals("merchant-1", dayAggregated.getMerchantId());
+    assertEquals(epochDay, dayAggregated.getEpochDay());
+    assertEquals(now, dayAggregated.getLastUpdateTimestamp());
+    assertEquals(now, dayAggregated.getAggregateRequestTimestamp());
+    assertEquals(now, dayAggregated.getAggregationStartedTimestamp());
+    assertEquals(now, dayAggregated.getAggregationCompletedTimestamp());
+    assertEquals(0, dayAggregated.getTransactionCount());
+    assertEquals(0.0, dayAggregated.getTransactionTotalAmount(), 0.0);
+  }
+
+  @Test
   public void hourAggregationTest() {
     DayTestKit testKit = DayTestKit.of(Day::new);
 

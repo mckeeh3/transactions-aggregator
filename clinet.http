@@ -3,10 +3,10 @@
 @merchantIdRange = 100
 @transactionCount = 10000
 @transactionIntervalMs = 5
-@day = 2022-01-01T00:00:00.000Z
+@day = 2022-01-02T00:00:00.000Z
 @merchantId = merchant-1
-@fromDate = 2022-01-01T00:00:00.000Z
-@toDate = 2022-01-02T00:00:00.000Z
+@fromDate = 2022-01-02T00:00:00.000Z
+@toDate = 2022-01-03T00:00:00.000Z
 
 ### io.aggregator.action.Frontend.GenerateTransactions
 

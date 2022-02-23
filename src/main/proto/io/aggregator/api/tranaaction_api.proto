@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+import "akkaserverless/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+package io.aggregator.api;
+
+option java_outer_classname = "TransactionApi";
+
+service Transaction {
+  option (akkaserverless.codegen) = {
+    event_sourced_entity: {
+      name: "io.aggregator.entity.Transaction"
+      entity_type: "transaction"
+      state: "io.aggregator.entity.TransactionState"
+      events: [
+        "io.aggregator.entity.TransactionCreated"  //
+      ]
+    }
+  };
+
+  rpc CreateTransaction(CreateTransactionCommand) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/transaction/{transaction_id}/service/account/add"
+      body: "*"
+    };
+  }
+}
+
+message CreateTransactionCommand {
+  TransactionKey transaction_key = 1 [(akkaserverless.field).entity_key = true];
+  double transaction_amount = 2;
+  string merchant_id = 3;
+  google.protobuf.Timestamp transaction_timestamp = 4;
+}
+
+message TransactionKey {
+  string transaction_id = 1;
+  string service = 2;
+  string account = 3;
+}
