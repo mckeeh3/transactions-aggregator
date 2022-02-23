@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import io.aggregator.TimeTo;
 import io.aggregator.api.DayApi;
-import io.aggregator.api.SubSecondApi;
+import io.aggregator.api.TransactionApi;
 import io.aggregator.view.DailyTotalsByDateModel.DailyTotalsByDateRequest;
 import io.aggregator.view.DailyTotalsByDateModel.DailyTotalsByDateResponse;
 import io.aggregator.view.DailyTotalsModel.DailyTotal;
@@ -43,18 +43,18 @@ public class FrontendAction extends AbstractFrontendAction {
     var results = IntStream.range(0, generateTransactionsRequest.getTransactionCount())
         .mapToObj(i -> {
           var timestamp = TimeTo.fromTimestamp(generateTransactionsRequest.getDay()).plus().milliSeconds(i * intervalMs).toTimestamp();
-          var epochSubSecond = TimeTo.fromTimestamp(timestamp).toEpochSubSecond();
 
-          return SubSecondApi.AddTransactionCommand
+          return TransactionApi.CreateTransactionCommand
               .newBuilder()
-              .setMerchantId("merchant-" + random.nextInt(generateTransactionsRequest.getMerchantIdRange()))
-              .setEpochSubSecond(epochSubSecond)
               .setTransactionId(UUID.randomUUID().toString())
-              .setAmount(random.nextInt(100) / 10.0)
-              .setTimestamp(timestamp)
+              .setService("service-" + random.nextInt(10) + 1)
+              .setAccount("account-" + random.nextInt(10) + 1)
+              .setMerchantId("merchant-" + random.nextInt(generateTransactionsRequest.getMerchantIdRange()))
+              .setTransactionAmount(random.nextInt(100) / 10.0)
+              .setTransactionTimestamp(timestamp)
               .build();
         })
-        .map(command -> components().subSecond().addTransaction(command).execute())
+        .map(command -> components().transaction().createTransaction(command).execute())
         .collect(Collectors.toList());
 
     var result = CompletableFuture.allOf(results.toArray(new CompletableFuture[results.size()]))

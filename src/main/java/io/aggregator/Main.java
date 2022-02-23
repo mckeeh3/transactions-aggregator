@@ -10,6 +10,7 @@ import io.aggregator.action.MinuteToSecondAction;
 import io.aggregator.action.SecondToMinuteAction;
 import io.aggregator.action.SecondToSubSecondAction;
 import io.aggregator.action.SubSecondToSecondAction;
+import io.aggregator.action.TransactionToSubSecondAction;
 import io.aggregator.entity.Day;
 import io.aggregator.entity.Hour;
 import io.aggregator.entity.Minute;
@@ -52,7 +53,8 @@ public final class Main {
       MinuteToSecondAction::new,
       SecondToMinuteAction::new,
       SecondToSubSecondAction::new,
-      SubSecondToSecondAction::new);
+      SubSecondToSecondAction::new,
+      TransactionToSubSecondAction::new);
   }
 
   public static void main(String[] args) throws Exception {
