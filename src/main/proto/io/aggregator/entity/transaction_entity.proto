@@ -21,7 +21,7 @@ message TransactionKey {
 
 message TransactionState {
   TransactionKey transaction_key = 1;
-  double transaction_amount = 2;
-  string merchant_id = 3;
+  string merchant_id = 2;
+  double transaction_amount = 3;
   google.protobuf.Timestamp transaction_timestamp = 4;
 }

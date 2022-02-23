@@ -7,6 +7,11 @@
 @merchantId = merchant-1
 @fromDate = 2022-01-02T00:00:00.000Z
 @toDate = 2022-01-03T00:00:00.000Z
+@transactionAmount = 123.45
+@transactionTimestamp = 2022-01-02T00:00:00.000Z
+@transactionId = transaction-1
+@service = service-1
+@account = account-1
 
 ### io.aggregator.action.Frontend.GenerateTransactions
 
@@ -32,3 +37,16 @@ curl -XGET -H "Content-Type: application/json"
 
 curl -XGET -H "Content-Type: application/json"
   '{{urlPrefix}}/daily-totals-by-merchant?merchant_id={{merchantId}}'
+
+### io.aggregator.api.Transaction.CreateTransaction
+
+curl -XPOST -H "Content-Type: application/json" -d '{
+  "transaction_amount":{{transactionAmount}},
+  "merchant_id":"{{merchantId}}",
+  "transaction_timestamp":"{{transactionTimestamp}}"}'
+  {{urlPrefix}}/transaction/{{transactionId}}/{{service}}/{{account}}/add
+
+### io.aggregator.api.Transaction.GetTransaction
+
+curl -XGET -H "Content-Type: application/json"
+  '{{urlPrefix}}/transaction/{{transactionId}}/{{service}}/{{account}}'

@@ -33,24 +33,58 @@ public class TransactionTest {
   public void createTransactionTest() {
     TransactionTestKit testKit = TransactionTestKit.of(Transaction::new);
 
-    testKit.createTransaction(TransactionApi.CreateTransactionCommand
-        .newBuilder()
-        .setTransactionKey(
-            TransactionApi.TransactionKey
-                .newBuilder()
-                .setTransactionId("123")
-                .setService("456")
-                .setAccount("789")
-                .build())
-        .setTransactionAmount(123.45)
-        .setMerchantId("merchant-1")
-        .setTransactionTimestamp(TimeTo.now())
-        .build());
+    testKit.createTransaction(
+        TransactionApi.CreateTransactionCommand
+            .newBuilder()
+            .setTransactionId("123")
+            .setService("456")
+            .setAccount("789")
+            .setMerchantId("merchant-1")
+            .setTransactionAmount(123.45)
+            .setTransactionTimestamp(TimeTo.now())
+            .build());
 
     var state = testKit.getState();
 
     assertEquals(state.getTransactionKey().getTransactionId(), "123");
     assertEquals(state.getTransactionKey().getService(), "456");
     assertEquals(state.getTransactionKey().getAccount(), "789");
+    assertEquals("merchant-1", state.getMerchantId());
+    assertEquals(123.45, state.getTransactionAmount(), 0.0);
+    assertTrue(state.getTransactionTimestamp().getSeconds() > 0);
+  }
+
+  @Test
+  public void getTransactionTest() {
+    TransactionTestKit testKit = TransactionTestKit.of(Transaction::new);
+
+    testKit.createTransaction(
+        TransactionApi.CreateTransactionCommand
+            .newBuilder()
+            .setTransactionId("123")
+            .setService("456")
+            .setAccount("789")
+            .setMerchantId("merchant-1")
+            .setTransactionAmount(123.45)
+            .setTransactionTimestamp(TimeTo.now())
+            .build());
+
+    var response = testKit.getTransaction(
+        TransactionApi.GetTransactionRequest
+            .newBuilder()
+            .setTransactionId("123")
+            .setService("456")
+            .setAccount("789")
+            .build());
+
+    var transaction = response.getReply();
+
+    assertNotNull(transaction);
+    assertEquals("123", transaction.getTransactionKey().getTransactionId());
+    assertEquals("456", transaction.getTransactionKey().getService());
+    assertEquals("789", transaction.getTransactionKey().getAccount());
+    assertEquals("merchant-1", transaction.getMerchantId());
+    assertEquals(123.45, transaction.getTransactionAmount(), 0.0);
+    assertTrue(transaction.getTransactionTimestamp().getSeconds() > 0);
   }
 }

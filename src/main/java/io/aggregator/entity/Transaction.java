@@ -1,5 +1,7 @@
 package io.aggregator.entity;
 
+import java.util.Optional;
+
 import com.akkaserverless.javasdk.eventsourcedentity.EventSourcedEntityContext;
 import com.google.protobuf.Empty;
 
@@ -32,6 +34,11 @@ public class Transaction extends AbstractTransaction {
   }
 
   @Override
+  public Effect<TransactionApi.GetTransactionResponse> getTransaction(TransactionEntity.TransactionState state, TransactionApi.GetTransactionRequest request) {
+    return reject(state, request).orElseGet((() -> handle(state, request)));
+  }
+
+  @Override
   public TransactionEntity.TransactionState transactionCreated(TransactionEntity.TransactionState state, TransactionEntity.TransactionCreated event) {
     return handle(state, event);
   }
@@ -45,6 +52,30 @@ public class Transaction extends AbstractTransaction {
     return effects()
         .emitEvent(eventFor(state, command))
         .thenReply(newState -> Empty.getDefaultInstance());
+  }
+
+  private Optional<Effect<TransactionApi.GetTransactionResponse>> reject(TransactionEntity.TransactionState state, TransactionApi.GetTransactionRequest request) {
+    if (state.getTransactionKey() == null || state.getTransactionKey().getTransactionId().isEmpty()) {
+      return Optional.of(effects().error(String.format("Transaction %s|%s|%s not found", request.getTransactionId(), request.getService(), request.getAccount())));
+    }
+    return Optional.empty();
+  }
+
+  private Effect<TransactionApi.GetTransactionResponse> handle(TransactionEntity.TransactionState state, TransactionApi.GetTransactionRequest request) {
+    return effects().reply(
+        TransactionApi.GetTransactionResponse
+            .newBuilder()
+            .setTransactionKey(
+                TransactionApi.TransactionKey
+                    .newBuilder()
+                    .setTransactionId(state.getTransactionKey().getTransactionId())
+                    .setService(state.getTransactionKey().getService())
+                    .setAccount(state.getTransactionKey().getAccount())
+                    .build())
+            .setMerchantId(state.getMerchantId())
+            .setTransactionAmount(state.getTransactionAmount())
+            .setTransactionTimestamp(state.getTransactionTimestamp())
+            .build());
   }
 
   private TransactionEntity.TransactionState handle(TransactionEntity.TransactionState state, TransactionEntity.TransactionCreated event) {
@@ -69,9 +100,9 @@ public class Transaction extends AbstractTransaction {
         .setTransactionKey(
             TransactionEntity.TransactionKey
                 .newBuilder()
-                .setTransactionId(command.getTransactionKey().getTransactionId())
-                .setService(command.getTransactionKey().getService())
-                .setAccount(command.getTransactionKey().getAccount())
+                .setTransactionId(command.getTransactionId())
+                .setService(command.getService())
+                .setAccount(command.getAccount())
                 .build())
         .setTransactionAmount(command.getTransactionAmount())
         .setMerchantId(command.getMerchantId())
