@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+import "akkaserverless/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+package io.aggregator.api;
+
+option java_outer_classname = "PaymentApi";
+
+service Payment {
+  option (akkaserverless.codegen) = {
+    event_sourced_entity: {
+      name: "io.aggregator.entity.Payment"
+      entity_type: "payment"
+      state: "io.aggregator.entity.PaymentState"
+      events: [
+        "io.aggregator.entity.PaymentCreated",
+        "io.aggregator.entity.PaymentAggregationRequested",
+        "io.aggregator.entity.PaymentAggregated"  //
+      ]
+    }
+  };
+
+  rpc CreatePayment(CreatePaymentCommand) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/payment/{merchant_id}/{service}/{account_from}/{account_to}/{payment_id}/create"
+      body: "*"
+    };
+  }
+
+  rpc PaymentDayAggregation(PaymentDayAggregationCommand) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/payment/{merchant_id}/{service}/{account}/{from}/{to}/hour-aggregation"
+      body: "*"
+    };
+  }
+}
+
+message CreatePaymentCommand {}
+
+message PaymentDayAggregationCommand {}

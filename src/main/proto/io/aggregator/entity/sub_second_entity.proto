@@ -45,4 +45,5 @@ message Transaction {
   string transaction_id = 3;
   double amount = 4;
   google.protobuf.Timestamp timestamp = 5;
+  google.protobuf.Timestamp aggregate_request_timestamp = 6;
 }

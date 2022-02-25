@@ -131,7 +131,11 @@ public class SecondTest {
 
     var state = testKit.getState();
 
-    assertEquals(now, state.getAggregateRequestTimestamp());
+    var aggregateSecond = state.getAggregateSecondsList().stream()
+        .filter(aggSec -> aggSec.getAggregateRequestTimestamp().equals(now))
+        .findFirst();
+    assertTrue(aggregateSecond.isPresent());
+    assertEquals(now, aggregateSecond.get().getAggregateRequestTimestamp());
   }
 
   @Test
@@ -141,7 +145,7 @@ public class SecondTest {
     var epochSubSecond = TimeTo.fromNow().toEpochSubSecond();
     var nextEpochSubSecond = TimeTo.fromEpochSubSecond(epochSubSecond).plus().seconds(1).toEpochSubSecond();
     var epochSecond = TimeTo.fromEpochSubSecond(epochSubSecond).toEpochSecond();
-    var now = TimeTo.fromEpochSubSecond(epochSubSecond).toTimestamp();
+    var aggregateRequestTimestamp = TimeTo.fromEpochSubSecond(epochSubSecond).toTimestamp();
 
     testKit.addSubSecond(
         SecondApi.AddSubSecondCommand
@@ -164,7 +168,7 @@ public class SecondTest {
             .newBuilder()
             .setMerchantId("merchant-1")
             .setEpochSecond(epochSecond)
-            .setAggregateRequestTimestamp(now)
+            .setAggregateRequestTimestamp(aggregateRequestTimestamp)
             .build());
 
     var response = testKit.subSecondAggregation(
@@ -175,8 +179,8 @@ public class SecondTest {
             .setEpochSubSecond(epochSubSecond)
             .setTransactionTotalAmount(123.45)
             .setTransactionCount(10)
-            .setLastUpdateTimestamp(now)
-            .setAggregateRequestTimestamp(now)
+            .setLastUpdateTimestamp(aggregateRequestTimestamp)
+            .setAggregateRequestTimestamp(aggregateRequestTimestamp)
             .build());
 
     var activeSubSecondAggregated = response.getNextEventOfType(SecondEntity.ActiveSubSecondAggregated.class);
@@ -185,8 +189,8 @@ public class SecondTest {
     assertEquals(epochSubSecond, activeSubSecondAggregated.getEpochSubSecond());
     assertEquals(123.45, activeSubSecondAggregated.getTransactionTotalAmount(), 0.0);
     assertEquals(10, activeSubSecondAggregated.getTransactionCount());
-    assertEquals(now, activeSubSecondAggregated.getLastUpdateTimestamp());
-    assertEquals(now, activeSubSecondAggregated.getAggregateRequestTimestamp());
+    assertEquals(aggregateRequestTimestamp, activeSubSecondAggregated.getLastUpdateTimestamp());
+    assertEquals(aggregateRequestTimestamp, activeSubSecondAggregated.getAggregateRequestTimestamp());
 
     response = testKit.subSecondAggregation(
         SecondApi.SubSecondAggregationCommand
@@ -196,8 +200,8 @@ public class SecondTest {
             .setEpochSubSecond(nextEpochSubSecond)
             .setTransactionTotalAmount(678.90)
             .setTransactionCount(20)
-            .setLastUpdateTimestamp(now)
-            .setAggregateRequestTimestamp(now)
+            .setLastUpdateTimestamp(aggregateRequestTimestamp)
+            .setAggregateRequestTimestamp(aggregateRequestTimestamp)
             .build());
 
     var secondAggregated = response.getNextEventOfType(SecondEntity.SecondAggregated.class);
@@ -207,14 +211,62 @@ public class SecondTest {
     assertEquals(nextEpochSubSecond, activeSubSecondAggregated.getEpochSubSecond());
     assertEquals(678.90, activeSubSecondAggregated.getTransactionTotalAmount(), 0.0);
     assertEquals(20, activeSubSecondAggregated.getTransactionCount());
-    assertEquals(now, activeSubSecondAggregated.getLastUpdateTimestamp());
-    assertEquals(now, activeSubSecondAggregated.getAggregateRequestTimestamp());
+    assertEquals(aggregateRequestTimestamp, activeSubSecondAggregated.getLastUpdateTimestamp());
+    assertEquals(aggregateRequestTimestamp, activeSubSecondAggregated.getAggregateRequestTimestamp());
 
     assertEquals("merchant-1", secondAggregated.getMerchantId());
     assertEquals(epochSecond, secondAggregated.getEpochSecond());
     assertEquals(123.45 + 678.90, secondAggregated.getTransactionTotalAmount(), 0.0);
     assertEquals(10 + 20, secondAggregated.getTransactionCount());
-    assertEquals(now, secondAggregated.getLastUpdateTimestamp());
-    assertEquals(now, secondAggregated.getAggregateRequestTimestamp());
+    assertEquals(aggregateRequestTimestamp, secondAggregated.getLastUpdateTimestamp());
+    assertEquals(aggregateRequestTimestamp, secondAggregated.getAggregateRequestTimestamp());
+
+    // this sequence re-activates the sub-second and second aggregation
+    aggregateRequestTimestamp = TimeTo.fromEpochSubSecond(epochSubSecond).plus().minutes(1).toTimestamp();
+
+    testKit.addSubSecond(
+        SecondApi.AddSubSecondCommand
+            .newBuilder()
+            .setMerchantId("merchant-1")
+            .setEpochSecond(epochSecond)
+            .setEpochSubSecond(epochSubSecond)
+            .build());
+
+    testKit.aggregateSecond(
+        SecondApi.AggregateSecondCommand
+            .newBuilder()
+            .setMerchantId("merchant-1")
+            .setEpochSecond(epochSecond)
+            .setAggregateRequestTimestamp(aggregateRequestTimestamp)
+            .build());
+
+    response = testKit.subSecondAggregation(
+        SecondApi.SubSecondAggregationCommand
+            .newBuilder()
+            .setMerchantId("merchant-1")
+            .setEpochSecond(epochSecond)
+            .setEpochSubSecond(epochSubSecond)
+            .setTransactionTotalAmount(543.21)
+            .setTransactionCount(321)
+            .setLastUpdateTimestamp(aggregateRequestTimestamp)
+            .setAggregateRequestTimestamp(aggregateRequestTimestamp)
+            .build());
+
+    secondAggregated = response.getNextEventOfType(SecondEntity.SecondAggregated.class);
+    activeSubSecondAggregated = response.getNextEventOfType(SecondEntity.ActiveSubSecondAggregated.class);
+
+    assertEquals("merchant-1", activeSubSecondAggregated.getMerchantId());
+    assertEquals(epochSubSecond, activeSubSecondAggregated.getEpochSubSecond());
+    assertEquals(543.21, activeSubSecondAggregated.getTransactionTotalAmount(), 0.0);
+    assertEquals(321, activeSubSecondAggregated.getTransactionCount());
+    assertEquals(aggregateRequestTimestamp, activeSubSecondAggregated.getLastUpdateTimestamp());
+    assertEquals(aggregateRequestTimestamp, activeSubSecondAggregated.getAggregateRequestTimestamp());
+
+    assertEquals("merchant-1", secondAggregated.getMerchantId());
+    assertEquals(epochSecond, secondAggregated.getEpochSecond());
+    assertEquals(543.21, secondAggregated.getTransactionTotalAmount(), 0.0);
+    assertEquals(321, secondAggregated.getTransactionCount());
+    assertEquals(aggregateRequestTimestamp, secondAggregated.getLastUpdateTimestamp());
+    assertEquals(aggregateRequestTimestamp, secondAggregated.getAggregateRequestTimestamp());
   }
 }

@@ -48,8 +48,13 @@ message SecondState {
   int64 epoch_hour = 4;
   int64 epoch_day = 5;
   repeated ActiveSubSecond activeSubSeconds = 6;
-  google.protobuf.Timestamp last_update_timestamp = 7;
-  google.protobuf.Timestamp aggregate_request_timestamp = 8;
+  repeated AggregateSecond aggregateSeconds = 7;
+  google.protobuf.Timestamp last_update_timestamp = 8;
+}
+
+message AggregateSecond {
+  repeated ActiveSubSecond activeSubSeconds = 1;
+  google.protobuf.Timestamp aggregate_request_timestamp = 2;
 }
 
 message ActiveSubSecond {

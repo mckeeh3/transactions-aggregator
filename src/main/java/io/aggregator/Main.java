@@ -14,6 +14,7 @@ import io.aggregator.action.TransactionToSubSecondAction;
 import io.aggregator.entity.Day;
 import io.aggregator.entity.Hour;
 import io.aggregator.entity.Minute;
+import io.aggregator.entity.Payment;
 import io.aggregator.entity.Second;
 import io.aggregator.entity.SubSecond;
 import io.aggregator.entity.Transaction;
@@ -40,6 +41,7 @@ public final class Main {
       Day::new,
       Hour::new,
       Minute::new,
+      Payment::new,
       Second::new,
       SubSecond::new,
       Transaction::new,

@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package io.aggregator.entity;
+
+option java_outer_classname = "PaymentEntity";
+
+message PaymentCreated {}
+
+message PaymentAggregationRequested {}
+
+message PaymentAggregated {}
+
+message PaymentState {}

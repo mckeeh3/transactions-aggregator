@@ -101,7 +101,22 @@ public class SubSecond extends AbstractSubSecond {
   }
 
   static SubSecondEntity.SubSecondState handle(SubSecondEntity.SubSecondState state, SubSecondEntity.SubSecondAggregated event) {
-    return state; // this is a non-state changing event
+    var transactions = state.getTransactionsList().stream()
+        .map(transaction -> {
+          if (transaction.getAggregateRequestTimestamp().getSeconds() == 0) {
+            return transaction.toBuilder()
+                .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
+                .build();
+          } else {
+            return transaction;
+          }
+        })
+        .toList();
+
+    return state.toBuilder()
+        .clearTransactions()
+        .addAllTransactions(transactions)
+        .build();
   }
 
   static List<?> eventsFor(SubSecondEntity.SubSecondState state, SubSecondApi.AddTransactionCommand command) {
@@ -114,7 +129,10 @@ public class SubSecond extends AbstractSubSecond {
         .setTimestamp(command.getTimestamp())
         .build();
 
-    if (state.getMerchantId().isEmpty()) {
+    var isInactive = state.getTransactionsCount() == 0 || state.getTransactionsList().stream()
+        .allMatch(transaction -> transaction.getAggregateRequestTimestamp().getSeconds() > 0);
+
+    if (isInactive) {
       var secondCreated = SubSecondEntity.SubSecondCreated
           .newBuilder()
           .setMerchantId(command.getMerchantId())
@@ -128,8 +146,22 @@ public class SubSecond extends AbstractSubSecond {
   }
 
   static SubSecondEntity.SubSecondAggregated eventFor(SubSecondEntity.SubSecondState state, SubSecondApi.AggregateSubSecondCommand command) {
-    var total = state.getTransactionsList().stream().reduce(0.0, (a, b) -> a + b.getAmount(), (a, b) -> a + b);
-    var lastUpdate = state.getTransactionsList().stream()
+    var transactions = state.getTransactionsList().stream()
+        .filter(transaction -> transaction.getAggregateRequestTimestamp().getSeconds() == 0)
+        .toList();
+
+    if (transactions.size() == 0) {
+      return SubSecondEntity.SubSecondAggregated
+          .newBuilder()
+          .setMerchantId(state.getMerchantId())
+          .setEpochSubSecond(state.getEpochSubSecond())
+          .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
+          .build();
+    }
+
+    var total = transactions.stream()
+        .reduce(0.0, (a, b) -> a + b.getAmount(), (a, b) -> a + b);
+    var lastUpdate = transactions.stream()
         .map(transaction -> transaction.getTimestamp())
         .max(TimeTo.comparator())
         .get();

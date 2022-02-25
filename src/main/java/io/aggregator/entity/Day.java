@@ -1,7 +1,8 @@
 package io.aggregator.entity;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.akkaserverless.javasdk.eventsourcedentity.EventSourcedEntityContext;
 import com.google.protobuf.Empty;
@@ -118,9 +119,25 @@ public class Day extends AbstractDay {
   }
 
   static DayEntity.DayState handle(DayEntity.DayState state, DayEntity.DayAggregationRequested event) {
+    var activeAlreadyMoved = state.getAggregateDaysList().stream()
+        .anyMatch(aggregatedDay -> aggregatedDay.getAggregateRequestTimestamp() == event.getAggregateRequestTimestamp());
+
+    if (activeAlreadyMoved) {
+      return state;
+    } else {
+      return moveActiveHoursToAggregateDay(state, event);
+    }
+  }
+
+  static DayEntity.DayState moveActiveHoursToAggregateDay(DayEntity.DayState state, DayEntity.DayAggregationRequested event) {
     return state.toBuilder()
-        .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
-        .setAggregationStartedTimestamp(TimeTo.now())
+        .clearActiveHours()
+        .addAggregateDays(
+            DayEntity.AggregateDay
+                .newBuilder()
+                .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
+                .addAllActiveHours(state.getActiveHoursList())
+                .build())
         .build();
   }
 
@@ -130,23 +147,42 @@ public class Day extends AbstractDay {
 
   static DayEntity.DayState handle(DayEntity.DayState state, DayEntity.ActiveHourAggregated event) {
     return state.toBuilder()
-        .clearActiveHours()
-        .addAllActiveHours(state.getActiveHoursList().stream()
-            .map(activeHour -> {
-              if (activeHour.getEpochHour() == event.getEpochHour()) {
-                return activeHour
-                    .toBuilder()
-                    .setTransactionTotalAmount(event.getTransactionTotalAmount())
-                    .setTransactionCount(event.getTransactionCount())
-                    .setLastUpdateTimestamp(event.getLastUpdateTimestamp())
-                    .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
-                    .build();
-              } else {
-                return activeHour;
-              }
-            })
-            .collect(Collectors.toList()))
+        .clearAggregateDays()
+        .addAllAggregateDays(updateAggregateDays(state, event))
         .build();
+  }
+
+  static List<DayEntity.AggregateDay> updateAggregateDays(DayEntity.DayState state, DayEntity.ActiveHourAggregated event) {
+    return state.getAggregateDaysList().stream()
+        .map(aggregatedDay -> {
+          if (aggregatedDay.getAggregateRequestTimestamp().equals(event.getAggregateRequestTimestamp())) {
+            return aggregatedDay.toBuilder()
+                .clearActiveHours()
+                .addAllActiveHours(updateActiveSecond(event, aggregatedDay))
+                .build();
+          } else {
+            return aggregatedDay;
+          }
+        })
+        .toList();
+  }
+
+  static List<DayEntity.ActiveHour> updateActiveSecond(DayEntity.ActiveHourAggregated event, DayEntity.AggregateDay aggregateDay) {
+    return aggregateDay.getActiveHoursList().stream()
+        .map(activeHour -> {
+          if (activeHour.getEpochHour() == event.getEpochHour()) {
+            return activeHour
+                .toBuilder()
+                .setTransactionTotalAmount(event.getTransactionTotalAmount())
+                .setTransactionCount(event.getTransactionCount())
+                .setLastUpdateTimestamp(event.getLastUpdateTimestamp())
+                .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
+                .build();
+          } else {
+            return activeHour;
+          }
+        })
+        .toList();
   }
 
   static List<?> eventsFor(DayEntity.DayState state, DayApi.AddHourCommand command) {
@@ -190,36 +226,42 @@ public class Day extends AbstractDay {
           .addAllEpochHours(
               state.getActiveHoursList().stream()
                   .map(activeHour -> activeHour.getEpochHour())
-                  .collect(Collectors.toList()))
+                  .toList())
           .build());
     }
   }
 
   static List<?> eventsFor(DayEntity.DayState state, DayApi.HourAggregationCommand command) {
-    var activeHours = state.getActiveHoursList();
+    var aggregateDay = state.getAggregateDaysList().stream()
+        .filter(aggregatedDay -> aggregatedDay.getAggregateRequestTimestamp().equals(command.getAggregateRequestTimestamp()))
+        .findFirst()
+        .orElse(
+            DayEntity.AggregateDay
+                .newBuilder()
+                .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
+                .build());
+    var aggregateRequestTimestamp = aggregateDay.getAggregateRequestTimestamp();
+    var activeHours = aggregateDay.getActiveHoursList();
 
     var alreadyInList = activeHours.stream()
         .anyMatch(activeHour -> activeHour.getEpochHour() == command.getEpochHour());
 
     if (!alreadyInList) {
+      activeHours = new ArrayList<>(activeHours);
       activeHours.add(
           DayEntity.ActiveHour
               .newBuilder()
               .setEpochHour(command.getEpochHour())
               .build());
+      activeHours = Collections.unmodifiableList(activeHours);
     }
 
     activeHours = updateActiveHours(command, activeHours);
-
-    final var aggregateRequestTimestamp = state.getAggregateRequestTimestamp();
 
     var allHoursAggregated = activeHours.stream()
         .allMatch(activeHour -> activeHour.getAggregateRequestTimestamp().equals(aggregateRequestTimestamp));
 
     if (allHoursAggregated) {
-      log.info("All hours aggregated, merchantId: {}\nstarted: {}\ncompleted: {}",
-          state.getMerchantId(), TimeTo.fromTimestamp(state.getAggregationStartedTimestamp()).format(), TimeTo.fromNow().format());
-
       return List.of(toDayAggregated(state, command, activeHours), toActiveHourAggregated(command));
     } else {
       return List.of(toActiveHourAggregated(command));
@@ -241,7 +283,7 @@ public class Day extends AbstractDay {
             return activeHour;
           }
         })
-        .collect(Collectors.toList());
+        .toList();
   }
 
   static DayEntity.ActiveHourAggregated toActiveHourAggregated(DayApi.HourAggregationCommand command) {

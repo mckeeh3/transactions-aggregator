@@ -1,7 +1,8 @@
 package io.aggregator.entity;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.akkaserverless.javasdk.eventsourcedentity.EventSourcedEntityContext;
 import com.google.protobuf.Empty;
@@ -119,34 +120,70 @@ public class Hour extends AbstractHour {
   }
 
   static HourEntity.HourState handle(HourEntity.HourState state, HourEntity.HourAggregationRequested event) {
+    var activeAlreadyMoved = state.getAggregateHoursList().stream()
+        .anyMatch(aggregateHour -> aggregateHour.getAggregateRequestTimestamp() == event.getAggregateRequestTimestamp());
+
+    if (activeAlreadyMoved) {
+      return state;
+    } else {
+      return moveActiveMinutesToAggregateHour(state, event);
+    }
+  }
+
+  static HourEntity.HourState moveActiveMinutesToAggregateHour(HourEntity.HourState state, HourEntity.HourAggregationRequested event) {
     return state.toBuilder()
-        .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
+        .clearActiveMinutes()
+        .addAggregateHours(
+            HourEntity.AggregateHour
+                .newBuilder()
+                .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
+                .addAllActiveMinutes(state.getActiveMinutesList())
+                .build())
         .build();
   }
 
   static HourEntity.HourState handle(HourEntity.HourState state, HourEntity.HourAggregated event) {
-    return state; // no state change event
+    return state; // non-state change event
   }
 
   static HourEntity.HourState handle(HourEntity.HourState state, HourEntity.ActiveMinuteAggregated event) {
     return state.toBuilder()
-        .clearActiveMinutes()
-        .addAllActiveMinutes(state.getActiveMinutesList().stream()
-            .map(activeMinute -> {
-              if (activeMinute.getEpochMinute() == event.getEpochMinute()) {
-                return activeMinute
-                    .toBuilder()
-                    .setTransactionTotalAmount(event.getTransactionTotalAmount())
-                    .setTransactionCount(event.getTransactionCount())
-                    .setLastUpdateTimestamp(event.getLastUpdateTimestamp())
-                    .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
-                    .build();
-              } else {
-                return activeMinute;
-              }
-            })
-            .collect(Collectors.toList()))
+        .clearAggregateHours()
+        .addAllAggregateHours(updateAggregateMinutes(state, event))
         .build();
+  }
+
+  static List<HourEntity.AggregateHour> updateAggregateMinutes(HourEntity.HourState state, HourEntity.ActiveMinuteAggregated event) {
+    return state.getAggregateHoursList().stream()
+        .map(aggregatedHour -> {
+          if (aggregatedHour.getAggregateRequestTimestamp().equals(event.getAggregateRequestTimestamp())) {
+            return aggregatedHour.toBuilder()
+                .clearActiveMinutes()
+                .addAllActiveMinutes(updateActiveMinutes(event, aggregatedHour))
+                .build();
+          } else {
+            return aggregatedHour;
+          }
+        })
+        .toList();
+  }
+
+  static List<HourEntity.ActiveMinute> updateActiveMinutes(HourEntity.ActiveMinuteAggregated event, HourEntity.AggregateHour aggregateHour) {
+    return aggregateHour.getActiveMinutesList().stream()
+        .map(activeMinute -> {
+          if (activeMinute.getEpochMinute() == event.getEpochMinute()) {
+            return activeMinute
+                .toBuilder()
+                .setTransactionTotalAmount(event.getTransactionTotalAmount())
+                .setTransactionCount(event.getTransactionCount())
+                .setLastUpdateTimestamp(event.getLastUpdateTimestamp())
+                .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
+                .build();
+          } else {
+            return activeMinute;
+          }
+        })
+        .toList();
   }
 
   static List<?> eventsFor(HourEntity.HourState state, HourApi.AddMinuteCommand command) {
@@ -178,27 +215,36 @@ public class Hour extends AbstractHour {
         .addAllEpochMinutes(
             state.getActiveMinutesList().stream()
                 .map(activeMinute -> activeMinute.getEpochMinute())
-                .collect(Collectors.toList()))
+                .toList())
         .build();
   }
 
   static List<?> eventsFor(HourEntity.HourState state, HourApi.MinuteAggregationCommand command) {
-    var activeMinutes = state.getActiveMinutesList();
+    var aggregateHour = state.getAggregateHoursList().stream()
+        .filter(aggHr -> aggHr.getAggregateRequestTimestamp().equals(command.getAggregateRequestTimestamp()))
+        .findFirst()
+        .orElse(
+            HourEntity.AggregateHour
+                .newBuilder()
+                .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
+                .build());
+    var aggregateRequestTimestamp = aggregateHour.getAggregateRequestTimestamp();
+    var activeMinutes = aggregateHour.getActiveMinutesList();
 
     var alreadyInList = activeMinutes.stream()
         .anyMatch(activeMinute -> activeMinute.getEpochMinute() == command.getEpochMinute());
 
     if (!alreadyInList) {
+      activeMinutes = new ArrayList<>(activeMinutes);
       activeMinutes.add(
           HourEntity.ActiveMinute
               .newBuilder()
               .setEpochMinute(command.getEpochMinute())
               .build());
+      activeMinutes = Collections.unmodifiableList(activeMinutes);
     }
 
     activeMinutes = updateActiveMinutes(command, activeMinutes);
-
-    final var aggregateRequestTimestamp = state.getAggregateRequestTimestamp();
 
     var allMinutesAggregated = activeMinutes.stream()
         .allMatch(activeMinute -> activeMinute.getAggregateRequestTimestamp().equals(aggregateRequestTimestamp));
@@ -225,7 +271,7 @@ public class Hour extends AbstractHour {
             return activeMinute;
           }
         })
-        .collect(Collectors.toList());
+        .toList();
   }
 
   static HourEntity.ActiveMinuteAggregated toActiveMinuteAggregated(HourApi.MinuteAggregationCommand command) {

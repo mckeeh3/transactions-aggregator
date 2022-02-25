@@ -132,7 +132,11 @@ public class MinuteTest {
 
     var state = testKit.getState();
 
-    assertEquals(now, state.getAggregateRequestTimestamp());
+    var aggregateMinute = state.getAggregateMinutesList().stream()
+        .filter(aggMin -> aggMin.getAggregateRequestTimestamp().equals(now))
+        .findFirst();
+    assertTrue(aggregateMinute.isPresent());
+    assertEquals(now, aggregateMinute.get().getAggregateRequestTimestamp());
   }
 
   @Test
@@ -142,7 +146,7 @@ public class MinuteTest {
     var epochSecond = TimeTo.fromNow().toEpochSecond();
     var nextEpochSecond = TimeTo.fromEpochSecond(epochSecond).plus().seconds(1).toEpochSecond();
     var epochMinute = TimeTo.fromEpochSecond(epochSecond).toEpochMinute();
-    var now = TimeTo.fromEpochSecond(epochSecond).toTimestamp();
+    var aggregateRequestTimestamp = TimeTo.fromEpochSecond(epochSecond).toTimestamp();
 
     testKit.addSecond(
         MinuteApi.AddSecondCommand
@@ -165,7 +169,7 @@ public class MinuteTest {
             .newBuilder()
             .setMerchantId("merchant-1")
             .setEpochMinute(epochMinute)
-            .setAggregateRequestTimestamp(now)
+            .setAggregateRequestTimestamp(aggregateRequestTimestamp)
             .build());
 
     var response = testKit.secondAggregation(
@@ -176,8 +180,8 @@ public class MinuteTest {
             .setEpochSecond(epochSecond)
             .setTransactionTotalAmount(123.45)
             .setTransactionCount(10)
-            .setLastUpdateTimestamp(now)
-            .setAggregateRequestTimestamp(now)
+            .setLastUpdateTimestamp(aggregateRequestTimestamp)
+            .setAggregateRequestTimestamp(aggregateRequestTimestamp)
             .build());
 
     var activeSecondAggregated = response.getNextEventOfType(MinuteEntity.ActiveSecondAggregated.class);
@@ -186,8 +190,8 @@ public class MinuteTest {
     assertEquals(epochSecond, activeSecondAggregated.getEpochSecond());
     assertEquals(123.45, activeSecondAggregated.getTransactionTotalAmount(), 0.0);
     assertEquals(10, activeSecondAggregated.getTransactionCount());
-    assertEquals(now, activeSecondAggregated.getLastUpdateTimestamp());
-    assertEquals(now, activeSecondAggregated.getAggregateRequestTimestamp());
+    assertEquals(aggregateRequestTimestamp, activeSecondAggregated.getLastUpdateTimestamp());
+    assertEquals(aggregateRequestTimestamp, activeSecondAggregated.getAggregateRequestTimestamp());
 
     response = testKit.secondAggregation(
         MinuteApi.SecondAggregationCommand
@@ -197,8 +201,8 @@ public class MinuteTest {
             .setEpochSecond(nextEpochSecond)
             .setTransactionTotalAmount(678.90)
             .setTransactionCount(20)
-            .setLastUpdateTimestamp(now)
-            .setAggregateRequestTimestamp(now)
+            .setLastUpdateTimestamp(aggregateRequestTimestamp)
+            .setAggregateRequestTimestamp(aggregateRequestTimestamp)
             .build());
 
     var minuteAggregated = response.getNextEventOfType(MinuteEntity.MinuteAggregated.class);
@@ -208,14 +212,62 @@ public class MinuteTest {
     assertEquals(nextEpochSecond, activeSecondAggregated.getEpochSecond());
     assertEquals(678.90, activeSecondAggregated.getTransactionTotalAmount(), 0.0);
     assertEquals(20, activeSecondAggregated.getTransactionCount());
-    assertEquals(now, activeSecondAggregated.getLastUpdateTimestamp());
-    assertEquals(now, activeSecondAggregated.getAggregateRequestTimestamp());
+    assertEquals(aggregateRequestTimestamp, activeSecondAggregated.getLastUpdateTimestamp());
+    assertEquals(aggregateRequestTimestamp, activeSecondAggregated.getAggregateRequestTimestamp());
 
     assertEquals("merchant-1", minuteAggregated.getMerchantId());
     assertEquals(epochMinute, minuteAggregated.getEpochMinute());
     assertEquals(123.45 + 678.90, minuteAggregated.getTransactionTotalAmount(), 0.0);
     assertEquals(10 + 20, minuteAggregated.getTransactionCount());
-    assertEquals(now, minuteAggregated.getLastUpdateTimestamp());
-    assertEquals(now, minuteAggregated.getAggregateRequestTimestamp());
+    assertEquals(aggregateRequestTimestamp, minuteAggregated.getLastUpdateTimestamp());
+    assertEquals(aggregateRequestTimestamp, minuteAggregated.getAggregateRequestTimestamp());
+
+    // this sequence re-activates the second and minute aggregation
+    aggregateRequestTimestamp = TimeTo.fromEpochSecond(epochSecond).plus().minutes(1).toTimestamp();
+
+    testKit.addSecond(
+        MinuteApi.AddSecondCommand
+            .newBuilder()
+            .setMerchantId("merchant-1")
+            .setEpochMinute(epochMinute)
+            .setEpochSecond(epochSecond)
+            .build());
+
+    testKit.aggregateMinute(
+        MinuteApi.AggregateMinuteCommand
+            .newBuilder()
+            .setMerchantId("merchant-1")
+            .setEpochMinute(epochMinute)
+            .setAggregateRequestTimestamp(aggregateRequestTimestamp)
+            .build());
+
+    response = testKit.secondAggregation(
+        MinuteApi.SecondAggregationCommand
+            .newBuilder()
+            .setMerchantId("merchant-1")
+            .setEpochMinute(epochMinute)
+            .setEpochSecond(epochSecond)
+            .setTransactionTotalAmount(543.21)
+            .setTransactionCount(321)
+            .setLastUpdateTimestamp(aggregateRequestTimestamp)
+            .setAggregateRequestTimestamp(aggregateRequestTimestamp)
+            .build());
+
+    minuteAggregated = response.getNextEventOfType(MinuteEntity.MinuteAggregated.class);
+    activeSecondAggregated = response.getNextEventOfType(MinuteEntity.ActiveSecondAggregated.class);
+
+    assertEquals("merchant-1", activeSecondAggregated.getMerchantId());
+    assertEquals(epochSecond, activeSecondAggregated.getEpochSecond());
+    assertEquals(543.21, activeSecondAggregated.getTransactionTotalAmount(), 0.0);
+    assertEquals(321, activeSecondAggregated.getTransactionCount());
+    assertEquals(aggregateRequestTimestamp, activeSecondAggregated.getLastUpdateTimestamp());
+    assertEquals(aggregateRequestTimestamp, activeSecondAggregated.getAggregateRequestTimestamp());
+
+    assertEquals("merchant-1", minuteAggregated.getMerchantId());
+    assertEquals(epochMinute, minuteAggregated.getEpochMinute());
+    assertEquals(543.21, minuteAggregated.getTransactionTotalAmount(), 0.0);
+    assertEquals(321, minuteAggregated.getTransactionCount());
+    assertEquals(aggregateRequestTimestamp, minuteAggregated.getLastUpdateTimestamp());
+    assertEquals(aggregateRequestTimestamp, minuteAggregated.getAggregateRequestTimestamp());
   }
 }

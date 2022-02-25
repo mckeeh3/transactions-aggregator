@@ -1,7 +1,8 @@
 package io.aggregator.entity;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.akkaserverless.javasdk.eventsourcedentity.EventSourcedEntityContext;
 import com.google.protobuf.Empty;
@@ -120,34 +121,70 @@ public class Minute extends AbstractMinute {
   }
 
   static MinuteEntity.MinuteState handle(MinuteEntity.MinuteState state, MinuteEntity.MinuteAggregationRequested event) {
+    var activeAlreadyMoved = state.getAggregateMinutesList().stream()
+        .anyMatch(activeMinute -> activeMinute.getAggregateRequestTimestamp().equals(event.getAggregateRequestTimestamp()));
+
+    if (activeAlreadyMoved) {
+      return state;
+    } else {
+      return moveActiveSecondsToAggregateMinute(state, event);
+    }
+  }
+
+  static MinuteEntity.MinuteState moveActiveSecondsToAggregateMinute(MinuteEntity.MinuteState state, MinuteEntity.MinuteAggregationRequested event) {
     return state.toBuilder()
-        .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
+        .clearActiveSeconds()
+        .addAggregateMinutes(
+            MinuteEntity.AggregateMinute
+                .newBuilder()
+                .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
+                .addAllActiveSeconds(state.getActiveSecondsList())
+                .build())
         .build();
   }
 
   static MinuteEntity.MinuteState handle(MinuteEntity.MinuteState state, MinuteEntity.MinuteAggregated event) {
-    return state; // no state change event
+    return state; // non-state change event
   }
 
   static MinuteEntity.MinuteState handle(MinuteEntity.MinuteState state, MinuteEntity.ActiveSecondAggregated event) {
     return state.toBuilder()
-        .clearActiveSeconds()
-        .addAllActiveSeconds(state.getActiveSecondsList().stream()
-            .map(activeSecond -> {
-              if (activeSecond.getEpochSecond() == event.getEpochSecond()) {
-                return activeSecond
-                    .toBuilder()
-                    .setTransactionTotalAmount(event.getTransactionTotalAmount())
-                    .setTransactionCount(event.getTransactionCount())
-                    .setLastUpdateTimestamp(event.getLastUpdateTimestamp())
-                    .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
-                    .build();
-              } else {
-                return activeSecond;
-              }
-            })
-            .collect(Collectors.toList()))
+        .clearAggregateMinutes()
+        .addAllAggregateMinutes(updateAggregateMinutes(state, event))
         .build();
+  }
+
+  static List<MinuteEntity.AggregateMinute> updateAggregateMinutes(MinuteEntity.MinuteState state, MinuteEntity.ActiveSecondAggregated event) {
+    return state.getAggregateMinutesList().stream()
+        .map(aggregatedMinute -> {
+          if (aggregatedMinute.getAggregateRequestTimestamp().equals(event.getAggregateRequestTimestamp())) {
+            return aggregatedMinute.toBuilder()
+                .clearActiveSeconds()
+                .addAllActiveSeconds(updateActiveSeconds(event, aggregatedMinute))
+                .build();
+          } else {
+            return aggregatedMinute;
+          }
+        })
+        .toList();
+  }
+
+  static List<MinuteEntity.ActiveSecond> updateActiveSeconds(MinuteEntity.ActiveSecondAggregated event, MinuteEntity.AggregateMinute aggregateMinute) {
+    return aggregateMinute.getActiveSecondsList().stream()
+        .map(activeSecond -> {
+          if (activeSecond.getEpochSecond() == event.getEpochSecond()) {
+            return activeSecond
+                .toBuilder()
+                .setTransactionTotalAmount(event.getTransactionTotalAmount())
+                .setTransactionCount(event.getTransactionCount())
+                .setLastUpdateTimestamp(event.getLastUpdateTimestamp())
+                .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
+                .build();
+          } else {
+            return activeSecond;
+          }
+        })
+        .toList();
   }
 
   static List<?> eventsFor(MinuteEntity.MinuteState state, MinuteApi.AddSecondCommand command) {
@@ -179,27 +216,37 @@ public class Minute extends AbstractMinute {
         .addAllEpochSeconds(
             state.getActiveSecondsList().stream()
                 .map(activeSecond -> activeSecond.getEpochSecond())
-                .collect(Collectors.toList()))
+                .toList())
         .build();
   }
 
   static List<?> eventsFor(MinuteEntity.MinuteState state, MinuteApi.SecondAggregationCommand command) {
-    var activeSeconds = state.getActiveSecondsList();
+    var aggregateMinute = state.getAggregateMinutesList().stream()
+        .filter(aggMin -> aggMin.getAggregateRequestTimestamp().equals(command.getAggregateRequestTimestamp()))
+        .findFirst()
+        .orElse(
+            MinuteEntity.AggregateMinute
+                .newBuilder()
+                .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
+                .addAllActiveSeconds(state.getActiveSecondsList())
+                .build());
+    var aggregateRequestTimestamp = aggregateMinute.getAggregateRequestTimestamp();
+    var activeSeconds = aggregateMinute.getActiveSecondsList();
 
     var alreadyInList = activeSeconds.stream()
         .anyMatch(activeSecond -> activeSecond.getEpochSecond() == command.getEpochSecond());
 
     if (!alreadyInList) {
+      activeSeconds = new ArrayList<>(activeSeconds);
       activeSeconds.add(
           MinuteEntity.ActiveSecond
               .newBuilder()
               .setEpochSecond(command.getEpochSecond())
               .build());
+      activeSeconds = Collections.unmodifiableList(activeSeconds);
     }
 
     activeSeconds = updateActiveSeconds(command, activeSeconds);
-
-    final var aggregateRequestTimestamp = state.getAggregateRequestTimestamp();
 
     var allSecondsAggregated = activeSeconds.stream()
         .allMatch(activeSecond -> activeSecond.getAggregateRequestTimestamp().equals(aggregateRequestTimestamp));
@@ -226,7 +273,7 @@ public class Minute extends AbstractMinute {
             return activeSecond;
           }
         })
-        .collect(Collectors.toList());
+        .toList();
   }
 
   static MinuteEntity.ActiveSecondAggregated toActiveSecondAggregated(MinuteApi.SecondAggregationCommand command) {
