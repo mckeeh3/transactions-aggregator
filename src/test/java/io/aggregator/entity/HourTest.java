@@ -119,6 +119,7 @@ public class HourTest {
             .setMerchantId("merchant-1")
             .setEpochHour(epochHour)
             .setAggregateRequestTimestamp(now)
+            .setPaymentId("payment-1")
             .build());
 
     var hourAggregationRequested = response.getNextEventOfType(HourEntity.HourAggregationRequested.class);
@@ -129,6 +130,7 @@ public class HourTest {
     assertEquals(2, hourAggregationRequested.getEpochMinutesCount());
     assertEquals(epochMinute, hourAggregationRequested.getEpochMinutes(0));
     assertEquals(nextEpochMinute, hourAggregationRequested.getEpochMinutes(1));
+    assertEquals("payment-1", hourAggregationRequested.getPaymentId());
 
     var state = testKit.getState();
 
@@ -137,6 +139,31 @@ public class HourTest {
         .findFirst();
     assertTrue(aggregateHour.isPresent());
     assertEquals(now, aggregateHour.get().getAggregateRequestTimestamp());
+  }
+
+  @Test
+  public void aggregateHourWithNoHoursTest() {
+    HourTestKit testKit = HourTestKit.of(Hour::new);
+
+    var epochHour = TimeTo.fromNow().toEpochHour();
+    var now = TimeTo.fromEpochHour(epochHour).toTimestamp();
+
+    var response = testKit.aggregateHour(
+        HourApi.AggregateHourCommand
+            .newBuilder()
+            .setMerchantId("merchant-1")
+            .setEpochHour(epochHour)
+            .setAggregateRequestTimestamp(now)
+            .setPaymentId("payment-1")
+            .build());
+
+    var hourAggregated = response.getNextEventOfType(HourEntity.HourAggregated.class);
+
+    assertEquals("merchant-1", hourAggregated.getMerchantId());
+    assertEquals(epochHour, hourAggregated.getEpochHour());
+    assertEquals(now, hourAggregated.getAggregateRequestTimestamp());
+    assertEquals(0, hourAggregated.getTransactionCount());
+    assertEquals(0.0, hourAggregated.getTransactionTotalAmount(), 0.0);
   }
 
   @Test
@@ -170,6 +197,7 @@ public class HourTest {
             .setMerchantId("merchant-1")
             .setEpochHour(epochHour)
             .setAggregateRequestTimestamp(aggregateRequestTimestamp)
+            .setPaymentId("payment-1")
             .build());
 
     var response = testKit.minuteAggregation(
@@ -182,6 +210,7 @@ public class HourTest {
             .setTransactionCount(10)
             .setLastUpdateTimestamp(aggregateRequestTimestamp)
             .setAggregateRequestTimestamp(aggregateRequestTimestamp)
+            .setPaymentId("payment-1")
             .build());
 
     var activeMinuteAggregated = response.getNextEventOfType(HourEntity.ActiveMinuteAggregated.class);
@@ -192,6 +221,7 @@ public class HourTest {
     assertEquals(10, activeMinuteAggregated.getTransactionCount());
     assertEquals(aggregateRequestTimestamp, activeMinuteAggregated.getLastUpdateTimestamp());
     assertEquals(aggregateRequestTimestamp, activeMinuteAggregated.getAggregateRequestTimestamp());
+    assertEquals("payment-1", activeMinuteAggregated.getPaymentId());
 
     response = testKit.minuteAggregation(
         HourApi.MinuteAggregationCommand
@@ -203,6 +233,7 @@ public class HourTest {
             .setTransactionCount(20)
             .setLastUpdateTimestamp(aggregateRequestTimestamp)
             .setAggregateRequestTimestamp(aggregateRequestTimestamp)
+            .setPaymentId("payment-1")
             .build());
 
     var hourAggregated = response.getNextEventOfType(HourEntity.HourAggregated.class);
@@ -214,6 +245,7 @@ public class HourTest {
     assertEquals(20, activeMinuteAggregated.getTransactionCount());
     assertEquals(aggregateRequestTimestamp, activeMinuteAggregated.getLastUpdateTimestamp());
     assertEquals(aggregateRequestTimestamp, activeMinuteAggregated.getAggregateRequestTimestamp());
+    assertEquals("payment-1", activeMinuteAggregated.getPaymentId());
 
     assertEquals("merchant-1", hourAggregated.getMerchantId());
     assertEquals(epochHour, hourAggregated.getEpochHour());
@@ -221,6 +253,7 @@ public class HourTest {
     assertEquals(10 + 20, hourAggregated.getTransactionCount());
     assertEquals(aggregateRequestTimestamp, hourAggregated.getLastUpdateTimestamp());
     assertEquals(aggregateRequestTimestamp, hourAggregated.getAggregateRequestTimestamp());
+    assertEquals("payment-1", hourAggregated.getPaymentId());
 
     // this sequence re-activates the hour and minute aggregation
     aggregateRequestTimestamp = TimeTo.fromEpochHour(epochHour).plus().minutes(1).toTimestamp();
@@ -239,6 +272,7 @@ public class HourTest {
             .setMerchantId("merchant-1")
             .setEpochHour(epochHour)
             .setAggregateRequestTimestamp(aggregateRequestTimestamp)
+            .setPaymentId("payment-1")
             .build());
 
     response = testKit.minuteAggregation(
@@ -251,6 +285,7 @@ public class HourTest {
             .setTransactionCount(321)
             .setLastUpdateTimestamp(aggregateRequestTimestamp)
             .setAggregateRequestTimestamp(aggregateRequestTimestamp)
+            .setPaymentId("payment-1")
             .build());
 
     hourAggregated = response.getNextEventOfType(HourEntity.HourAggregated.class);
@@ -262,6 +297,7 @@ public class HourTest {
     assertEquals(321, activeMinuteAggregated.getTransactionCount());
     assertEquals(aggregateRequestTimestamp, activeMinuteAggregated.getLastUpdateTimestamp());
     assertEquals(aggregateRequestTimestamp, activeMinuteAggregated.getAggregateRequestTimestamp());
+    assertEquals("payment-1", activeMinuteAggregated.getPaymentId());
 
     assertEquals("merchant-1", hourAggregated.getMerchantId());
     assertEquals(epochHour, hourAggregated.getEpochHour());
@@ -269,5 +305,6 @@ public class HourTest {
     assertEquals(321, hourAggregated.getTransactionCount());
     assertEquals(aggregateRequestTimestamp, hourAggregated.getLastUpdateTimestamp());
     assertEquals(aggregateRequestTimestamp, hourAggregated.getAggregateRequestTimestamp());
+    assertEquals("payment-1", hourAggregated.getPaymentId());
   }
 }

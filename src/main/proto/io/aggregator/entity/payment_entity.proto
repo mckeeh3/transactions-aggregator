@@ -6,10 +6,51 @@ package io.aggregator.entity;
 
 option java_outer_classname = "PaymentEntity";
 
-message PaymentCreated {}
+message PaymentCreated {
+  string merchant_id = 1;
+  string service_code = 2;
+  string account_from = 3;
+  string account_to = 4;
+  string payment_id = 5;
+  google.protobuf.Timestamp aggregate_request_timestamp = 6;
+}
 
-message PaymentAggregationRequested {}
+message PaymentAggregationRequested {
+  string merchant_id = 1;
+  string service_code = 2;
+  string account_from = 3;
+  string account_to = 4;
+  string payment_id = 5;
+  google.protobuf.Timestamp aggregate_request_timestamp = 6;
+}
 
-message PaymentAggregated {}
+message PaymentDayAggregated {
+  string merchant_id = 1;
+  string service_code = 2;
+  string account_from = 3;
+  string account_to = 4;
+  string payment_id = 5;
+  double transaction_total_amount = 6;
+  int32 transaction_count = 7;
+  google.protobuf.Timestamp last_update_timestamp = 8;
+  google.protobuf.Timestamp aggregate_request_timestamp = 9;
+}
 
-message PaymentState {}
+message PaymentState {
+  string merchant_id = 1;
+  string service_code = 2;
+  string account_from = 3;
+  string account_to = 4;
+  string payment_id = 5;
+  google.protobuf.Timestamp last_update_timestamp = 6;
+  google.protobuf.Timestamp aggregate_request_timestamp = 7;
+  repeated ActiveDay active_days = 8;
+}
+
+message ActiveDay {
+  int64 epoch_day = 1;
+  double transaction_total_amount = 6;
+  int32 transaction_count = 7;
+  google.protobuf.Timestamp last_update_timestamp = 8;
+  google.protobuf.Timestamp aggregate_request_timestamp = 9;
+}

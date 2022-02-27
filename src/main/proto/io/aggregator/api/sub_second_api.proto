@@ -50,4 +50,5 @@ message AggregateSubSecondCommand {
   string merchant_id = 1 [(akkaserverless.field).entity_key = true];
   int64 epoch_sub_second = 2 [(akkaserverless.field).entity_key = true];
   google.protobuf.Timestamp aggregate_request_timestamp = 3;
+  string payment_id = 4;
 }

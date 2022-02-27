@@ -33,16 +33,16 @@ public class PaymentTest {
   }
 
   @Test
-  public void createPaymentTest() {
+  public void paymentAggregationRequestTest() {
     PaymentTestKit testKit = PaymentTestKit.of(Payment::new);
-    // EventSourcedResult<Empty> result = testKit.createPayment(CreatePaymentCommand.newBuilder()...build());
+    // EventSourcedResult<Empty> result = testKit.paymentAggregationRequest(PaymentAggregationRequestCommand.newBuilder()...build());
   }
 
 
   @Test
-  public void paymentDayAggregationTest() {
+  public void dayAggregationTest() {
     PaymentTestKit testKit = PaymentTestKit.of(Payment::new);
-    // EventSourcedResult<Empty> result = testKit.paymentDayAggregation(PaymentDayAggregationCommand.newBuilder()...build());
+    // EventSourcedResult<Empty> result = testKit.dayAggregation(DayAggregationCommand.newBuilder()...build());
   }
 
 }

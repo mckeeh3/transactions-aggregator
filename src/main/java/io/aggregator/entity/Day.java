@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import io.aggregator.TimeTo;
 import io.aggregator.api.DayApi;
+import io.aggregator.entity.DayEntity.ActiveHour;
 
 // This class was initially generated based on the .proto definition by Akka Serverless tooling.
 //
@@ -136,6 +137,8 @@ public class Day extends AbstractDay {
             DayEntity.AggregateDay
                 .newBuilder()
                 .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
+                .setAggregationStartedTimestamp(event.getAggregationStartedTimestamp())
+                .setPaymentId(event.getPaymentId())
                 .addAllActiveHours(state.getActiveHoursList())
                 .build())
         .build();
@@ -208,26 +211,33 @@ public class Day extends AbstractDay {
   static List<?> eventsFor(DayEntity.DayState state, DayApi.AggregateDayCommand command) {
     if (state.getActiveHoursCount() == 0) {
       var timestamp = command.getAggregateRequestTimestamp();
-      return List.of(DayEntity.DayAggregated
-          .newBuilder()
-          .setMerchantId(command.getMerchantId())
-          .setEpochDay(command.getEpochDay())
-          .setLastUpdateTimestamp(timestamp)
-          .setAggregateRequestTimestamp(timestamp)
-          .setAggregationStartedTimestamp(timestamp)
-          .setAggregationCompletedTimestamp(timestamp)
-          .build());
+      return List.of(
+          DayEntity.DayAggregated
+              .newBuilder()
+              .setMerchantId(command.getMerchantId())
+              .setEpochDay(command.getEpochDay())
+              .setTransactionTotalAmount(0.0)
+              .setTransactionCount(0)
+              .setLastUpdateTimestamp(timestamp)
+              .setAggregateRequestTimestamp(timestamp)
+              .setAggregationStartedTimestamp(timestamp)
+              .setAggregationCompletedTimestamp(timestamp)
+              .setPaymentId(command.getPaymentId())
+              .build());
     } else {
-      return List.of(DayEntity.DayAggregationRequested
-          .newBuilder()
-          .setMerchantId(command.getMerchantId())
-          .setEpochDay(command.getEpochDay())
-          .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
-          .addAllEpochHours(
-              state.getActiveHoursList().stream()
-                  .map(activeHour -> activeHour.getEpochHour())
-                  .toList())
-          .build());
+      return List.of(
+          DayEntity.DayAggregationRequested
+              .newBuilder()
+              .setMerchantId(command.getMerchantId())
+              .setEpochDay(command.getEpochDay())
+              .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
+              .setPaymentId(command.getPaymentId())
+              .setAggregationStartedTimestamp(command.getAggregateRequestTimestamp())
+              .addAllEpochHours(
+                  state.getActiveHoursList().stream()
+                      .map(activeHour -> activeHour.getEpochHour())
+                      .toList())
+              .build());
     }
   }
 
@@ -262,7 +272,7 @@ public class Day extends AbstractDay {
         .allMatch(activeHour -> activeHour.getAggregateRequestTimestamp().equals(aggregateRequestTimestamp));
 
     if (allHoursAggregated) {
-      return List.of(toDayAggregated(state, command, activeHours), toActiveHourAggregated(command));
+      return List.of(toDayAggregated(state, aggregateDay, activeHours), toActiveHourAggregated(command));
     } else {
       return List.of(toActiveHourAggregated(command));
     }
@@ -295,11 +305,12 @@ public class Day extends AbstractDay {
         .setTransactionCount(command.getTransactionCount())
         .setLastUpdateTimestamp(command.getLastUpdateTimestamp())
         .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
+        .setPaymentId(command.getPaymentId())
         .build();
     return activeHourAggregated;
   }
 
-  static DayEntity.DayAggregated toDayAggregated(DayEntity.DayState state, DayApi.HourAggregationCommand command, List<DayEntity.ActiveHour> activeHours) {
+  static DayEntity.DayAggregated toDayAggregated(DayEntity.DayState state, DayEntity.AggregateDay aggregateDay, List<ActiveHour> activeHours) {
     var transactionTotalAmount = activeHours.stream()
         .reduce(0.0, (amount, activeHour) -> amount + activeHour.getTransactionTotalAmount(), Double::sum);
 
@@ -313,14 +324,15 @@ public class Day extends AbstractDay {
 
     return DayEntity.DayAggregated
         .newBuilder()
-        .setMerchantId(command.getMerchantId())
-        .setEpochDay(command.getEpochDay())
+        .setMerchantId(state.getMerchantId())
+        .setEpochDay(state.getEpochDay())
         .setTransactionTotalAmount(transactionTotalAmount)
         .setTransactionCount(transactionCount)
         .setLastUpdateTimestamp(lastUpdateTimestamp)
-        .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
-        .setAggregationStartedTimestamp(state.getAggregationStartedTimestamp())
+        .setAggregateRequestTimestamp(aggregateDay.getAggregateRequestTimestamp())
+        .setAggregationStartedTimestamp(aggregateDay.getAggregationStartedTimestamp())
         .setAggregationCompletedTimestamp(TimeTo.now())
+        .setPaymentId(aggregateDay.getPaymentId())
         .build();
   }
 }

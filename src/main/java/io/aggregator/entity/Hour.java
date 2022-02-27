@@ -82,7 +82,7 @@ public class Hour extends AbstractHour {
     log.info("state: {}\nAggregateHourCommand: {}", state, command);
 
     return effects()
-        .emitEvent(eventFor(state, command))
+        .emitEvents(eventsFor(state, command))
         .thenReply(newState -> Empty.getDefaultInstance());
   }
 
@@ -137,6 +137,7 @@ public class Hour extends AbstractHour {
             HourEntity.AggregateHour
                 .newBuilder()
                 .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
+                .setPaymentId(event.getPaymentId())
                 .addAllActiveMinutes(state.getActiveMinutesList())
                 .build())
         .build();
@@ -206,17 +207,34 @@ public class Hour extends AbstractHour {
     }
   }
 
-  static HourEntity.HourAggregationRequested eventFor(HourEntity.HourState state, HourApi.AggregateHourCommand command) {
-    return HourEntity.HourAggregationRequested
-        .newBuilder()
-        .setMerchantId(command.getMerchantId())
-        .setEpochHour(command.getEpochHour())
-        .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
-        .addAllEpochMinutes(
-            state.getActiveMinutesList().stream()
-                .map(activeMinute -> activeMinute.getEpochMinute())
-                .toList())
-        .build();
+  static List<?> eventsFor(HourEntity.HourState state, HourApi.AggregateHourCommand command) {
+    if (state.getActiveMinutesCount() == 0) {
+      var timestamp = command.getAggregateRequestTimestamp();
+      return List.of(
+          HourEntity.HourAggregated
+              .newBuilder()
+              .setMerchantId(command.getMerchantId())
+              .setEpochHour(command.getEpochHour())
+              .setTransactionTotalAmount(0.0)
+              .setTransactionCount(0)
+              .setLastUpdateTimestamp(timestamp)
+              .setAggregateRequestTimestamp(timestamp)
+              .setPaymentId(command.getPaymentId())
+              .build());
+    } else {
+      return List.of(
+          HourEntity.HourAggregationRequested
+              .newBuilder()
+              .setMerchantId(command.getMerchantId())
+              .setEpochHour(command.getEpochHour())
+              .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
+              .setPaymentId(command.getPaymentId())
+              .addAllEpochMinutes(
+                  state.getActiveMinutesList().stream()
+                      .map(activeMinute -> activeMinute.getEpochMinute())
+                      .toList())
+              .build());
+    }
   }
 
   static List<?> eventsFor(HourEntity.HourState state, HourApi.MinuteAggregationCommand command) {
@@ -283,6 +301,7 @@ public class Hour extends AbstractHour {
         .setTransactionCount(command.getTransactionCount())
         .setLastUpdateTimestamp(command.getLastUpdateTimestamp())
         .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
+        .setPaymentId(command.getPaymentId())
         .build();
     return activeMinuteAggregated;
   }
@@ -307,6 +326,7 @@ public class Hour extends AbstractHour {
         .setTransactionCount(transactionCount)
         .setLastUpdateTimestamp(lastUpdateTimestamp)
         .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
+        .setPaymentId(command.getPaymentId())
         .build();
   }
 }

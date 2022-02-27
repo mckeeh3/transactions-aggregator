@@ -23,6 +23,7 @@ message SecondAggregated {
   int32 transaction_count = 4;
   google.protobuf.Timestamp last_update_timestamp = 5;
   google.protobuf.Timestamp aggregate_request_timestamp = 6;
+  string payment_id = 7;
 }
 
 message ActiveSubSecondAggregated {
@@ -32,6 +33,7 @@ message ActiveSubSecondAggregated {
   int32 transaction_count = 4;
   google.protobuf.Timestamp last_update_timestamp = 5;
   google.protobuf.Timestamp aggregate_request_timestamp = 6;
+  string payment_id = 7;
 }
 
 message SecondAggregationRequested {
@@ -39,6 +41,7 @@ message SecondAggregationRequested {
   int64 epoch_second = 2;
   repeated int64 epoch_sub_seconds = 3;
   google.protobuf.Timestamp aggregate_request_timestamp = 6;
+  string payment_id = 7;
 }
 
 message SecondState {
@@ -55,6 +58,7 @@ message SecondState {
 message AggregateSecond {
   repeated ActiveSubSecond activeSubSeconds = 1;
   google.protobuf.Timestamp aggregate_request_timestamp = 2;
+  string payment_id = 3;
 }
 
 message ActiveSubSecond {
@@ -63,4 +67,5 @@ message ActiveSubSecond {
   int32 transaction_count = 3;
   google.protobuf.Timestamp last_update_timestamp = 4;
   google.protobuf.Timestamp aggregate_request_timestamp = 5;
+  string payment_id = 6;
 }

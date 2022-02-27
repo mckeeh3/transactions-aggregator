@@ -82,7 +82,7 @@ public class Minute extends AbstractMinute {
     log.info("state: {}\nAggregateMinuteCommand: {}", state, command);
 
     return effects()
-        .emitEvent(eventFor(state, command))
+        .emitEvents(eventsFor(state, command))
         .thenReply(newState -> Empty.getDefaultInstance());
   }
 
@@ -138,6 +138,7 @@ public class Minute extends AbstractMinute {
             MinuteEntity.AggregateMinute
                 .newBuilder()
                 .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
+                .setPaymentId(event.getPaymentId())
                 .addAllActiveSeconds(state.getActiveSecondsList())
                 .build())
         .build();
@@ -207,17 +208,34 @@ public class Minute extends AbstractMinute {
     }
   }
 
-  static MinuteEntity.MinuteAggregationRequested eventFor(MinuteEntity.MinuteState state, MinuteApi.AggregateMinuteCommand command) {
-    return MinuteEntity.MinuteAggregationRequested
-        .newBuilder()
-        .setMerchantId(command.getMerchantId())
-        .setEpochMinute(command.getEpochMinute())
-        .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
-        .addAllEpochSeconds(
-            state.getActiveSecondsList().stream()
-                .map(activeSecond -> activeSecond.getEpochSecond())
-                .toList())
-        .build();
+  static List<?> eventsFor(MinuteEntity.MinuteState state, MinuteApi.AggregateMinuteCommand command) {
+    if (state.getActiveSecondsCount() == 0) {
+      var timestamp = command.getAggregateRequestTimestamp();
+      return List.of(
+          MinuteEntity.MinuteAggregated
+              .newBuilder()
+              .setMerchantId(command.getMerchantId())
+              .setEpochMinute(command.getEpochMinute())
+              .setTransactionTotalAmount(0.0)
+              .setTransactionCount(0)
+              .setLastUpdateTimestamp(timestamp)
+              .setAggregateRequestTimestamp(timestamp)
+              .setPaymentId(command.getPaymentId())
+              .build());
+    } else {
+      return List.of(
+          MinuteEntity.MinuteAggregationRequested
+              .newBuilder()
+              .setMerchantId(command.getMerchantId())
+              .setEpochMinute(command.getEpochMinute())
+              .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
+              .setPaymentId(command.getPaymentId())
+              .addAllEpochSeconds(
+                  state.getActiveSecondsList().stream()
+                      .map(activeSecond -> activeSecond.getEpochSecond())
+                      .toList())
+              .build());
+    }
   }
 
   static List<?> eventsFor(MinuteEntity.MinuteState state, MinuteApi.SecondAggregationCommand command) {
@@ -285,6 +303,7 @@ public class Minute extends AbstractMinute {
         .setTransactionCount(command.getTransactionCount())
         .setLastUpdateTimestamp(command.getLastUpdateTimestamp())
         .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
+        .setPaymentId(command.getPaymentId())
         .build();
     return activeSecondAggregated;
   }
@@ -309,6 +328,7 @@ public class Minute extends AbstractMinute {
         .setTransactionCount(transactionCount)
         .setLastUpdateTimestamp(lastUpdateTimestamp)
         .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
+        .setPaymentId(command.getPaymentId())
         .build();
   }
 }

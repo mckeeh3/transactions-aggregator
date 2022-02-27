@@ -18,26 +18,43 @@ service Payment {
       events: [
         "io.aggregator.entity.PaymentCreated",
         "io.aggregator.entity.PaymentAggregationRequested",
-        "io.aggregator.entity.PaymentAggregated"  //
+        "io.aggregator.entity.PaymentDayAggregated"  //
       ]
     }
   };
 
-  rpc CreatePayment(CreatePaymentCommand) returns (google.protobuf.Empty) {
+  rpc PaymentAggregationRequest(PaymentAggregationRequestCommand) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      post: "/payment/{merchant_id}/{service}/{account_from}/{account_to}/{payment_id}/create"
+      post: "/payment/create"
       body: "*"
     };
   }
 
-  rpc PaymentDayAggregation(PaymentDayAggregationCommand) returns (google.protobuf.Empty) {
+  rpc DayAggregation(DayAggregationCommand) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      post: "/payment/{merchant_id}/{service}/{account}/{from}/{to}/hour-aggregation"
+      post: "/payment/aggregation"
       body: "*"
     };
   }
 }
 
-message CreatePaymentCommand {}
+message PaymentAggregationRequestCommand {
+  string merchant_id = 1 [(akkaserverless.field).entity_key = true];
+  string service_code = 2 [(akkaserverless.field).entity_key = true];
+  string account_from = 3 [(akkaserverless.field).entity_key = true];
+  string account_to = 4 [(akkaserverless.field).entity_key = true];
+  string payment_id = 5 [(akkaserverless.field).entity_key = true];
+  google.protobuf.Timestamp aggregate_request_timestamp = 6;
+}
 
-message PaymentDayAggregationCommand {}
+message DayAggregationCommand {
+  string merchant_id = 1 [(akkaserverless.field).entity_key = true];
+  string service_code = 2 [(akkaserverless.field).entity_key = true];
+  string account_from = 3 [(akkaserverless.field).entity_key = true];
+  string account_to = 4 [(akkaserverless.field).entity_key = true];
+  string payment_id = 5 [(akkaserverless.field).entity_key = true];
+  double transaction_total_amount = 6;
+  int32 transaction_count = 7;
+  google.protobuf.Timestamp last_update_timestamp = 8;
+  google.protobuf.Timestamp aggregate_request_timestamp = 9;
+}

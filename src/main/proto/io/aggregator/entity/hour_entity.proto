@@ -23,6 +23,7 @@ message HourAggregated {
   int32 transaction_count = 4;
   google.protobuf.Timestamp last_update_timestamp = 5;
   google.protobuf.Timestamp aggregate_request_timestamp = 6;
+  string payment_id = 7;
 }
 
 message ActiveMinuteAggregated {
@@ -32,6 +33,7 @@ message ActiveMinuteAggregated {
   int32 transaction_count = 4;
   google.protobuf.Timestamp last_update_timestamp = 5;
   google.protobuf.Timestamp aggregate_request_timestamp = 6;
+  string payment_id = 7;
 }
 
 message HourAggregationRequested {
@@ -39,6 +41,7 @@ message HourAggregationRequested {
   int64 epoch_hour = 2;
   repeated int64 epoch_minutes = 3;
   google.protobuf.Timestamp aggregate_request_timestamp = 4;
+  string payment_id = 5;
 }
 
 message HourState {
@@ -53,6 +56,7 @@ message HourState {
 message AggregateHour {
   repeated ActiveMinute activeMinutes = 1;
   google.protobuf.Timestamp aggregate_request_timestamp = 2;
+  string payment_id = 3;
 }
 
 message ActiveMinute {
@@ -61,4 +65,5 @@ message ActiveMinute {
   int32 transaction_count = 3;
   google.protobuf.Timestamp last_update_timestamp = 4;
   google.protobuf.Timestamp aggregate_request_timestamp = 5;
+  string paymenet_id = 6;
 }

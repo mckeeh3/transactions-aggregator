@@ -27,13 +27,13 @@ public class Payment extends AbstractPayment {
   }
 
   @Override
-  public Effect<Empty> createPayment(PaymentEntity.PaymentState currentState, PaymentApi.CreatePaymentCommand createPaymentCommand) {
-    return effects().error("The command handler for `CreatePayment` is not implemented, yet");
+  public Effect<Empty> paymentAggregationRequest(PaymentEntity.PaymentState currentState, PaymentApi.PaymentAggregationRequestCommand paymentAggregationRequestCommand) {
+    return effects().error("The command handler for `PaymentAggregationRequest` is not implemented, yet");
   }
 
   @Override
-  public Effect<Empty> paymentDayAggregation(PaymentEntity.PaymentState currentState, PaymentApi.PaymentDayAggregationCommand paymentDayAggregationCommand) {
-    return effects().error("The command handler for `PaymentDayAggregation` is not implemented, yet");
+  public Effect<Empty> dayAggregation(PaymentEntity.PaymentState currentState, PaymentApi.DayAggregationCommand dayAggregationCommand) {
+    return effects().error("The command handler for `DayAggregation` is not implemented, yet");
   }
 
   @Override
@@ -45,8 +45,8 @@ public class Payment extends AbstractPayment {
     throw new RuntimeException("The event handler for `PaymentAggregationRequested` is not implemented, yet");
   }
   @Override
-  public PaymentEntity.PaymentState paymentAggregated(PaymentEntity.PaymentState currentState, PaymentEntity.PaymentAggregated paymentAggregated) {
-    throw new RuntimeException("The event handler for `PaymentAggregated` is not implemented, yet");
+  public PaymentEntity.PaymentState paymentDayAggregated(PaymentEntity.PaymentState currentState, PaymentEntity.PaymentDayAggregated paymentDayAggregated) {
+    throw new RuntimeException("The event handler for `PaymentDayAggregated` is not implemented, yet");
   }
 
 }

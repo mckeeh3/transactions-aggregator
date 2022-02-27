@@ -119,6 +119,7 @@ public class MinuteTest {
             .setMerchantId("merchant-1")
             .setEpochMinute(epochMinute)
             .setAggregateRequestTimestamp(now)
+            .setPaymentId("payment-1")
             .build());
 
     var minuteAggregationRequested = response.getNextEventOfType(MinuteEntity.MinuteAggregationRequested.class);
@@ -129,6 +130,7 @@ public class MinuteTest {
     assertEquals(2, minuteAggregationRequested.getEpochSecondsCount());
     assertEquals(epochSecond, minuteAggregationRequested.getEpochSeconds(0));
     assertEquals(nextEpochSecond, minuteAggregationRequested.getEpochSeconds(1));
+    assertEquals("payment-1", minuteAggregationRequested.getPaymentId());
 
     var state = testKit.getState();
 
@@ -137,6 +139,32 @@ public class MinuteTest {
         .findFirst();
     assertTrue(aggregateMinute.isPresent());
     assertEquals(now, aggregateMinute.get().getAggregateRequestTimestamp());
+  }
+
+  @Test
+  public void aggregateMinuteWithNoSecondsTest() {
+    MinuteTestKit testKit = MinuteTestKit.of(Minute::new);
+
+    var epochSecond = TimeTo.fromNow().toEpochSecond();
+    var epochMinute = TimeTo.fromEpochSecond(epochSecond).toEpochMinute();
+    var now = TimeTo.fromEpochSecond(epochSecond).toTimestamp();
+
+    var response = testKit.aggregateMinute(
+        MinuteApi.AggregateMinuteCommand
+            .newBuilder()
+            .setMerchantId("merchant-1")
+            .setEpochMinute(epochMinute)
+            .setAggregateRequestTimestamp(now)
+            .setPaymentId("payment-1")
+            .build());
+
+    var minuteAggregated = response.getNextEventOfType(MinuteEntity.MinuteAggregated.class);
+
+    assertEquals("merchant-1", minuteAggregated.getMerchantId());
+    assertEquals(epochMinute, minuteAggregated.getEpochMinute());
+    assertEquals(now, minuteAggregated.getAggregateRequestTimestamp());
+    assertEquals(0, minuteAggregated.getTransactionCount());
+    assertEquals(0.0, minuteAggregated.getTransactionTotalAmount(), 0.0);
   }
 
   @Test
@@ -170,6 +198,7 @@ public class MinuteTest {
             .setMerchantId("merchant-1")
             .setEpochMinute(epochMinute)
             .setAggregateRequestTimestamp(aggregateRequestTimestamp)
+            .setPaymentId("payment-1")
             .build());
 
     var response = testKit.secondAggregation(
@@ -182,6 +211,7 @@ public class MinuteTest {
             .setTransactionCount(10)
             .setLastUpdateTimestamp(aggregateRequestTimestamp)
             .setAggregateRequestTimestamp(aggregateRequestTimestamp)
+            .setPaymentId("payment-1")
             .build());
 
     var activeSecondAggregated = response.getNextEventOfType(MinuteEntity.ActiveSecondAggregated.class);
@@ -192,6 +222,7 @@ public class MinuteTest {
     assertEquals(10, activeSecondAggregated.getTransactionCount());
     assertEquals(aggregateRequestTimestamp, activeSecondAggregated.getLastUpdateTimestamp());
     assertEquals(aggregateRequestTimestamp, activeSecondAggregated.getAggregateRequestTimestamp());
+    assertEquals("payment-1", activeSecondAggregated.getPaymentId());
 
     response = testKit.secondAggregation(
         MinuteApi.SecondAggregationCommand
@@ -203,6 +234,7 @@ public class MinuteTest {
             .setTransactionCount(20)
             .setLastUpdateTimestamp(aggregateRequestTimestamp)
             .setAggregateRequestTimestamp(aggregateRequestTimestamp)
+            .setPaymentId("payment-1")
             .build());
 
     var minuteAggregated = response.getNextEventOfType(MinuteEntity.MinuteAggregated.class);
@@ -214,6 +246,7 @@ public class MinuteTest {
     assertEquals(20, activeSecondAggregated.getTransactionCount());
     assertEquals(aggregateRequestTimestamp, activeSecondAggregated.getLastUpdateTimestamp());
     assertEquals(aggregateRequestTimestamp, activeSecondAggregated.getAggregateRequestTimestamp());
+    assertEquals("payment-1", activeSecondAggregated.getPaymentId());
 
     assertEquals("merchant-1", minuteAggregated.getMerchantId());
     assertEquals(epochMinute, minuteAggregated.getEpochMinute());
@@ -221,6 +254,7 @@ public class MinuteTest {
     assertEquals(10 + 20, minuteAggregated.getTransactionCount());
     assertEquals(aggregateRequestTimestamp, minuteAggregated.getLastUpdateTimestamp());
     assertEquals(aggregateRequestTimestamp, minuteAggregated.getAggregateRequestTimestamp());
+    assertEquals("payment-1", minuteAggregated.getPaymentId());
 
     // this sequence re-activates the second and minute aggregation
     aggregateRequestTimestamp = TimeTo.fromEpochSecond(epochSecond).plus().minutes(1).toTimestamp();
@@ -239,6 +273,7 @@ public class MinuteTest {
             .setMerchantId("merchant-1")
             .setEpochMinute(epochMinute)
             .setAggregateRequestTimestamp(aggregateRequestTimestamp)
+            .setPaymentId("payment-1")
             .build());
 
     response = testKit.secondAggregation(
@@ -251,6 +286,7 @@ public class MinuteTest {
             .setTransactionCount(321)
             .setLastUpdateTimestamp(aggregateRequestTimestamp)
             .setAggregateRequestTimestamp(aggregateRequestTimestamp)
+            .setPaymentId("payment-1")
             .build());
 
     minuteAggregated = response.getNextEventOfType(MinuteEntity.MinuteAggregated.class);
@@ -262,6 +298,7 @@ public class MinuteTest {
     assertEquals(321, activeSecondAggregated.getTransactionCount());
     assertEquals(aggregateRequestTimestamp, activeSecondAggregated.getLastUpdateTimestamp());
     assertEquals(aggregateRequestTimestamp, activeSecondAggregated.getAggregateRequestTimestamp());
+    assertEquals("payment-1", activeSecondAggregated.getPaymentId());
 
     assertEquals("merchant-1", minuteAggregated.getMerchantId());
     assertEquals(epochMinute, minuteAggregated.getEpochMinute());
@@ -269,5 +306,6 @@ public class MinuteTest {
     assertEquals(321, minuteAggregated.getTransactionCount());
     assertEquals(aggregateRequestTimestamp, minuteAggregated.getLastUpdateTimestamp());
     assertEquals(aggregateRequestTimestamp, minuteAggregated.getAggregateRequestTimestamp());
+    assertEquals("payment-1", minuteAggregated.getPaymentId());
   }
 }

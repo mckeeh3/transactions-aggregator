@@ -119,6 +119,7 @@ public class DayTest {
             .setMerchantId("merchant-1")
             .setEpochDay(epochDay)
             .setAggregateRequestTimestamp(now)
+            .setPaymentId("payment-1")
             .build());
 
     var dayAggregationRequested = response.getNextEventOfType(DayEntity.DayAggregationRequested.class);
@@ -129,6 +130,7 @@ public class DayTest {
     assertEquals(2, dayAggregationRequested.getEpochHoursCount());
     assertEquals(epochHour, dayAggregationRequested.getEpochHours(0));
     assertEquals(nextEpochHour, dayAggregationRequested.getEpochHours(1));
+    assertEquals("payment-1", dayAggregationRequested.getPaymentId());
 
     var state = testKit.getState();
 
@@ -197,6 +199,7 @@ public class DayTest {
             .setMerchantId("merchant-1")
             .setEpochDay(epochDay)
             .setAggregateRequestTimestamp(aggregateRequestTimestamp)
+            .setPaymentId("payment-1")
             .build());
 
     var response = testKit.hourAggregation(
@@ -209,6 +212,7 @@ public class DayTest {
             .setTransactionCount(10)
             .setLastUpdateTimestamp(aggregateRequestTimestamp)
             .setAggregateRequestTimestamp(aggregateRequestTimestamp)
+            .setPaymentId("payment-1")
             .build());
 
     var activeHourAggregated = response.getNextEventOfType(DayEntity.ActiveHourAggregated.class);
@@ -219,6 +223,7 @@ public class DayTest {
     assertEquals(10, activeHourAggregated.getTransactionCount());
     assertEquals(aggregateRequestTimestamp, activeHourAggregated.getLastUpdateTimestamp());
     assertEquals(aggregateRequestTimestamp, activeHourAggregated.getAggregateRequestTimestamp());
+    assertEquals("payment-1", activeHourAggregated.getPaymentId());
 
     response = testKit.hourAggregation(
         DayApi.HourAggregationCommand
@@ -230,6 +235,7 @@ public class DayTest {
             .setTransactionCount(20)
             .setLastUpdateTimestamp(aggregateRequestTimestamp)
             .setAggregateRequestTimestamp(aggregateRequestTimestamp)
+            .setPaymentId("payment-1")
             .build());
 
     var dayAggregated = response.getNextEventOfType(DayEntity.DayAggregated.class);
@@ -241,6 +247,7 @@ public class DayTest {
     assertEquals(20, activeHourAggregated.getTransactionCount());
     assertEquals(aggregateRequestTimestamp, activeHourAggregated.getLastUpdateTimestamp());
     assertEquals(aggregateRequestTimestamp, activeHourAggregated.getAggregateRequestTimestamp());
+    assertEquals("payment-1", activeHourAggregated.getPaymentId());
 
     assertEquals("merchant-1", dayAggregated.getMerchantId());
     assertEquals(epochDay, dayAggregated.getEpochDay());
@@ -248,6 +255,7 @@ public class DayTest {
     assertEquals(10 + 20, dayAggregated.getTransactionCount());
     assertEquals(aggregateRequestTimestamp, dayAggregated.getLastUpdateTimestamp());
     assertEquals(aggregateRequestTimestamp, dayAggregated.getAggregateRequestTimestamp());
+    assertEquals("payment-1", dayAggregated.getPaymentId());
 
     // this sequence re-activates the day and hour aggregation
     aggregateRequestTimestamp = TimeTo.fromEpochDay(epochDay).plus().minutes(1).toTimestamp();
@@ -266,6 +274,7 @@ public class DayTest {
             .setMerchantId("merchant-1")
             .setEpochDay(epochDay)
             .setAggregateRequestTimestamp(aggregateRequestTimestamp)
+            .setPaymentId("payment-1")
             .build());
 
     response = testKit.hourAggregation(
@@ -278,6 +287,7 @@ public class DayTest {
             .setTransactionCount(321)
             .setLastUpdateTimestamp(aggregateRequestTimestamp)
             .setAggregateRequestTimestamp(aggregateRequestTimestamp)
+            .setPaymentId("payment-1")
             .build());
 
     dayAggregated = response.getNextEventOfType(DayEntity.DayAggregated.class);
@@ -289,6 +299,7 @@ public class DayTest {
     assertEquals(321, activeHourAggregated.getTransactionCount());
     assertEquals(aggregateRequestTimestamp, activeHourAggregated.getLastUpdateTimestamp());
     assertEquals(aggregateRequestTimestamp, activeHourAggregated.getAggregateRequestTimestamp());
+    assertEquals("payment-1", activeHourAggregated.getPaymentId());
 
     assertEquals("merchant-1", dayAggregated.getMerchantId());
     assertEquals(epochDay, dayAggregated.getEpochDay());
@@ -296,5 +307,6 @@ public class DayTest {
     assertEquals(321, dayAggregated.getTransactionCount());
     assertEquals(aggregateRequestTimestamp, dayAggregated.getLastUpdateTimestamp());
     assertEquals(aggregateRequestTimestamp, dayAggregated.getAggregateRequestTimestamp());
+    assertEquals("payment-1", dayAggregated.getPaymentId());
   }
 }

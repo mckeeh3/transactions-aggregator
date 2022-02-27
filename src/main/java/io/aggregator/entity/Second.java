@@ -82,7 +82,7 @@ public class Second extends AbstractSecond {
     log.info("state: {}\nAggregateSecondCommand: {}", state, command);
 
     return effects()
-        .emitEvent(eventFor(state, command))
+        .emitEvents(eventsFor(state, command))
         .thenReply(newState -> Empty.getDefaultInstance());
   }
 
@@ -138,6 +138,7 @@ public class Second extends AbstractSecond {
             SecondEntity.AggregateSecond
                 .newBuilder()
                 .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
+                .setPaymentId(event.getPaymentId())
                 .addAllActiveSubSeconds(state.getActiveSubSecondsList())
                 .build())
         .build();
@@ -207,17 +208,34 @@ public class Second extends AbstractSecond {
     }
   }
 
-  static SecondEntity.SecondAggregationRequested eventFor(SecondEntity.SecondState state, SecondApi.AggregateSecondCommand command) {
-    return SecondEntity.SecondAggregationRequested
-        .newBuilder()
-        .setMerchantId(command.getMerchantId())
-        .setEpochSecond(command.getEpochSecond())
-        .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
-        .addAllEpochSubSeconds(
-            state.getActiveSubSecondsList().stream()
-                .map(activeSubSecond -> activeSubSecond.getEpochSubSecond())
-                .toList())
-        .build();
+  static List<?> eventsFor(SecondEntity.SecondState state, SecondApi.AggregateSecondCommand command) {
+    if (state.getActiveSubSecondsCount() == 0) {
+      var timestamp = command.getAggregateRequestTimestamp();
+      return List.of(
+          SecondEntity.SecondAggregated
+              .newBuilder()
+              .setMerchantId(command.getMerchantId())
+              .setEpochSecond(command.getEpochSecond())
+              .setTransactionTotalAmount(0.0)
+              .setTransactionCount(0)
+              .setLastUpdateTimestamp(timestamp)
+              .setAggregateRequestTimestamp(timestamp)
+              .setPaymentId(command.getPaymentId())
+              .build());
+    } else {
+      return List.of(
+          SecondEntity.SecondAggregationRequested
+              .newBuilder()
+              .setMerchantId(command.getMerchantId())
+              .setEpochSecond(command.getEpochSecond())
+              .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
+              .setPaymentId(command.getPaymentId())
+              .addAllEpochSubSeconds(
+                  state.getActiveSubSecondsList().stream()
+                      .map(activeSubSecond -> activeSubSecond.getEpochSubSecond())
+                      .toList())
+              .build());
+    }
   }
 
   static List<?> eventsFor(SecondEntity.SecondState state, SecondApi.SubSecondAggregationCommand command) {
@@ -285,6 +303,7 @@ public class Second extends AbstractSecond {
         .setTransactionCount(command.getTransactionCount())
         .setLastUpdateTimestamp(command.getLastUpdateTimestamp())
         .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
+        .setPaymentId(command.getPaymentId())
         .build();
   }
 
@@ -308,6 +327,7 @@ public class Second extends AbstractSecond {
         .setTransactionCount(transactionCount)
         .setLastUpdateTimestamp(lastUpdateTimestamp)
         .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
+        .setPaymentId(command.getPaymentId())
         .build();
   }
 }

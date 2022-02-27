@@ -155,7 +155,10 @@ public class SubSecond extends AbstractSubSecond {
           .newBuilder()
           .setMerchantId(state.getMerchantId())
           .setEpochSubSecond(state.getEpochSubSecond())
+          .setTransactionTotalAmount(0.0)
+          .setTransactionCount(0)
           .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
+          .setPaymentId(command.getPaymentId())
           .build();
     }
 
@@ -171,9 +174,10 @@ public class SubSecond extends AbstractSubSecond {
         .setMerchantId(state.getMerchantId())
         .setEpochSubSecond(state.getEpochSubSecond())
         .setTransactionTotalAmount(total)
-        .setTransactionCount(state.getTransactionsCount())
+        .setTransactionCount(transactions.size())
         .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
         .setLastUpdateTimestamp(lastUpdate)
+        .setPaymentId(command.getPaymentId())
         .build();
   }
 }
