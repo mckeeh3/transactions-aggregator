@@ -33,7 +33,8 @@ public class TransactionTest {
   public void createTransactionTest() {
     TransactionTestKit testKit = TransactionTestKit.of(Transaction::new);
 
-    testKit.createTransaction(
+    var now = TimeTo.now();
+    var response = testKit.createTransaction(
         TransactionApi.CreateTransactionCommand
             .newBuilder()
             .setTransactionId("transaction-1")
@@ -41,9 +42,21 @@ public class TransactionTest {
             .setAccountFrom("account-from-1")
             .setAccountTo("account-to-1")
             .setMerchantId("merchant-1")
+            .setShopId("shop-1")
             .setTransactionAmount(123.45)
-            .setTransactionTimestamp(TimeTo.now())
+            .setTransactionTimestamp(now)
             .build());
+
+    var transactionCreated = response.getNextEventOfType(TransactionEntity.TransactionCreated.class);
+
+    assertEquals("transaction-1", transactionCreated.getTransactionKey().getTransactionId());
+    assertEquals("service-code-1", transactionCreated.getTransactionKey().getServiceCode());
+    assertEquals("account-from-1", transactionCreated.getTransactionKey().getAccountFrom());
+    assertEquals("account-to-1", transactionCreated.getTransactionKey().getAccountTo());
+    assertEquals("merchant-1", transactionCreated.getMerchantId());
+    assertEquals("shop-1", transactionCreated.getShopId());
+    assertEquals(123.45, transactionCreated.getTransactionAmount(), 0.0);
+    assertEquals(now, transactionCreated.getTransactionTimestamp());
 
     var state = testKit.getState();
 
@@ -52,8 +65,58 @@ public class TransactionTest {
     assertEquals("account-from-1", state.getTransactionKey().getAccountFrom());
     assertEquals("account-to-1", state.getTransactionKey().getAccountTo());
     assertEquals("merchant-1", state.getMerchantId());
+    assertEquals("shop-1", state.getShopId());
     assertEquals(123.45, state.getTransactionAmount(), 0.0);
-    assertTrue(state.getTransactionTimestamp().getSeconds() > 0);
+    assertEquals(now, state.getTransactionTimestamp());
+  }
+
+  @Test
+  public void addPaymentTest() {
+    TransactionTestKit testKit = TransactionTestKit.of(Transaction::new);
+
+    var now = TimeTo.now();
+    testKit.createTransaction(
+        TransactionApi.CreateTransactionCommand
+            .newBuilder()
+            .setTransactionId("transaction-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
+            .setMerchantId("merchant-1")
+            .setShopId("shop-1")
+            .setTransactionAmount(123.45)
+            .setTransactionTimestamp(now)
+            .build());
+
+    var response = testKit.addPayment(
+        TransactionApi.AddPaymentCommand
+            .newBuilder()
+            .setTransactionId("transaction-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
+            .setPaymentId("payment-1")
+            .build());
+
+    var paymentAdded = response.getNextEventOfType(TransactionEntity.PaymentAdded.class);
+
+    assertEquals("transaction-1", paymentAdded.getTransactionKey().getTransactionId());
+    assertEquals("service-code-1", paymentAdded.getTransactionKey().getServiceCode());
+    assertEquals("account-from-1", paymentAdded.getTransactionKey().getAccountFrom());
+    assertEquals("account-to-1", paymentAdded.getTransactionKey().getAccountTo());
+    assertEquals("payment-1", paymentAdded.getPaymentId());
+
+    var state = testKit.getState();
+
+    assertEquals("transaction-1", state.getTransactionKey().getTransactionId());
+    assertEquals("service-code-1", state.getTransactionKey().getServiceCode());
+    assertEquals("account-from-1", state.getTransactionKey().getAccountFrom());
+    assertEquals("account-to-1", state.getTransactionKey().getAccountTo());
+    assertEquals("merchant-1", state.getMerchantId());
+    assertEquals("shop-1", state.getShopId());
+    assertEquals(123.45, state.getTransactionAmount(), 0.0);
+    assertEquals(now, state.getTransactionTimestamp());
+    assertEquals("payment-1", state.getPaymentId());
   }
 
   @Test

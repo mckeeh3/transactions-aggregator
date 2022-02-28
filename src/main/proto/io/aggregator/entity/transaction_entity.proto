@@ -15,10 +15,16 @@ message TransactionCreated {
   google.protobuf.Timestamp transaction_timestamp = 5;
 }
 
+message PaymentAdded {
+  TransactionKey transaction_key = 1;
+  string payment_id = 2;
+}
+
 message TransactionState {
   TransactionKey transaction_key = 1;
   string merchant_id = 2;
   string shop_id = 3;
   double transaction_amount = 4;
   google.protobuf.Timestamp transaction_timestamp = 5;
+  string payment_id = 6;
 }

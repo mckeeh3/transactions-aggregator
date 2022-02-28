@@ -16,21 +16,29 @@ service Transaction {
       entity_type: "transaction"
       state: "io.aggregator.entity.TransactionState"
       events: [
-        "io.aggregator.entity.TransactionCreated"  //
+        "io.aggregator.entity.TransactionCreated",
+        "io.aggregator.entity.PaymentAdded"  //
       ]
     }
   };
 
   rpc CreateTransaction(CreateTransactionCommand) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      post: "/transaction/{transaction_id}/{service}/{account}/add"
+      post: "/transaction/create"
+      body: "*"
+    };
+  }
+
+  rpc AddPayment(AddPaymentCommand) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/transaction/add-payment"
       body: "*"
     };
   }
 
   rpc GetTransaction(GetTransactionRequest) returns (GetTransactionResponse) {
     option (google.api.http) = {
-      get: "/transaction/{transaction_id}/{service}/{account}"
+      get: "/transaction/{transaction_id}/{service_code}/{account_from}/{account_to}"
     };
   }
 }
@@ -44,6 +52,14 @@ message CreateTransactionCommand {
   string merchant_id = 6;
   string shop_id = 7;
   google.protobuf.Timestamp transaction_timestamp = 8;
+}
+
+message AddPaymentCommand {
+  string transaction_id = 1 [(akkaserverless.field).entity_key = true];
+  string service_code = 2 [(akkaserverless.field).entity_key = true];
+  string account_from = 3 [(akkaserverless.field).entity_key = true];
+  string account_to = 4 [(akkaserverless.field).entity_key = true];
+  string payment_id = 5;
 }
 
 message GetTransactionRequest {
