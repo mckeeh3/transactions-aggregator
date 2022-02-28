@@ -42,6 +42,9 @@ public class HourTest {
         HourApi.AddMinuteCommand
             .newBuilder()
             .setMerchantId("merchant-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
             .setEpochHour(epochHour)
             .setEpochMinute(epochMinute)
             .build());
@@ -49,14 +52,24 @@ public class HourTest {
     var hourCreated = response.getNextEventOfType(HourEntity.HourCreated.class);
     var minuteAdded = response.getNextEventOfType(HourEntity.MinuteAdded.class);
 
-    assertEquals("merchant-1", hourCreated.getMerchantId());
+    assertEquals("merchant-1", hourCreated.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", hourCreated.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", hourCreated.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", hourCreated.getMerchantKey().getAccountTo());
     assertEquals(epochHour, hourCreated.getEpochHour());
-    assertEquals("merchant-1", minuteAdded.getMerchantId());
+
+    assertEquals("merchant-1", minuteAdded.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", minuteAdded.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", minuteAdded.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", minuteAdded.getMerchantKey().getAccountTo());
     assertEquals(epochMinute, minuteAdded.getEpochMinute());
 
     var state = testKit.getState();
 
-    assertEquals("merchant-1", state.getMerchantId());
+    assertEquals("merchant-1", state.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", state.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", state.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", state.getMerchantKey().getAccountTo());
     assertEquals(epochHour, state.getEpochHour());
     assertEquals(1, state.getActiveMinutesCount());
 
@@ -68,18 +81,27 @@ public class HourTest {
         HourApi.AddMinuteCommand
             .newBuilder()
             .setMerchantId("merchant-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
             .setEpochHour(epochHour)
             .setEpochMinute(nextEpochMinute)
             .build());
 
     minuteAdded = response.getNextEventOfType(HourEntity.MinuteAdded.class);
 
-    assertEquals("merchant-1", minuteAdded.getMerchantId());
+    assertEquals("merchant-1", minuteAdded.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", minuteAdded.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", minuteAdded.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", minuteAdded.getMerchantKey().getAccountTo());
     assertEquals(nextEpochMinute, minuteAdded.getEpochMinute());
 
     state = testKit.getState();
 
-    assertEquals("merchant-1", state.getMerchantId());
+    assertEquals("merchant-1", state.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", state.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", state.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", state.getMerchantKey().getAccountTo());
     assertEquals(epochHour, state.getEpochHour());
     assertEquals(2, state.getActiveMinutesCount());
 
@@ -101,6 +123,9 @@ public class HourTest {
         HourApi.AddMinuteCommand
             .newBuilder()
             .setMerchantId("merchant-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
             .setEpochHour(epochHour)
             .setEpochMinute(epochMinute)
             .build());
@@ -109,6 +134,9 @@ public class HourTest {
         HourApi.AddMinuteCommand
             .newBuilder()
             .setMerchantId("merchant-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
             .setEpochHour(epochHour)
             .setEpochMinute(nextEpochMinute)
             .build());
@@ -117,6 +145,9 @@ public class HourTest {
         HourApi.AggregateHourCommand
             .newBuilder()
             .setMerchantId("merchant-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
             .setEpochHour(epochHour)
             .setAggregateRequestTimestamp(now)
             .setPaymentId("payment-1")
@@ -124,7 +155,10 @@ public class HourTest {
 
     var hourAggregationRequested = response.getNextEventOfType(HourEntity.HourAggregationRequested.class);
 
-    assertEquals("merchant-1", hourAggregationRequested.getMerchantId());
+    assertEquals("merchant-1", hourAggregationRequested.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", hourAggregationRequested.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", hourAggregationRequested.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", hourAggregationRequested.getMerchantKey().getAccountTo());
     assertEquals(epochHour, hourAggregationRequested.getEpochHour());
     assertEquals(now, hourAggregationRequested.getAggregateRequestTimestamp());
     assertEquals(2, hourAggregationRequested.getEpochMinutesCount());
@@ -152,6 +186,9 @@ public class HourTest {
         HourApi.AggregateHourCommand
             .newBuilder()
             .setMerchantId("merchant-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
             .setEpochHour(epochHour)
             .setAggregateRequestTimestamp(now)
             .setPaymentId("payment-1")
@@ -159,7 +196,10 @@ public class HourTest {
 
     var hourAggregated = response.getNextEventOfType(HourEntity.HourAggregated.class);
 
-    assertEquals("merchant-1", hourAggregated.getMerchantId());
+    assertEquals("merchant-1", hourAggregated.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", hourAggregated.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", hourAggregated.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", hourAggregated.getMerchantKey().getAccountTo());
     assertEquals(epochHour, hourAggregated.getEpochHour());
     assertEquals(now, hourAggregated.getAggregateRequestTimestamp());
     assertEquals(0, hourAggregated.getTransactionCount());
@@ -179,6 +219,9 @@ public class HourTest {
         HourApi.AddMinuteCommand
             .newBuilder()
             .setMerchantId("merchant-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
             .setEpochHour(epochHour)
             .setEpochMinute(epochMinute)
             .build());
@@ -187,6 +230,9 @@ public class HourTest {
         HourApi.AddMinuteCommand
             .newBuilder()
             .setMerchantId("merchant-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
             .setEpochHour(epochHour)
             .setEpochMinute(nextEpochMinute)
             .build());
@@ -195,6 +241,9 @@ public class HourTest {
         HourApi.AggregateHourCommand
             .newBuilder()
             .setMerchantId("merchant-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
             .setEpochHour(epochHour)
             .setAggregateRequestTimestamp(aggregateRequestTimestamp)
             .setPaymentId("payment-1")
@@ -204,6 +253,9 @@ public class HourTest {
         HourApi.MinuteAggregationCommand
             .newBuilder()
             .setMerchantId("merchant-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
             .setEpochHour(epochHour)
             .setEpochMinute(epochMinute)
             .setTransactionTotalAmount(123.45)
@@ -215,7 +267,10 @@ public class HourTest {
 
     var activeMinuteAggregated = response.getNextEventOfType(HourEntity.ActiveMinuteAggregated.class);
 
-    assertEquals("merchant-1", activeMinuteAggregated.getMerchantId());
+    assertEquals("merchant-1", activeMinuteAggregated.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", activeMinuteAggregated.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", activeMinuteAggregated.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", activeMinuteAggregated.getMerchantKey().getAccountTo());
     assertEquals(epochMinute, activeMinuteAggregated.getEpochMinute());
     assertEquals(123.45, activeMinuteAggregated.getTransactionTotalAmount(), 0.0);
     assertEquals(10, activeMinuteAggregated.getTransactionCount());
@@ -227,6 +282,9 @@ public class HourTest {
         HourApi.MinuteAggregationCommand
             .newBuilder()
             .setMerchantId("merchant-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
             .setEpochHour(epochHour)
             .setEpochMinute(nextEpochMinute)
             .setTransactionTotalAmount(678.90)
@@ -239,7 +297,10 @@ public class HourTest {
     var hourAggregated = response.getNextEventOfType(HourEntity.HourAggregated.class);
     activeMinuteAggregated = response.getNextEventOfType(HourEntity.ActiveMinuteAggregated.class);
 
-    assertEquals("merchant-1", activeMinuteAggregated.getMerchantId());
+    assertEquals("merchant-1", activeMinuteAggregated.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", activeMinuteAggregated.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", activeMinuteAggregated.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", activeMinuteAggregated.getMerchantKey().getAccountTo());
     assertEquals(nextEpochMinute, activeMinuteAggregated.getEpochMinute());
     assertEquals(678.90, activeMinuteAggregated.getTransactionTotalAmount(), 0.0);
     assertEquals(20, activeMinuteAggregated.getTransactionCount());
@@ -247,7 +308,10 @@ public class HourTest {
     assertEquals(aggregateRequestTimestamp, activeMinuteAggregated.getAggregateRequestTimestamp());
     assertEquals("payment-1", activeMinuteAggregated.getPaymentId());
 
-    assertEquals("merchant-1", hourAggregated.getMerchantId());
+    assertEquals("merchant-1", hourAggregated.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", hourAggregated.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", hourAggregated.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", hourAggregated.getMerchantKey().getAccountTo());
     assertEquals(epochHour, hourAggregated.getEpochHour());
     assertEquals(123.45 + 678.90, hourAggregated.getTransactionTotalAmount(), 0.0);
     assertEquals(10 + 20, hourAggregated.getTransactionCount());
@@ -262,6 +326,9 @@ public class HourTest {
         HourApi.AddMinuteCommand
             .newBuilder()
             .setMerchantId("merchant-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
             .setEpochHour(epochHour)
             .setEpochMinute(epochMinute)
             .build());
@@ -270,6 +337,9 @@ public class HourTest {
         HourApi.AggregateHourCommand
             .newBuilder()
             .setMerchantId("merchant-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
             .setEpochHour(epochHour)
             .setAggregateRequestTimestamp(aggregateRequestTimestamp)
             .setPaymentId("payment-1")
@@ -279,6 +349,9 @@ public class HourTest {
         HourApi.MinuteAggregationCommand
             .newBuilder()
             .setMerchantId("merchant-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
             .setEpochHour(epochHour)
             .setEpochMinute(epochMinute)
             .setTransactionTotalAmount(543.21)
@@ -291,7 +364,10 @@ public class HourTest {
     hourAggregated = response.getNextEventOfType(HourEntity.HourAggregated.class);
     activeMinuteAggregated = response.getNextEventOfType(HourEntity.ActiveMinuteAggregated.class);
 
-    assertEquals("merchant-1", activeMinuteAggregated.getMerchantId());
+    assertEquals("merchant-1", activeMinuteAggregated.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", activeMinuteAggregated.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", activeMinuteAggregated.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", activeMinuteAggregated.getMerchantKey().getAccountTo());
     assertEquals(epochMinute, activeMinuteAggregated.getEpochMinute());
     assertEquals(543.21, activeMinuteAggregated.getTransactionTotalAmount(), 0.0);
     assertEquals(321, activeMinuteAggregated.getTransactionCount());
@@ -299,7 +375,10 @@ public class HourTest {
     assertEquals(aggregateRequestTimestamp, activeMinuteAggregated.getAggregateRequestTimestamp());
     assertEquals("payment-1", activeMinuteAggregated.getPaymentId());
 
-    assertEquals("merchant-1", hourAggregated.getMerchantId());
+    assertEquals("merchant-1", hourAggregated.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", hourAggregated.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", hourAggregated.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", hourAggregated.getMerchantKey().getAccountTo());
     assertEquals(epochHour, hourAggregated.getEpochHour());
     assertEquals(543.21, hourAggregated.getTransactionTotalAmount(), 0.0);
     assertEquals(321, hourAggregated.getTransactionCount());

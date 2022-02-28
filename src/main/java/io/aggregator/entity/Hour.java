@@ -96,7 +96,14 @@ public class Hour extends AbstractHour {
 
   static HourEntity.HourState handle(HourEntity.HourState state, HourEntity.HourCreated event) {
     return state.toBuilder()
-        .setMerchantId(event.getMerchantId())
+        .setMerchantKey(
+            TransactionMerchantKey.MerchantKey
+                .newBuilder()
+                .setMerchantId(event.getMerchantKey().getMerchantId())
+                .setServiceCode(event.getMerchantKey().getServiceCode())
+                .setAccountFrom(event.getMerchantKey().getAccountFrom())
+                .setAccountTo(event.getMerchantKey().getAccountTo())
+                .build())
         .setEpochHour(event.getEpochHour())
         .setEpochDay(TimeTo.fromEpochHour(event.getEpochHour()).toEpochDay())
         .build();
@@ -190,14 +197,28 @@ public class Hour extends AbstractHour {
   static List<?> eventsFor(HourEntity.HourState state, HourApi.AddMinuteCommand command) {
     var minuteAdded = HourEntity.MinuteAdded
         .newBuilder()
-        .setMerchantId(command.getMerchantId())
+        .setMerchantKey(
+            TransactionMerchantKey.MerchantKey
+                .newBuilder()
+                .setMerchantId(command.getMerchantId())
+                .setServiceCode(command.getServiceCode())
+                .setAccountFrom(command.getAccountFrom())
+                .setAccountTo(command.getAccountTo())
+                .build())
         .setEpochMinute(command.getEpochMinute())
         .build();
 
-    if (state.getMerchantId().isEmpty()) {
+    if (state.getMerchantKey().getMerchantId().isEmpty()) {
       var hourCreated = HourEntity.HourCreated
           .newBuilder()
-          .setMerchantId(command.getMerchantId())
+          .setMerchantKey(
+              TransactionMerchantKey.MerchantKey
+                  .newBuilder()
+                  .setMerchantId(command.getMerchantId())
+                  .setServiceCode(command.getServiceCode())
+                  .setAccountFrom(command.getAccountFrom())
+                  .setAccountTo(command.getAccountTo())
+                  .build())
           .setEpochHour(command.getEpochHour())
           .build();
 
@@ -213,7 +234,14 @@ public class Hour extends AbstractHour {
       return List.of(
           HourEntity.HourAggregated
               .newBuilder()
-              .setMerchantId(command.getMerchantId())
+              .setMerchantKey(
+                  TransactionMerchantKey.MerchantKey
+                      .newBuilder()
+                      .setMerchantId(command.getMerchantId())
+                      .setServiceCode(command.getServiceCode())
+                      .setAccountFrom(command.getAccountFrom())
+                      .setAccountTo(command.getAccountTo())
+                      .build())
               .setEpochHour(command.getEpochHour())
               .setTransactionTotalAmount(0.0)
               .setTransactionCount(0)
@@ -225,7 +253,14 @@ public class Hour extends AbstractHour {
       return List.of(
           HourEntity.HourAggregationRequested
               .newBuilder()
-              .setMerchantId(command.getMerchantId())
+              .setMerchantKey(
+                  TransactionMerchantKey.MerchantKey
+                      .newBuilder()
+                      .setMerchantId(command.getMerchantId())
+                      .setServiceCode(command.getServiceCode())
+                      .setAccountFrom(command.getAccountFrom())
+                      .setAccountTo(command.getAccountTo())
+                      .build())
               .setEpochHour(command.getEpochHour())
               .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
               .setPaymentId(command.getPaymentId())
@@ -295,7 +330,14 @@ public class Hour extends AbstractHour {
   static HourEntity.ActiveMinuteAggregated toActiveMinuteAggregated(HourApi.MinuteAggregationCommand command) {
     var activeMinuteAggregated = HourEntity.ActiveMinuteAggregated
         .newBuilder()
-        .setMerchantId(command.getMerchantId())
+        .setMerchantKey(
+            TransactionMerchantKey.MerchantKey
+                .newBuilder()
+                .setMerchantId(command.getMerchantId())
+                .setServiceCode(command.getServiceCode())
+                .setAccountFrom(command.getAccountFrom())
+                .setAccountTo(command.getAccountTo())
+                .build())
         .setEpochMinute(command.getEpochMinute())
         .setTransactionTotalAmount(command.getTransactionTotalAmount())
         .setTransactionCount(command.getTransactionCount())
@@ -320,7 +362,14 @@ public class Hour extends AbstractHour {
 
     return HourEntity.HourAggregated
         .newBuilder()
-        .setMerchantId(command.getMerchantId())
+        .setMerchantKey(
+            TransactionMerchantKey.MerchantKey
+                .newBuilder()
+                .setMerchantId(command.getMerchantId())
+                .setServiceCode(command.getServiceCode())
+                .setAccountFrom(command.getAccountFrom())
+                .setAccountTo(command.getAccountTo())
+                .build())
         .setEpochHour(command.getEpochHour())
         .setTransactionTotalAmount(transactionTotalAmount)
         .setTransactionCount(transactionCount)

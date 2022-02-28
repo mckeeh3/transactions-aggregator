@@ -1,23 +1,24 @@
 syntax = "proto3";
 
 import "google/protobuf/timestamp.proto";
+import "io/aggregator/entity/transaction_merchant_key.proto";
 
 package io.aggregator.entity;
 
 option java_outer_classname = "SecondEntity";
 
 message SecondCreated {
-  string merchant_id = 1;
+  MerchantKey merchant_key = 1;
   int64 epoch_second = 2;
 }
 
 message SubSecondAdded {
-  string merchant_id = 1;
+  MerchantKey merchant_key = 1;
   int64 epoch_sub_second = 2;
 }
 
 message SecondAggregated {
-  string merchant_id = 1;
+  MerchantKey merchant_key = 1;
   int64 epoch_second = 2;
   double transaction_total_amount = 3;
   int32 transaction_count = 4;
@@ -27,7 +28,7 @@ message SecondAggregated {
 }
 
 message ActiveSubSecondAggregated {
-  string merchant_id = 1;
+  MerchantKey merchant_key = 1;
   int64 epoch_sub_second = 2;
   double transaction_total_amount = 3;
   int32 transaction_count = 4;
@@ -37,7 +38,7 @@ message ActiveSubSecondAggregated {
 }
 
 message SecondAggregationRequested {
-  string merchant_id = 1;
+  MerchantKey merchant_key = 1;
   int64 epoch_second = 2;
   repeated int64 epoch_sub_seconds = 3;
   google.protobuf.Timestamp aggregate_request_timestamp = 6;
@@ -45,7 +46,7 @@ message SecondAggregationRequested {
 }
 
 message SecondState {
-  string merchant_id = 1;
+  MerchantKey merchant_key = 1;
   int64 epoch_second = 2;
   int64 epoch_minute = 3;
   int64 epoch_hour = 4;

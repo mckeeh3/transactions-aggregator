@@ -23,7 +23,10 @@ public class SecondToMinuteAction extends AbstractSecondToMinuteAction {
     return effects().forward(components().minute().addSecond(
         MinuteApi.AddSecondCommand
             .newBuilder()
-            .setMerchantId(secondCreated.getMerchantId())
+            .setMerchantId(secondCreated.getMerchantKey().getMerchantId())
+            .setServiceCode(secondCreated.getMerchantKey().getServiceCode())
+            .setAccountFrom(secondCreated.getMerchantKey().getAccountFrom())
+            .setAccountTo(secondCreated.getMerchantKey().getAccountTo())
             .setEpochMinute(TimeTo.fromEpochSecond(secondCreated.getEpochSecond()).toEpochMinute())
             .setEpochSecond(secondCreated.getEpochSecond())
             .build()));
@@ -34,7 +37,10 @@ public class SecondToMinuteAction extends AbstractSecondToMinuteAction {
     return effects().forward(components().minute().secondAggregation(
         MinuteApi.SecondAggregationCommand
             .newBuilder()
-            .setMerchantId(secondAggregated.getMerchantId())
+            .setMerchantId(secondAggregated.getMerchantKey().getMerchantId())
+            .setServiceCode(secondAggregated.getMerchantKey().getServiceCode())
+            .setAccountFrom(secondAggregated.getMerchantKey().getAccountFrom())
+            .setAccountTo(secondAggregated.getMerchantKey().getAccountTo())
             .setEpochMinute(TimeTo.fromEpochSecond(secondAggregated.getEpochSecond()).toEpochMinute())
             .setEpochSecond(secondAggregated.getEpochSecond())
             .setTransactionTotalAmount(secondAggregated.getTransactionTotalAmount())

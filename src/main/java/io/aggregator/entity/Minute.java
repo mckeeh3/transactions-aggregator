@@ -96,7 +96,14 @@ public class Minute extends AbstractMinute {
 
   static MinuteEntity.MinuteState handle(MinuteEntity.MinuteState state, MinuteEntity.MinuteCreated event) {
     return state.toBuilder()
-        .setMerchantId(event.getMerchantId())
+        .setMerchantKey(
+            TransactionMerchantKey.MerchantKey
+                .newBuilder()
+                .setMerchantId(event.getMerchantKey().getMerchantId())
+                .setServiceCode(event.getMerchantKey().getServiceCode())
+                .setAccountFrom(event.getMerchantKey().getAccountFrom())
+                .setAccountTo(event.getMerchantKey().getAccountTo())
+                .build())
         .setEpochMinute(event.getEpochMinute())
         .setEpochHour(TimeTo.fromEpochMinute(event.getEpochMinute()).toEpochHour())
         .setEpochDay(TimeTo.fromEpochMinute(event.getEpochMinute()).toEpochDay())
@@ -191,14 +198,28 @@ public class Minute extends AbstractMinute {
   static List<?> eventsFor(MinuteEntity.MinuteState state, MinuteApi.AddSecondCommand command) {
     var secondAdded = MinuteEntity.SecondAdded
         .newBuilder()
-        .setMerchantId(command.getMerchantId())
+        .setMerchantKey(
+            TransactionMerchantKey.MerchantKey
+                .newBuilder()
+                .setMerchantId(command.getMerchantId())
+                .setServiceCode(command.getServiceCode())
+                .setAccountFrom(command.getAccountFrom())
+                .setAccountTo(command.getAccountTo())
+                .build())
         .setEpochSecond(command.getEpochSecond())
         .build();
 
-    if (state.getMerchantId().isEmpty()) {
+    if (state.getMerchantKey().getMerchantId().isEmpty()) {
       var minuteCreated = MinuteEntity.MinuteCreated
           .newBuilder()
-          .setMerchantId(command.getMerchantId())
+          .setMerchantKey(
+              TransactionMerchantKey.MerchantKey
+                  .newBuilder()
+                  .setMerchantId(command.getMerchantId())
+                  .setServiceCode(command.getServiceCode())
+                  .setAccountFrom(command.getAccountFrom())
+                  .setAccountTo(command.getAccountTo())
+                  .build())
           .setEpochMinute(command.getEpochMinute())
           .build();
 
@@ -214,7 +235,14 @@ public class Minute extends AbstractMinute {
       return List.of(
           MinuteEntity.MinuteAggregated
               .newBuilder()
-              .setMerchantId(command.getMerchantId())
+              .setMerchantKey(
+                  TransactionMerchantKey.MerchantKey
+                      .newBuilder()
+                      .setMerchantId(command.getMerchantId())
+                      .setServiceCode(command.getServiceCode())
+                      .setAccountFrom(command.getAccountFrom())
+                      .setAccountTo(command.getAccountTo())
+                      .build())
               .setEpochMinute(command.getEpochMinute())
               .setTransactionTotalAmount(0.0)
               .setTransactionCount(0)
@@ -226,7 +254,14 @@ public class Minute extends AbstractMinute {
       return List.of(
           MinuteEntity.MinuteAggregationRequested
               .newBuilder()
-              .setMerchantId(command.getMerchantId())
+              .setMerchantKey(
+                  TransactionMerchantKey.MerchantKey
+                      .newBuilder()
+                      .setMerchantId(command.getMerchantId())
+                      .setServiceCode(command.getServiceCode())
+                      .setAccountFrom(command.getAccountFrom())
+                      .setAccountTo(command.getAccountTo())
+                      .build())
               .setEpochMinute(command.getEpochMinute())
               .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
               .setPaymentId(command.getPaymentId())
@@ -297,7 +332,14 @@ public class Minute extends AbstractMinute {
   static MinuteEntity.ActiveSecondAggregated toActiveSecondAggregated(MinuteApi.SecondAggregationCommand command) {
     var activeSecondAggregated = MinuteEntity.ActiveSecondAggregated
         .newBuilder()
-        .setMerchantId(command.getMerchantId())
+        .setMerchantKey(
+            TransactionMerchantKey.MerchantKey
+                .newBuilder()
+                .setMerchantId(command.getMerchantId())
+                .setServiceCode(command.getServiceCode())
+                .setAccountFrom(command.getAccountFrom())
+                .setAccountTo(command.getAccountTo())
+                .build())
         .setEpochSecond(command.getEpochSecond())
         .setTransactionTotalAmount(command.getTransactionTotalAmount())
         .setTransactionCount(command.getTransactionCount())
@@ -322,7 +364,14 @@ public class Minute extends AbstractMinute {
 
     return MinuteEntity.MinuteAggregated
         .newBuilder()
-        .setMerchantId(command.getMerchantId())
+        .setMerchantKey(
+            TransactionMerchantKey.MerchantKey
+                .newBuilder()
+                .setMerchantId(command.getMerchantId())
+                .setServiceCode(command.getServiceCode())
+                .setAccountFrom(command.getAccountFrom())
+                .setAccountTo(command.getAccountTo())
+                .build())
         .setEpochMinute(command.getEpochMinute())
         .setTransactionTotalAmount(transactionTotalAmount)
         .setTransactionCount(transactionCount)

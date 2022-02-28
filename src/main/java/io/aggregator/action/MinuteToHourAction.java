@@ -23,7 +23,10 @@ public class MinuteToHourAction extends AbstractMinuteToHourAction {
     return effects().forward(components().hour().addMinute(
         HourApi.AddMinuteCommand
             .newBuilder()
-            .setMerchantId(minuteCreated.getMerchantId())
+            .setMerchantId(minuteCreated.getMerchantKey().getMerchantId())
+            .setServiceCode(minuteCreated.getMerchantKey().getServiceCode())
+            .setAccountFrom(minuteCreated.getMerchantKey().getAccountFrom())
+            .setAccountTo(minuteCreated.getMerchantKey().getAccountTo())
             .setEpochHour(TimeTo.fromEpochMinute(minuteCreated.getEpochMinute()).toEpochHour())
             .setEpochMinute(minuteCreated.getEpochMinute())
             .build()));
@@ -34,7 +37,10 @@ public class MinuteToHourAction extends AbstractMinuteToHourAction {
     return effects().forward(components().hour().minuteAggregation(
         HourApi.MinuteAggregationCommand
             .newBuilder()
-            .setMerchantId(minuteAggregated.getMerchantId())
+            .setMerchantId(minuteAggregated.getMerchantKey().getMerchantId())
+            .setServiceCode(minuteAggregated.getMerchantKey().getServiceCode())
+            .setAccountFrom(minuteAggregated.getMerchantKey().getAccountFrom())
+            .setAccountTo(minuteAggregated.getMerchantKey().getAccountTo())
             .setEpochHour(TimeTo.fromEpochMinute(minuteAggregated.getEpochMinute()).toEpochHour())
             .setEpochMinute(minuteAggregated.getEpochMinute())
             .setTransactionTotalAmount(minuteAggregated.getTransactionTotalAmount())

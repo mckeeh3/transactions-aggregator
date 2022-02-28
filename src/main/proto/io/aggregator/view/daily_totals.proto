@@ -3,17 +3,18 @@ syntax = "proto3";
 package io.aggregator.view;
 
 import "google/protobuf/timestamp.proto";
+import "io/aggregator/entity/transaction_merchant_key.proto";
 
 option java_outer_classname = "DailyTotalsModel";
 
 message DailyTotal {
-  string merchant_id = 1;
+  entity.MerchantKey merchant_key = 1;
   int64 epoch_day = 2;
   double transaction_total_amount = 3;
   int32 transaction_count = 4;
   google.protobuf.Timestamp day = 5;
   google.protobuf.Timestamp last_update_timestamp = 6;
   google.protobuf.Timestamp aggregate_request_timestamp = 7;
-  google.protobuf.Timestamp aggregation_started_timestamp = 8;
+  string payment_id = 8;
   google.protobuf.Timestamp aggregation_completed_timestamp = 9;
 }

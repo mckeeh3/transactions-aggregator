@@ -47,9 +47,10 @@ public class FrontendAction extends AbstractFrontendAction {
           return TransactionApi.CreateTransactionCommand
               .newBuilder()
               .setTransactionId(UUID.randomUUID().toString())
-              .setService("service-" + random.nextInt(10) + 1)
-              .setAccount("account-" + random.nextInt(10) + 1)
               .setMerchantId("merchant-" + random.nextInt(generateTransactionsRequest.getMerchantIdRange()))
+              .setServiceCode("service-code-" + random.nextInt(3) + 1)
+              .setAccountFrom("account-from-" + random.nextInt(3) + 1)
+              .setAccountTo("account-to-" + random.nextInt(3) + 3)
               .setTransactionAmount(random.nextInt(100) / 10.0)
               .setTransactionTimestamp(timestamp)
               .build();
@@ -103,9 +104,13 @@ public class FrontendAction extends AbstractFrontendAction {
     return components().day().aggregateDay(
         DayApi.AggregateDayCommand
             .newBuilder()
-            .setMerchantId(dailyTotal.getMerchantId())
+            .setMerchantId(dailyTotal.getMerchantKey().getMerchantId())
+            .setServiceCode(dailyTotal.getMerchantKey().getServiceCode())
+            .setAccountFrom(dailyTotal.getMerchantKey().getAccountFrom())
+            .setAccountTo(dailyTotal.getMerchantKey().getAccountTo())
             .setEpochDay(dailyTotal.getEpochDay())
             .setAggregateRequestTimestamp(day)
+            .setPaymentId(dailyTotal.getPaymentId())
             .build())
         .execute();
   }

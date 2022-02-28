@@ -46,7 +46,7 @@ public class Transaction extends AbstractTransaction {
   private Effect<Empty> handle(TransactionEntity.TransactionState state, TransactionApi.CreateTransactionCommand command) {
     log.info("state: {}\nCreateTransactionCommand: {}", state, command);
 
-    if (state.getTransactionKey() != null && !state.getTransactionKey().getTransactionId().isEmpty()) {
+    if (state.getTransactionKey().getTransactionId() != null && !state.getTransactionKey().getTransactionId().isEmpty()) {
       return effects().reply(Empty.getDefaultInstance()); // already created
     }
     return effects()
@@ -56,7 +56,7 @@ public class Transaction extends AbstractTransaction {
 
   private Optional<Effect<TransactionApi.GetTransactionResponse>> reject(TransactionEntity.TransactionState state, TransactionApi.GetTransactionRequest request) {
     if (state.getTransactionKey() == null || state.getTransactionKey().getTransactionId().isEmpty()) {
-      return Optional.of(effects().error(String.format("Transaction %s|%s|%s not found", request.getTransactionId(), request.getService(), request.getAccount())));
+      return Optional.of(effects().error(String.format("Transaction %s not found", request)));
     }
     return Optional.empty();
   }
@@ -69,10 +69,12 @@ public class Transaction extends AbstractTransaction {
                 TransactionApi.TransactionKey
                     .newBuilder()
                     .setTransactionId(state.getTransactionKey().getTransactionId())
-                    .setService(state.getTransactionKey().getService())
-                    .setAccount(state.getTransactionKey().getAccount())
+                    .setServiceCode(state.getTransactionKey().getServiceCode())
+                    .setAccountFrom(state.getTransactionKey().getAccountFrom())
+                    .setAccountTo(state.getTransactionKey().getAccountTo())
                     .build())
             .setMerchantId(state.getMerchantId())
+            .setShopId(state.getShopId())
             .setTransactionAmount(state.getTransactionAmount())
             .setTransactionTimestamp(state.getTransactionTimestamp())
             .build());
@@ -82,14 +84,16 @@ public class Transaction extends AbstractTransaction {
     return TransactionEntity.TransactionState
         .newBuilder()
         .setTransactionKey(
-            TransactionEntity.TransactionKey
+            TransactionMerchantKey.TransactionKey
                 .newBuilder()
                 .setTransactionId(event.getTransactionKey().getTransactionId())
-                .setService(event.getTransactionKey().getService())
-                .setAccount(event.getTransactionKey().getAccount())
+                .setServiceCode(event.getTransactionKey().getServiceCode())
+                .setAccountFrom(event.getTransactionKey().getAccountFrom())
+                .setAccountTo(event.getTransactionKey().getAccountTo())
                 .build())
         .setTransactionAmount(event.getTransactionAmount())
         .setMerchantId(event.getMerchantId())
+        .setShopId(event.getShopId())
         .setTransactionTimestamp(event.getTransactionTimestamp())
         .build();
   }
@@ -98,14 +102,16 @@ public class Transaction extends AbstractTransaction {
     return TransactionEntity.TransactionCreated
         .newBuilder()
         .setTransactionKey(
-            TransactionEntity.TransactionKey
+            TransactionMerchantKey.TransactionKey
                 .newBuilder()
                 .setTransactionId(command.getTransactionId())
-                .setService(command.getService())
-                .setAccount(command.getAccount())
+                .setServiceCode(command.getServiceCode())
+                .setAccountFrom(command.getAccountFrom())
+                .setAccountTo(command.getAccountTo())
                 .build())
         .setTransactionAmount(command.getTransactionAmount())
         .setMerchantId(command.getMerchantId())
+        .setShopId(command.getShopId())
         .setTransactionTimestamp(command.getTransactionTimestamp())
         .build();
   }

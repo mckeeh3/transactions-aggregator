@@ -25,7 +25,10 @@ public class HourToMinuteAction extends AbstractHourToMinuteAction {
     var results = hourAggregationRequested.getEpochMinutesList().stream()
         .map(epochMinute -> MinuteApi.AggregateMinuteCommand
             .newBuilder()
-            .setMerchantId(hourAggregationRequested.getMerchantId())
+            .setMerchantId(hourAggregationRequested.getMerchantKey().getMerchantId())
+            .setServiceCode(hourAggregationRequested.getMerchantKey().getServiceCode())
+            .setAccountFrom(hourAggregationRequested.getMerchantKey().getAccountFrom())
+            .setAccountTo(hourAggregationRequested.getMerchantKey().getAccountTo())
             .setEpochMinute(epochMinute)
             .setAggregateRequestTimestamp(hourAggregationRequested.getAggregateRequestTimestamp())
             .build())

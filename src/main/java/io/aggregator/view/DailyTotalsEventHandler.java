@@ -2,29 +2,44 @@ package io.aggregator.view;
 
 import io.aggregator.TimeTo;
 import io.aggregator.entity.DayEntity;
+import io.aggregator.entity.TransactionMerchantKey;
 
 class DailyTotalsEventHandler {
 
-  static DailyTotalsModel.DailyTotal handle(DailyTotalsModel.DailyTotal state, DayEntity.DayCreated dayCreated) {
+  static DailyTotalsModel.DailyTotal handle(DailyTotalsModel.DailyTotal state, DayEntity.DayCreated event) {
     return state
         .toBuilder()
-        .setMerchantId(dayCreated.getMerchantId())
-        .setEpochDay(dayCreated.getEpochDay())
-        .setDay(TimeTo.fromEpochDay(dayCreated.getEpochDay()).toTimestamp())
+        .setMerchantKey(
+            TransactionMerchantKey.MerchantKey
+                .newBuilder()
+                .setMerchantId(event.getMerchantKey().getMerchantId())
+                .setServiceCode(event.getMerchantKey().getServiceCode())
+                .setAccountFrom(event.getMerchantKey().getAccountFrom())
+                .setAccountTo(event.getMerchantKey().getAccountTo())
+                .build())
+        .setEpochDay(event.getEpochDay())
+        .setDay(TimeTo.fromEpochDay(event.getEpochDay()).toTimestamp())
         .build();
   }
 
-  static DailyTotalsModel.DailyTotal handle(DailyTotalsModel.DailyTotal state, DayEntity.DayAggregated dayAggregated) {
+  static DailyTotalsModel.DailyTotal handle(DailyTotalsModel.DailyTotal state, DayEntity.DayAggregated event) {
     return state
         .toBuilder()
-        .setMerchantId(dayAggregated.getMerchantId())
-        .setEpochDay(dayAggregated.getEpochDay())
-        .setTransactionTotalAmount(dayAggregated.getTransactionTotalAmount())
-        .setTransactionCount(dayAggregated.getTransactionCount())
-        .setLastUpdateTimestamp(dayAggregated.getLastUpdateTimestamp())
-        .setAggregateRequestTimestamp(dayAggregated.getAggregateRequestTimestamp())
-        .setAggregationStartedTimestamp(dayAggregated.getAggregationStartedTimestamp())
-        .setAggregationCompletedTimestamp(dayAggregated.getAggregationCompletedTimestamp())
+        .setMerchantKey(
+            TransactionMerchantKey.MerchantKey
+                .newBuilder()
+                .setMerchantId(event.getMerchantKey().getMerchantId())
+                .setServiceCode(event.getMerchantKey().getServiceCode())
+                .setAccountFrom(event.getMerchantKey().getAccountFrom())
+                .setAccountTo(event.getMerchantKey().getAccountTo())
+                .build())
+        .setEpochDay(event.getEpochDay())
+        .setTransactionTotalAmount(event.getTransactionTotalAmount())
+        .setTransactionCount(event.getTransactionCount())
+        .setLastUpdateTimestamp(event.getLastUpdateTimestamp())
+        .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
+        .setPaymentId(event.getPaymentId())
+        .setAggregationCompletedTimestamp(event.getAggregationCompletedTimestamp())
         .build();
   }
 }

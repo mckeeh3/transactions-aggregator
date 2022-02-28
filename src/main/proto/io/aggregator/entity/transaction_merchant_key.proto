@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package io.aggregator.entity;
+
+option java_outer_classname = "TransactionMerchantKey";
+
+message TransactionKey {
+  string transaction_id = 1;
+  string service_code = 2;
+  string account_from = 3;
+  string account_to = 4;
+}
+
+message MerchantKey {
+  string merchant_id = 1;
+  string service_code = 2;
+  string account_from = 3;
+  string account_to = 4;
+}

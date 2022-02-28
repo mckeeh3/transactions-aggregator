@@ -36,19 +36,20 @@ public class TransactionTest {
     testKit.createTransaction(
         TransactionApi.CreateTransactionCommand
             .newBuilder()
-            .setTransactionId("123")
-            .setService("456")
-            .setAccount("789")
-            .setMerchantId("merchant-1")
+            .setTransactionId("transaction-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
             .setTransactionAmount(123.45)
             .setTransactionTimestamp(TimeTo.now())
             .build());
 
     var state = testKit.getState();
 
-    assertEquals(state.getTransactionKey().getTransactionId(), "123");
-    assertEquals(state.getTransactionKey().getService(), "456");
-    assertEquals(state.getTransactionKey().getAccount(), "789");
+    assertEquals("transaction-1", state.getTransactionKey().getTransactionId());
+    assertEquals("service-code-1", state.getTransactionKey().getServiceCode());
+    assertEquals("account-from-1", state.getTransactionKey().getAccountFrom());
+    assertEquals("account-to-1", state.getTransactionKey().getAccountTo());
     assertEquals("merchant-1", state.getMerchantId());
     assertEquals(123.45, state.getTransactionAmount(), 0.0);
     assertTrue(state.getTransactionTimestamp().getSeconds() > 0);
@@ -61,9 +62,10 @@ public class TransactionTest {
     testKit.createTransaction(
         TransactionApi.CreateTransactionCommand
             .newBuilder()
-            .setTransactionId("123")
-            .setService("456")
-            .setAccount("789")
+            .setTransactionId("transaction-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
             .setMerchantId("merchant-1")
             .setTransactionAmount(123.45)
             .setTransactionTimestamp(TimeTo.now())
@@ -72,17 +74,19 @@ public class TransactionTest {
     var response = testKit.getTransaction(
         TransactionApi.GetTransactionRequest
             .newBuilder()
-            .setTransactionId("123")
-            .setService("456")
-            .setAccount("789")
+            .setTransactionId("transaction-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
             .build());
 
     var transaction = response.getReply();
 
     assertNotNull(transaction);
-    assertEquals("123", transaction.getTransactionKey().getTransactionId());
-    assertEquals("456", transaction.getTransactionKey().getService());
-    assertEquals("789", transaction.getTransactionKey().getAccount());
+    assertEquals("transaction-1", transaction.getTransactionKey().getTransactionId());
+    assertEquals("service-code-1", transaction.getTransactionKey().getServiceCode());
+    assertEquals("account-from-1", transaction.getTransactionKey().getAccountFrom());
+    assertEquals("account-to-1", transaction.getTransactionKey().getAccountTo());
     assertEquals("merchant-1", transaction.getMerchantId());
     assertEquals(123.45, transaction.getTransactionAmount(), 0.0);
     assertTrue(transaction.getTransactionTimestamp().getSeconds() > 0);

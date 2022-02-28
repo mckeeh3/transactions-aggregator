@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 import "google/protobuf/timestamp.proto";
+import "io/aggregator/entity/transaction_merchant_key.proto";
 
 package io.aggregator.entity;
 
@@ -8,20 +9,16 @@ option java_outer_classname = "TransactionEntity";
 
 message TransactionCreated {
   TransactionKey transaction_key = 1;
-  double transaction_amount = 2;
-  string merchant_id = 3;
-  google.protobuf.Timestamp transaction_timestamp = 4;
-}
-
-message TransactionKey {
-  string transaction_id = 1;
-  string service = 2;
-  string account = 3;
+  string merchant_id = 2;
+  string shop_id = 3;
+  double transaction_amount = 4;
+  google.protobuf.Timestamp transaction_timestamp = 5;
 }
 
 message TransactionState {
   TransactionKey transaction_key = 1;
   string merchant_id = 2;
-  double transaction_amount = 3;
-  google.protobuf.Timestamp transaction_timestamp = 4;
+  string shop_id = 3;
+  double transaction_amount = 4;
+  google.protobuf.Timestamp transaction_timestamp = 5;
 }

@@ -1,6 +1,10 @@
 package io.aggregator.entity;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.akkaserverless.javasdk.eventsourcedentity.EventSourcedEntityContext;
 import com.google.protobuf.Empty;
@@ -52,6 +56,11 @@ public class SubSecond extends AbstractSubSecond {
     return handle(state, event);
   }
 
+  @Override
+  public SubSecondEntity.SubSecondState transactionPaid(SubSecondEntity.SubSecondState state, SubSecondEntity.TransactionPaid event) {
+    return state;
+  }
+
   private Effect<Empty> handle(SubSecondEntity.SubSecondState state, SubSecondApi.AddTransactionCommand command) {
     log.info("state: {}\nAddTransactionCommand: {}", state, command);
 
@@ -64,13 +73,20 @@ public class SubSecond extends AbstractSubSecond {
     log.info("state: {}\nAggregateCommand: {}", state, command);
 
     return effects()
-        .emitEvent(eventFor(state, command))
+        .emitEvents(eventsFor(state, command))
         .thenReply(newState -> Empty.getDefaultInstance());
   }
 
   static SubSecondEntity.SubSecondState handle(SubSecondEntity.SubSecondState state, SubSecondEntity.SubSecondCreated event) {
     return state.toBuilder()
-        .setMerchantId(event.getMerchantId())
+        .setMerchantKey(
+            TransactionMerchantKey.MerchantKey
+                .newBuilder()
+                .setMerchantId(event.getMerchantKey().getMerchantId())
+                .setServiceCode(event.getMerchantKey().getServiceCode())
+                .setAccountFrom(event.getMerchantKey().getAccountFrom())
+                .setAccountTo(event.getMerchantKey().getAccountTo())
+                .build())
         .setEpochSubSecond(event.getEpochSubSecond())
         .setEpochSecond(TimeTo.fromEpochSubSecond(event.getEpochSubSecond()).toEpochSecond())
         .setEpochMinute(TimeTo.fromEpochSubSecond(event.getEpochSubSecond()).toEpochMinute())
@@ -81,7 +97,7 @@ public class SubSecond extends AbstractSubSecond {
 
   static SubSecondEntity.SubSecondState handle(SubSecondEntity.SubSecondState state, SubSecondEntity.SubSecondTransactionAdded event) {
     var transactionAlreadyAdded = state.getTransactionsList().stream()
-        .anyMatch(transaction -> transaction.getTransactionId().equals(event.getTransactionId()));
+        .anyMatch(transaction -> transaction.getTransactionKey().equals(event.getTransactionKey()));
 
     if (transactionAlreadyAdded) {
       return state; // idempotent - no need to re-add the same transaction
@@ -90,9 +106,9 @@ public class SubSecond extends AbstractSubSecond {
           .addTransactions(
               SubSecondEntity.Transaction
                   .newBuilder()
-                  .setMerchantId(event.getMerchantId())
+                  .setMerchantId(event.getMerchantKey().getMerchantId())
                   .setEpochSubSecond(event.getEpochSubSecond())
-                  .setTransactionId(event.getTransactionId())
+                  .setTransactionKey(event.getTransactionKey())
                   .setAmount(event.getAmount())
                   .setTimestamp(event.getTimestamp())
                   .build())
@@ -122,9 +138,23 @@ public class SubSecond extends AbstractSubSecond {
   static List<?> eventsFor(SubSecondEntity.SubSecondState state, SubSecondApi.AddTransactionCommand command) {
     var transactionAdded = SubSecondEntity.SubSecondTransactionAdded
         .newBuilder()
-        .setMerchantId(command.getMerchantId())
+        .setMerchantKey(
+            TransactionMerchantKey.MerchantKey
+                .newBuilder()
+                .setMerchantId(command.getMerchantId())
+                .setServiceCode(command.getServiceCode())
+                .setAccountFrom(command.getAccountFrom())
+                .setAccountTo(command.getAccountTo())
+                .build())
         .setEpochSubSecond(command.getEpochSubSecond())
-        .setTransactionId(command.getTransactionId())
+        .setTransactionKey(
+            TransactionMerchantKey.TransactionKey
+                .newBuilder()
+                .setTransactionId(command.getTransactionId())
+                .setServiceCode(command.getServiceCode())
+                .setAccountFrom(command.getAccountFrom())
+                .setAccountTo(command.getAccountTo())
+                .build())
         .setAmount(command.getAmount())
         .setTimestamp(command.getTimestamp())
         .build();
@@ -135,7 +165,14 @@ public class SubSecond extends AbstractSubSecond {
     if (isInactive) {
       var secondCreated = SubSecondEntity.SubSecondCreated
           .newBuilder()
-          .setMerchantId(command.getMerchantId())
+          .setMerchantKey(
+              TransactionMerchantKey.MerchantKey
+                  .newBuilder()
+                  .setMerchantId(command.getMerchantId())
+                  .setServiceCode(command.getServiceCode())
+                  .setAccountFrom(command.getAccountFrom())
+                  .setAccountTo(command.getAccountTo())
+                  .build())
           .setEpochSubSecond(command.getEpochSubSecond())
           .build();
 
@@ -145,39 +182,57 @@ public class SubSecond extends AbstractSubSecond {
     }
   }
 
-  static SubSecondEntity.SubSecondAggregated eventFor(SubSecondEntity.SubSecondState state, SubSecondApi.AggregateSubSecondCommand command) {
+  static List<?> eventsFor(SubSecondEntity.SubSecondState state, SubSecondApi.AggregateSubSecondCommand command) {
     var transactions = state.getTransactionsList().stream()
         .filter(transaction -> transaction.getAggregateRequestTimestamp().getSeconds() == 0)
         .toList();
 
     if (transactions.size() == 0) {
-      return SubSecondEntity.SubSecondAggregated
+      return List.of(SubSecondEntity.SubSecondAggregated
           .newBuilder()
-          .setMerchantId(state.getMerchantId())
+          .setMerchantKey(state.getMerchantKey())
           .setEpochSubSecond(state.getEpochSubSecond())
           .setTransactionTotalAmount(0.0)
           .setTransactionCount(0)
           .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
           .setPaymentId(command.getPaymentId())
+          .build());
+    } else {
+      var total = transactions.stream()
+          .reduce(0.0, (a, b) -> a + b.getAmount(), (a, b) -> a + b);
+      var lastUpdate = transactions.stream()
+          .map(transaction -> transaction.getTimestamp())
+          .max(TimeTo.comparator())
+          .get();
+
+      var transactionsPaid = transactions.stream()
+          .map(transaction -> SubSecondEntity.TransactionPaid
+              .newBuilder()
+              .setTransactionKey(
+                  TransactionMerchantKey.TransactionKey
+                      .newBuilder()
+                      .setTransactionId(transaction.getTransactionKey().getTransactionId())
+                      .setServiceCode(transaction.getTransactionKey().getServiceCode())
+                      .setAccountFrom(transaction.getTransactionKey().getAccountFrom())
+                      .setAccountTo(transaction.getTransactionKey().getAccountTo())
+                      .build())
+              .setPaymentId(command.getPaymentId())
+              .setEpochSubSecond(state.getEpochSubSecond())
+              .setPaymentId(command.getPaymentId())
+              .build());
+
+      var subSecondAggregated = SubSecondEntity.SubSecondAggregated
+          .newBuilder()
+          .setMerchantKey(state.getMerchantKey())
+          .setEpochSubSecond(state.getEpochSubSecond())
+          .setTransactionTotalAmount(total)
+          .setTransactionCount(transactions.size())
+          .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
+          .setLastUpdateTimestamp(lastUpdate)
+          .setPaymentId(command.getPaymentId())
           .build();
+
+      return Stream.concat(Stream.of(subSecondAggregated), transactionsPaid).toList();
     }
-
-    var total = transactions.stream()
-        .reduce(0.0, (a, b) -> a + b.getAmount(), (a, b) -> a + b);
-    var lastUpdate = transactions.stream()
-        .map(transaction -> transaction.getTimestamp())
-        .max(TimeTo.comparator())
-        .get();
-
-    return SubSecondEntity.SubSecondAggregated
-        .newBuilder()
-        .setMerchantId(state.getMerchantId())
-        .setEpochSubSecond(state.getEpochSubSecond())
-        .setTransactionTotalAmount(total)
-        .setTransactionCount(transactions.size())
-        .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
-        .setLastUpdateTimestamp(lastUpdate)
-        .setPaymentId(command.getPaymentId())
-        .build();
   }
 }

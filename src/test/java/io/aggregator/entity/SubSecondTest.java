@@ -40,6 +40,9 @@ public class SubSecondTest {
         SubSecondApi.AddTransactionCommand
             .newBuilder()
             .setMerchantId("merchant-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
             .setEpochSubSecond(epochSubSecond)
             .setTransactionId("transaction-1")
             .setAmount(1.23)
@@ -49,25 +52,41 @@ public class SubSecondTest {
     var subSecondCreated = response.getNextEventOfType(SubSecondEntity.SubSecondCreated.class);
     var transactionAdded = response.getNextEventOfType(SubSecondEntity.SubSecondTransactionAdded.class);
 
-    assertEquals("merchant-1", subSecondCreated.getMerchantId());
+    assertEquals("merchant-1", subSecondCreated.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", subSecondCreated.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", subSecondCreated.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", subSecondCreated.getMerchantKey().getAccountTo());
     assertTrue(subSecondCreated.getEpochSubSecond() > 0);
-    assertEquals("merchant-1", transactionAdded.getMerchantId());
+
+    assertEquals("merchant-1", transactionAdded.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", transactionAdded.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", transactionAdded.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", transactionAdded.getMerchantKey().getAccountTo());
     assertTrue(transactionAdded.getEpochSubSecond() > 0);
 
-    assertEquals("transaction-1", transactionAdded.getTransactionId());
+    assertEquals("transaction-1", transactionAdded.getTransactionKey().getTransactionId());
+    assertEquals("service-code-1", transactionAdded.getTransactionKey().getServiceCode());
+    assertEquals("account-from-1", transactionAdded.getTransactionKey().getAccountFrom());
+    assertEquals("account-to-1", transactionAdded.getTransactionKey().getAccountTo());
     assertEquals(1.23, transactionAdded.getAmount(), 0.0);
     assertTrue(transactionAdded.getTimestamp().getSeconds() > 0);
 
     var state = testKit.getState();
 
-    assertEquals("merchant-1", state.getMerchantId());
+    assertEquals("merchant-1", state.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", state.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", state.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", state.getMerchantKey().getAccountTo());
     assertTrue(state.getEpochSubSecond() > 0);
     assertEquals(1, state.getTransactionsList().size());
 
     var transaction = state.getTransactionsList().get(0);
     assertEquals("merchant-1", transaction.getMerchantId());
     assertTrue(transaction.getEpochSubSecond() > 0);
-    assertEquals("transaction-1", transaction.getTransactionId());
+    assertEquals("transaction-1", transaction.getTransactionKey().getTransactionId());
+    assertEquals("service-code-1", transaction.getTransactionKey().getServiceCode());
+    assertEquals("account-from-1", transaction.getTransactionKey().getAccountFrom());
+    assertEquals("account-to-1", transaction.getTransactionKey().getAccountTo());
     assertEquals(1.23, transaction.getAmount(), 0.0);
     assertTrue(transaction.getTimestamp().getSeconds() > 0);
 
@@ -75,6 +94,9 @@ public class SubSecondTest {
         SubSecondApi.AddTransactionCommand
             .newBuilder()
             .setMerchantId("merchant-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
             .setEpochSubSecond(epochSubSecond)
             .setTransactionId("transaction-2")
             .setAmount(4.56)
@@ -85,6 +107,9 @@ public class SubSecondTest {
         SubSecondApi.AddTransactionCommand
             .newBuilder()
             .setMerchantId("merchant-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
             .setEpochSubSecond(epochSubSecond)
             .setTransactionId("transaction-2")
             .setAmount(4.56)
@@ -101,7 +126,10 @@ public class SubSecondTest {
     transaction = state.getTransactionsList().get(1);
     assertEquals("merchant-1", transaction.getMerchantId());
     assertTrue(transaction.getEpochSubSecond() > 0);
-    assertEquals("transaction-2", transaction.getTransactionId());
+    assertEquals("transaction-2", transaction.getTransactionKey().getTransactionId());
+    assertEquals("service-code-1", transaction.getTransactionKey().getServiceCode());
+    assertEquals("account-from-1", transaction.getTransactionKey().getAccountFrom());
+    assertEquals("account-to-1", transaction.getTransactionKey().getAccountTo());
     assertEquals(4.56, transaction.getAmount(), 0.0);
     assertTrue(transaction.getTimestamp().getSeconds() > 0);
   }
@@ -116,6 +144,9 @@ public class SubSecondTest {
         SubSecondApi.AddTransactionCommand
             .newBuilder()
             .setMerchantId("merchant-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
             .setEpochSubSecond(epochSubSecond)
             .setTransactionId("transaction-1")
             .setAmount(1.23)
@@ -126,6 +157,9 @@ public class SubSecondTest {
         SubSecondApi.AddTransactionCommand
             .newBuilder()
             .setMerchantId("merchant-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
             .setEpochSubSecond(epochSubSecond)
             .setTransactionId("transaction-2")
             .setAmount(4.56)
@@ -136,6 +170,9 @@ public class SubSecondTest {
         SubSecondApi.AddTransactionCommand
             .newBuilder()
             .setMerchantId("merchant-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
             .setEpochSubSecond(epochSubSecond)
             .setTransactionId("transaction-2")
             .setAmount(4.56)
@@ -146,6 +183,9 @@ public class SubSecondTest {
         SubSecondApi.AddTransactionCommand
             .newBuilder()
             .setMerchantId("merchant-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
             .setEpochSubSecond(epochSubSecond)
             .setTransactionId("transaction-3")
             .setAmount(7.89)
@@ -156,6 +196,9 @@ public class SubSecondTest {
         SubSecondApi.AggregateSubSecondCommand
             .newBuilder()
             .setMerchantId("merchant-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
             .setEpochSubSecond(epochSubSecond)
             .setAggregateRequestTimestamp(TimeTo.fromEpochSubSecond(epochSubSecond).plus().hours(2).toTimestamp())
             .setPaymentId("payment-1")
@@ -164,7 +207,10 @@ public class SubSecondTest {
     var aggregated = response.getNextEventOfType(SubSecondEntity.SubSecondAggregated.class);
 
     assertNotNull(aggregated);
-    assertEquals("merchant-1", aggregated.getMerchantId());
+    assertEquals("merchant-1", aggregated.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", aggregated.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", aggregated.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", aggregated.getMerchantKey().getAccountTo());
     assertEquals(epochSubSecond, aggregated.getEpochSubSecond());
     assertEquals(1.23 + 4.56 + 7.89, aggregated.getTransactionTotalAmount(), 0.0);
     assertEquals(3, aggregated.getTransactionCount());
@@ -177,6 +223,9 @@ public class SubSecondTest {
         SubSecondApi.AggregateSubSecondCommand
             .newBuilder()
             .setMerchantId("merchant-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
             .setEpochSubSecond(epochSubSecond)
             .setAggregateRequestTimestamp(TimeTo.fromEpochSubSecond(epochSubSecond).plus().hours(2).toTimestamp())
             .setPaymentId("payment-1")
@@ -185,7 +234,10 @@ public class SubSecondTest {
     aggregated = response.getNextEventOfType(SubSecondEntity.SubSecondAggregated.class);
 
     assertNotNull(aggregated);
-    assertEquals("merchant-1", aggregated.getMerchantId());
+    assertEquals("merchant-1", aggregated.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", aggregated.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", aggregated.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", aggregated.getMerchantKey().getAccountTo());
     assertEquals(epochSubSecond, aggregated.getEpochSubSecond());
     assertEquals(0.0, aggregated.getTransactionTotalAmount(), 0.0);
     assertEquals(0, aggregated.getTransactionCount());
@@ -200,6 +252,9 @@ public class SubSecondTest {
             .setMerchantId("merchant-1")
             .setEpochSubSecond(epochSubSecond)
             .setTransactionId("transaction-4")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
             .setAmount(6.54)
             .setTimestamp(TimeTo.fromEpochSubSecond(epochSubSecond).plus().nanos(30).toTimestamp())
             .build());
@@ -210,6 +265,9 @@ public class SubSecondTest {
             .setMerchantId("merchant-1")
             .setEpochSubSecond(epochSubSecond)
             .setTransactionId("transaction-5")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
             .setAmount(3.21)
             .setTimestamp(TimeTo.fromEpochSubSecond(epochSubSecond).plus().nanos(40).toTimestamp())
             .build());
@@ -218,6 +276,9 @@ public class SubSecondTest {
         SubSecondApi.AggregateSubSecondCommand
             .newBuilder()
             .setMerchantId("merchant-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
             .setEpochSubSecond(epochSubSecond)
             .setAggregateRequestTimestamp(TimeTo.fromEpochSubSecond(epochSubSecond).plus().hours(3).toTimestamp())
             .setPaymentId("payment-2")
@@ -226,12 +287,35 @@ public class SubSecondTest {
     aggregated = response.getNextEventOfType(SubSecondEntity.SubSecondAggregated.class);
 
     assertNotNull(aggregated);
-    assertEquals("merchant-1", aggregated.getMerchantId());
+    assertEquals("merchant-1", aggregated.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", aggregated.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", aggregated.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", aggregated.getMerchantKey().getAccountTo());
     assertEquals(epochSubSecond, aggregated.getEpochSubSecond());
     assertEquals(6.54 + 3.21, aggregated.getTransactionTotalAmount(), 0.0);
     assertEquals(2, aggregated.getTransactionCount());
     assertEquals(TimeTo.fromEpochSubSecond(epochSubSecond).plus().hours(3).toTimestamp(), aggregated.getAggregateRequestTimestamp());
     assertEquals(TimeTo.fromEpochSubSecond(epochSubSecond).plus().nanos(40).toTimestamp(), aggregated.getLastUpdateTimestamp());
     assertEquals("payment-2", aggregated.getPaymentId());
+  }
+
+  static TransactionMerchantKey.MerchantKey merchantKey(String merchantId) {
+    return TransactionMerchantKey.MerchantKey
+        .newBuilder()
+        .setMerchantId(merchantId)
+        .setServiceCode("service-code-1")
+        .setAccountFrom("account-from-1")
+        .setAccountTo("account-to-1")
+        .build();
+  }
+
+  static TransactionMerchantKey.TransactionKey transactionKey(String transactionId) {
+    return TransactionMerchantKey.TransactionKey
+        .newBuilder()
+        .setTransactionId(transactionId)
+        .setServiceCode("service-code-1")
+        .setAccountFrom("account-from-1")
+        .setAccountTo("account-to-1")
+        .build();
   }
 }

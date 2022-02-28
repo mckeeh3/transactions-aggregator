@@ -41,6 +41,9 @@ public class SecondTest {
         SecondApi.AddSubSecondCommand
             .newBuilder()
             .setMerchantId("merchant-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
             .setEpochSecond(epochSecond)
             .setEpochSubSecond(epochSubSecond)
             .build());
@@ -48,14 +51,24 @@ public class SecondTest {
     var secondCreated = response.getNextEventOfType(SecondEntity.SecondCreated.class);
     var secondAdded = response.getNextEventOfType(SecondEntity.SubSecondAdded.class);
 
-    assertEquals("merchant-1", secondCreated.getMerchantId());
+    assertEquals("merchant-1", secondCreated.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", secondCreated.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", secondCreated.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", secondCreated.getMerchantKey().getAccountTo());
     assertEquals(epochSecond, secondCreated.getEpochSecond());
-    assertEquals("merchant-1", secondAdded.getMerchantId());
+
+    assertEquals("merchant-1", secondAdded.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", secondAdded.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", secondAdded.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", secondAdded.getMerchantKey().getAccountTo());
     assertEquals(epochSubSecond, secondAdded.getEpochSubSecond());
 
     var state = testKit.getState();
 
-    assertEquals("merchant-1", state.getMerchantId());
+    assertEquals("merchant-1", state.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", state.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", state.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", state.getMerchantKey().getAccountTo());
     assertEquals(epochSecond, state.getEpochSecond());
     assertEquals(1, state.getActiveSubSecondsCount());
 
@@ -67,18 +80,27 @@ public class SecondTest {
         SecondApi.AddSubSecondCommand
             .newBuilder()
             .setMerchantId("merchant-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
             .setEpochSecond(epochSecond)
             .setEpochSubSecond(nextEpochSubSecond)
             .build());
 
     secondAdded = response.getNextEventOfType(SecondEntity.SubSecondAdded.class);
 
-    assertEquals("merchant-1", secondAdded.getMerchantId());
+    assertEquals("merchant-1", secondAdded.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", secondAdded.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", secondAdded.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", secondAdded.getMerchantKey().getAccountTo());
     assertEquals(nextEpochSubSecond, secondAdded.getEpochSubSecond());
 
     state = testKit.getState();
 
-    assertEquals("merchant-1", state.getMerchantId());
+    assertEquals("merchant-1", state.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", state.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", state.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", state.getMerchantKey().getAccountTo());
     assertEquals(epochSecond, state.getEpochSecond());
     assertEquals(2, state.getActiveSubSecondsCount());
 
@@ -100,6 +122,9 @@ public class SecondTest {
         SecondApi.AddSubSecondCommand
             .newBuilder()
             .setMerchantId("merchant-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
             .setEpochSecond(epochSecond)
             .setEpochSubSecond(epochSubSecond)
             .build());
@@ -108,6 +133,9 @@ public class SecondTest {
         SecondApi.AddSubSecondCommand
             .newBuilder()
             .setMerchantId("merchant-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
             .setEpochSecond(epochSecond)
             .setEpochSubSecond(nextEpochSubSecond)
             .build());
@@ -116,6 +144,9 @@ public class SecondTest {
         SecondApi.AggregateSecondCommand
             .newBuilder()
             .setMerchantId("merchant-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
             .setEpochSecond(epochSecond)
             .setAggregateRequestTimestamp(now)
             .setPaymentId("payment-1")
@@ -123,7 +154,10 @@ public class SecondTest {
 
     var secondAggregationRequested = response.getNextEventOfType(SecondEntity.SecondAggregationRequested.class);
 
-    assertEquals("merchant-1", secondAggregationRequested.getMerchantId());
+    assertEquals("merchant-1", secondAggregationRequested.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", secondAggregationRequested.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", secondAggregationRequested.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", secondAggregationRequested.getMerchantKey().getAccountTo());
     assertEquals(epochSecond, secondAggregationRequested.getEpochSecond());
     assertEquals(now, secondAggregationRequested.getAggregateRequestTimestamp());
     assertEquals(2, secondAggregationRequested.getEpochSubSecondsCount());
@@ -152,6 +186,9 @@ public class SecondTest {
         SecondApi.AggregateSecondCommand
             .newBuilder()
             .setMerchantId("merchant-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
             .setEpochSecond(epochSecond)
             .setAggregateRequestTimestamp(now)
             .setPaymentId("payment-1")
@@ -159,7 +196,10 @@ public class SecondTest {
 
     var secondAggregationRequested = response.getNextEventOfType(SecondEntity.SecondAggregated.class);
 
-    assertEquals("merchant-1", secondAggregationRequested.getMerchantId());
+    assertEquals("merchant-1", secondAggregationRequested.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", secondAggregationRequested.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", secondAggregationRequested.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", secondAggregationRequested.getMerchantKey().getAccountTo());
     assertEquals(epochSecond, secondAggregationRequested.getEpochSecond());
     assertEquals(now, secondAggregationRequested.getAggregateRequestTimestamp());
     assertEquals(0, secondAggregationRequested.getTransactionCount());
@@ -180,6 +220,9 @@ public class SecondTest {
         SecondApi.AddSubSecondCommand
             .newBuilder()
             .setMerchantId("merchant-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
             .setEpochSecond(epochSecond)
             .setEpochSubSecond(epochSubSecond)
             .build());
@@ -188,6 +231,9 @@ public class SecondTest {
         SecondApi.AddSubSecondCommand
             .newBuilder()
             .setMerchantId("merchant-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
             .setEpochSecond(epochSecond)
             .setEpochSubSecond(nextEpochSubSecond)
             .build());
@@ -196,6 +242,9 @@ public class SecondTest {
         SecondApi.AggregateSecondCommand
             .newBuilder()
             .setMerchantId("merchant-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
             .setEpochSecond(epochSecond)
             .setAggregateRequestTimestamp(aggregateRequestTimestamp)
             .setPaymentId("payment-1")
@@ -205,6 +254,9 @@ public class SecondTest {
         SecondApi.SubSecondAggregationCommand
             .newBuilder()
             .setMerchantId("merchant-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
             .setEpochSecond(epochSecond)
             .setEpochSubSecond(epochSubSecond)
             .setTransactionTotalAmount(123.45)
@@ -216,7 +268,10 @@ public class SecondTest {
 
     var activeSubSecondAggregated = response.getNextEventOfType(SecondEntity.ActiveSubSecondAggregated.class);
 
-    assertEquals("merchant-1", activeSubSecondAggregated.getMerchantId());
+    assertEquals("merchant-1", activeSubSecondAggregated.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", activeSubSecondAggregated.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", activeSubSecondAggregated.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", activeSubSecondAggregated.getMerchantKey().getAccountTo());
     assertEquals(epochSubSecond, activeSubSecondAggregated.getEpochSubSecond());
     assertEquals(123.45, activeSubSecondAggregated.getTransactionTotalAmount(), 0.0);
     assertEquals(10, activeSubSecondAggregated.getTransactionCount());
@@ -228,6 +283,9 @@ public class SecondTest {
         SecondApi.SubSecondAggregationCommand
             .newBuilder()
             .setMerchantId("merchant-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
             .setEpochSecond(epochSecond)
             .setEpochSubSecond(nextEpochSubSecond)
             .setTransactionTotalAmount(678.90)
@@ -240,7 +298,10 @@ public class SecondTest {
     var secondAggregated = response.getNextEventOfType(SecondEntity.SecondAggregated.class);
     activeSubSecondAggregated = response.getNextEventOfType(SecondEntity.ActiveSubSecondAggregated.class);
 
-    assertEquals("merchant-1", activeSubSecondAggregated.getMerchantId());
+    assertEquals("merchant-1", activeSubSecondAggregated.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", activeSubSecondAggregated.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", activeSubSecondAggregated.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", activeSubSecondAggregated.getMerchantKey().getAccountTo());
     assertEquals(nextEpochSubSecond, activeSubSecondAggregated.getEpochSubSecond());
     assertEquals(678.90, activeSubSecondAggregated.getTransactionTotalAmount(), 0.0);
     assertEquals(20, activeSubSecondAggregated.getTransactionCount());
@@ -248,7 +309,10 @@ public class SecondTest {
     assertEquals(aggregateRequestTimestamp, activeSubSecondAggregated.getAggregateRequestTimestamp());
     assertEquals("payment-1", activeSubSecondAggregated.getPaymentId());
 
-    assertEquals("merchant-1", secondAggregated.getMerchantId());
+    assertEquals("merchant-1", secondAggregated.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", secondAggregated.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", secondAggregated.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", secondAggregated.getMerchantKey().getAccountTo());
     assertEquals(epochSecond, secondAggregated.getEpochSecond());
     assertEquals(123.45 + 678.90, secondAggregated.getTransactionTotalAmount(), 0.0);
     assertEquals(10 + 20, secondAggregated.getTransactionCount());
@@ -263,6 +327,9 @@ public class SecondTest {
         SecondApi.AddSubSecondCommand
             .newBuilder()
             .setMerchantId("merchant-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
             .setEpochSecond(epochSecond)
             .setEpochSubSecond(epochSubSecond)
             .build());
@@ -271,6 +338,9 @@ public class SecondTest {
         SecondApi.AggregateSecondCommand
             .newBuilder()
             .setMerchantId("merchant-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
             .setEpochSecond(epochSecond)
             .setAggregateRequestTimestamp(aggregateRequestTimestamp)
             .setPaymentId("payment-1")
@@ -280,6 +350,9 @@ public class SecondTest {
         SecondApi.SubSecondAggregationCommand
             .newBuilder()
             .setMerchantId("merchant-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
             .setEpochSecond(epochSecond)
             .setEpochSubSecond(epochSubSecond)
             .setTransactionTotalAmount(543.21)
@@ -292,7 +365,10 @@ public class SecondTest {
     secondAggregated = response.getNextEventOfType(SecondEntity.SecondAggregated.class);
     activeSubSecondAggregated = response.getNextEventOfType(SecondEntity.ActiveSubSecondAggregated.class);
 
-    assertEquals("merchant-1", activeSubSecondAggregated.getMerchantId());
+    assertEquals("merchant-1", activeSubSecondAggregated.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", activeSubSecondAggregated.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", activeSubSecondAggregated.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", activeSubSecondAggregated.getMerchantKey().getAccountTo());
     assertEquals(epochSubSecond, activeSubSecondAggregated.getEpochSubSecond());
     assertEquals(543.21, activeSubSecondAggregated.getTransactionTotalAmount(), 0.0);
     assertEquals(321, activeSubSecondAggregated.getTransactionCount());
@@ -300,7 +376,10 @@ public class SecondTest {
     assertEquals(aggregateRequestTimestamp, activeSubSecondAggregated.getAggregateRequestTimestamp());
     assertEquals("payment-1", activeSubSecondAggregated.getPaymentId());
 
-    assertEquals("merchant-1", secondAggregated.getMerchantId());
+    assertEquals("merchant-1", secondAggregated.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", secondAggregated.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", secondAggregated.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", secondAggregated.getMerchantKey().getAccountTo());
     assertEquals(epochSecond, secondAggregated.getEpochSecond());
     assertEquals(543.21, secondAggregated.getTransactionTotalAmount(), 0.0);
     assertEquals(321, secondAggregated.getTransactionCount());

@@ -19,28 +19,34 @@ public class SubSecondToSecondAction extends AbstractSubSecondToSecondAction {
   }
 
   @Override
-  public Effect<Empty> onSubSecondCreated(SubSecondEntity.SubSecondCreated subSecondCreated) {
+  public Effect<Empty> onSubSecondCreated(SubSecondEntity.SubSecondCreated event) {
     return effects().forward(components().second().addSubSecond(
         SecondApi.AddSubSecondCommand
             .newBuilder()
-            .setMerchantId(subSecondCreated.getMerchantId())
-            .setEpochSecond(TimeTo.fromEpochSubSecond(subSecondCreated.getEpochSubSecond()).toEpochSecond())
-            .setEpochSubSecond(subSecondCreated.getEpochSubSecond())
+            .setMerchantId(event.getMerchantKey().getMerchantId())
+            .setServiceCode(event.getMerchantKey().getServiceCode())
+            .setAccountFrom(event.getMerchantKey().getAccountFrom())
+            .setAccountTo(event.getMerchantKey().getAccountTo())
+            .setEpochSecond(TimeTo.fromEpochSubSecond(event.getEpochSubSecond()).toEpochSecond())
+            .setEpochSubSecond(event.getEpochSubSecond())
             .build()));
   }
 
   @Override
-  public Effect<Empty> onSubSecondAggregated(SubSecondEntity.SubSecondAggregated subSecondAggregated) {
+  public Effect<Empty> onSubSecondAggregated(SubSecondEntity.SubSecondAggregated event) {
     return effects().forward(components().second().subSecondAggregation(
         SecondApi.SubSecondAggregationCommand
             .newBuilder()
-            .setMerchantId(subSecondAggregated.getMerchantId())
-            .setEpochSecond(TimeTo.fromEpochSubSecond(subSecondAggregated.getEpochSubSecond()).toEpochSecond())
-            .setEpochSubSecond(subSecondAggregated.getEpochSubSecond())
-            .setTransactionTotalAmount(subSecondAggregated.getTransactionTotalAmount())
-            .setTransactionCount(subSecondAggregated.getTransactionCount())
-            .setLastUpdateTimestamp(subSecondAggregated.getLastUpdateTimestamp())
-            .setAggregateRequestTimestamp(subSecondAggregated.getAggregateRequestTimestamp())
+            .setMerchantId(event.getMerchantKey().getMerchantId())
+            .setServiceCode(event.getMerchantKey().getServiceCode())
+            .setAccountFrom(event.getMerchantKey().getAccountFrom())
+            .setAccountTo(event.getMerchantKey().getAccountTo())
+            .setEpochSecond(TimeTo.fromEpochSubSecond(event.getEpochSubSecond()).toEpochSecond())
+            .setEpochSubSecond(event.getEpochSubSecond())
+            .setTransactionTotalAmount(event.getTransactionTotalAmount())
+            .setTransactionCount(event.getTransactionCount())
+            .setLastUpdateTimestamp(event.getLastUpdateTimestamp())
+            .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
             .build()));
   }
 

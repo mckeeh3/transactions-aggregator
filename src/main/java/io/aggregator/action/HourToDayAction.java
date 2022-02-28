@@ -23,7 +23,10 @@ public class HourToDayAction extends AbstractHourToDayAction {
     return effects().forward(components().day().addHour(
         DayApi.AddHourCommand
             .newBuilder()
-            .setMerchantId(hourCreated.getMerchantId())
+            .setMerchantId(hourCreated.getMerchantKey().getMerchantId())
+            .setServiceCode(hourCreated.getMerchantKey().getServiceCode())
+            .setAccountFrom(hourCreated.getMerchantKey().getAccountFrom())
+            .setAccountTo(hourCreated.getMerchantKey().getAccountTo())
             .setEpochDay(TimeTo.fromEpochHour(hourCreated.getEpochHour()).toEpochDay())
             .setEpochHour(hourCreated.getEpochHour())
             .build()));
@@ -34,7 +37,10 @@ public class HourToDayAction extends AbstractHourToDayAction {
     return effects().forward(components().day().hourAggregation(
         DayApi.HourAggregationCommand
             .newBuilder()
-            .setMerchantId(hourAggregated.getMerchantId())
+            .setMerchantId(hourAggregated.getMerchantKey().getMerchantId())
+            .setServiceCode(hourAggregated.getMerchantKey().getServiceCode())
+            .setAccountFrom(hourAggregated.getMerchantKey().getAccountFrom())
+            .setAccountTo(hourAggregated.getMerchantKey().getAccountTo())
             .setEpochDay(TimeTo.fromEpochHour(hourAggregated.getEpochHour()).toEpochDay())
             .setEpochHour(hourAggregated.getEpochHour())
             .setTransactionTotalAmount(hourAggregated.getTransactionTotalAmount())

@@ -25,7 +25,10 @@ public class DayToHourAction extends AbstractDayToHourAction {
     var results = dayAggregationRequested.getEpochHoursList().stream()
         .map(epochHour -> HourApi.AggregateHourCommand
             .newBuilder()
-            .setMerchantId(dayAggregationRequested.getMerchantId())
+            .setMerchantId(dayAggregationRequested.getMerchantKey().getMerchantId())
+            .setServiceCode(dayAggregationRequested.getMerchantKey().getServiceCode())
+            .setAccountFrom(dayAggregationRequested.getMerchantKey().getAccountFrom())
+            .setAccountTo(dayAggregationRequested.getMerchantKey().getAccountTo())
             .setEpochHour(epochHour)
             .setAggregateRequestTimestamp(dayAggregationRequested.getAggregateRequestTimestamp())
             .build())

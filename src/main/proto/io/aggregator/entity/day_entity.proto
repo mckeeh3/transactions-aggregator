@@ -1,35 +1,35 @@
 syntax = "proto3";
 
 import "google/protobuf/timestamp.proto";
+import "io/aggregator/entity/transaction_merchant_key.proto";
 
 package io.aggregator.entity;
 
 option java_outer_classname = "DayEntity";
 
 message DayCreated {
-  string merchant_id = 1;
+  MerchantKey merchant_key = 1;
   int64 epoch_day = 2;
 }
 
 message HourAdded {
-  string merchant_id = 1;
+  MerchantKey merchant_key = 1;
   int64 epoch_hour = 2;
 }
 
 message DayAggregated {
-  string merchant_id = 1;
+  MerchantKey merchant_key = 1;
   int64 epoch_day = 2;
   double transaction_total_amount = 3;
   int32 transaction_count = 4;
   google.protobuf.Timestamp last_update_timestamp = 5;
   google.protobuf.Timestamp aggregate_request_timestamp = 6;
   string payment_id = 7;
-  google.protobuf.Timestamp aggregation_started_timestamp = 8;
-  google.protobuf.Timestamp aggregation_completed_timestamp = 9;
+  google.protobuf.Timestamp aggregation_completed_timestamp = 8;
 }
 
 message ActiveHourAggregated {
-  string merchant_id = 1;
+  MerchantKey merchant_key = 1;
   int64 epoch_hour = 2;
   double transaction_total_amount = 3;
   int32 transaction_count = 4;
@@ -39,7 +39,7 @@ message ActiveHourAggregated {
 }
 
 message DayAggregationRequested {
-  string merchant_id = 1;
+  MerchantKey merchant_key = 1;
   int64 epoch_day = 2;
   repeated int64 epoch_hours = 3;
   google.protobuf.Timestamp aggregate_request_timestamp = 4;
@@ -48,7 +48,7 @@ message DayAggregationRequested {
 }
 
 message DayState {
-  string merchant_id = 1;
+  MerchantKey merchant_key = 1;
   int64 epoch_day = 2;
   repeated ActiveHour activeHours = 3;
   repeated AggregateDay aggregateDays = 4;
