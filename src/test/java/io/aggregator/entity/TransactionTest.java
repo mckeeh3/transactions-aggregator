@@ -40,6 +40,7 @@ public class TransactionTest {
             .setServiceCode("service-code-1")
             .setAccountFrom("account-from-1")
             .setAccountTo("account-to-1")
+            .setMerchantId("merchant-1")
             .setTransactionAmount(123.45)
             .setTransactionTimestamp(TimeTo.now())
             .build());

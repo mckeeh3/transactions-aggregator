@@ -23,7 +23,7 @@ public class Payment extends AbstractPayment {
 
   @Override
   public PaymentEntity.PaymentState emptyState() {
-    throw new UnsupportedOperationException("Not implemented yet, replace with your empty entity state");
+    return PaymentEntity.PaymentState.getDefaultInstance();
   }
 
   @Override
@@ -40,13 +40,14 @@ public class Payment extends AbstractPayment {
   public PaymentEntity.PaymentState paymentCreated(PaymentEntity.PaymentState currentState, PaymentEntity.PaymentCreated paymentCreated) {
     throw new RuntimeException("The event handler for `PaymentCreated` is not implemented, yet");
   }
+
   @Override
   public PaymentEntity.PaymentState paymentAggregationRequested(PaymentEntity.PaymentState currentState, PaymentEntity.PaymentAggregationRequested paymentAggregationRequested) {
     throw new RuntimeException("The event handler for `PaymentAggregationRequested` is not implemented, yet");
   }
+
   @Override
   public PaymentEntity.PaymentState paymentDayAggregated(PaymentEntity.PaymentState currentState, PaymentEntity.PaymentDayAggregated paymentDayAggregated) {
     throw new RuntimeException("The event handler for `PaymentDayAggregated` is not implemented, yet");
   }
-
 }

@@ -1,9 +1,6 @@
 package io.aggregator.entity;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.akkaserverless.javasdk.eventsourcedentity.EventSourcedEntityContext;
