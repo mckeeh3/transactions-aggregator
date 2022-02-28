@@ -9,8 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.aggregator.api.TransactionApi;
-import io.aggregator.api.TransactionApi.AddPaymentCommand;
-import io.aggregator.entity.TransactionEntity.TransactionState;
 
 // This class was initially generated based on the .proto definition by Akka Serverless tooling.
 // This is the implementation for the Event Sourced Entity Service described in your io/aggregator/api/tranaaction_api.proto file.
@@ -97,6 +95,7 @@ public class Transaction extends AbstractTransaction {
             .setShopId(state.getShopId())
             .setTransactionAmount(state.getTransactionAmount())
             .setTransactionTimestamp(state.getTransactionTimestamp())
+            .setPaymentId(state.getPaymentId())
             .build());
   }
 

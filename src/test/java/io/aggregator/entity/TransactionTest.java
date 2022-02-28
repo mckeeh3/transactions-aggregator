@@ -154,5 +154,28 @@ public class TransactionTest {
     assertEquals("merchant-1", transaction.getMerchantId());
     assertEquals(123.45, transaction.getTransactionAmount(), 0.0);
     assertTrue(transaction.getTransactionTimestamp().getSeconds() > 0);
+
+    testKit.addPayment(
+        TransactionApi.AddPaymentCommand
+            .newBuilder()
+            .setTransactionId("transaction-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
+            .setPaymentId("payment-1")
+            .build());
+
+    response = testKit.getTransaction(
+        TransactionApi.GetTransactionRequest
+            .newBuilder()
+            .setTransactionId("transaction-1")
+            .setServiceCode("service-code-1")
+            .setAccountFrom("account-from-1")
+            .setAccountTo("account-to-1")
+            .build());
+
+    transaction = response.getReply();
+
+    assertEquals("payment-1", transaction.getPaymentId());
   }
 }
