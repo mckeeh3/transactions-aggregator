@@ -316,6 +316,13 @@ public class PaymentTest {
     assertEquals(12 + 23 + 34 + 45 + 56 + 67, paymentAggregated.getTransactionCount());
     assertEquals(aggregateRequestTimestamp3, paymentAggregated.getLastUpdateTimestamp());
     assertEquals(aggregateRequestTimestamp3, paymentAggregated.getAggregateRequestTimestamp());
+
+    // after payment has been completed, further aggregation requests should be ignored
+    response = testKit.aggregationRequest(aggregationRequestCommand(aggregateRequestTimestamp2, epochDay1, epochDay2));
+    assertEquals(0, response.getAllEvents().size());
+
+    response = testKit.paymentRequest(paymentRequestCommand(aggregateRequestTimestamp3, epochDay1, epochDay2, epochDay3));
+    assertEquals(0, response.getAllEvents().size());
   }
 
   static PaymentApi.DayAggregationCommand dayAggregationCommand(long epochDay, double amount, int count, Timestamp timestamp) {

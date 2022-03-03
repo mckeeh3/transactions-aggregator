@@ -16,14 +16,14 @@ service Merchant {
       entity_type: "merchant"
       state: "io.aggregator.entity.MerchantState"
       events: [
-        "io.aggregator.entity.MerchantDayAdded",
+        "io.aggregator.entity.MerchantDayActivated",
         "io.aggregator.entity.MerchantPaymentRequested",
         "io.aggregator.entity.MerchantAggregationRequested"  //
       ]
     }
   };
 
-  rpc AddDay(AddDayCommand) returns (google.protobuf.Empty) {
+  rpc ActivateDay(ActivateDayCommand) returns (google.protobuf.Empty) {
     option (google.api.http) = {
       post: "/merchant/add-day"
       body: "*"
@@ -45,7 +45,7 @@ service Merchant {
   }
 }
 
-message AddDayCommand {
+message ActivateDayCommand {
   string merchant_id = 1 [(akkaserverless.field).entity_key = true];
   string service_code = 2 [(akkaserverless.field).entity_key = true];
   string account_from = 3 [(akkaserverless.field).entity_key = true];

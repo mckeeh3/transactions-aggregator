@@ -32,29 +32,21 @@ public class MerchantTest {
   }
 
   @Test
-  public void addDayTest() {
+  public void activateDayTest() {
     MerchantTestKit testKit = MerchantTestKit.of(Merchant::new);
 
     var now = TimeTo.now();
     var epochDay = TimeTo.fromTimestamp(now).toEpochDay();
 
-    var response = testKit.addDay(
-        MerchantApi.AddDayCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochDay(epochDay)
-            .build());
+    var response = testKit.activateDay(activateDayCommand(epochDay));
 
-    var dayAdded = response.getNextEventOfType(MerchantEntity.MerchantDayAdded.class);
+    var dayActivated = response.getNextEventOfType(MerchantEntity.MerchantDayActivated.class);
 
-    assertEquals("merchant-1", dayAdded.getMerchantKey().getMerchantId());
-    assertEquals("service-code-1", dayAdded.getMerchantKey().getServiceCode());
-    assertEquals("account-from-1", dayAdded.getMerchantKey().getAccountFrom());
-    assertEquals("account-to-1", dayAdded.getMerchantKey().getAccountTo());
-    assertEquals(epochDay, dayAdded.getEpochDay());
+    assertEquals("merchant-1", dayActivated.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", dayActivated.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", dayActivated.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", dayActivated.getMerchantKey().getAccountTo());
+    assertEquals(epochDay, dayActivated.getEpochDay());
 
     var state = testKit.getState();
 
@@ -62,7 +54,7 @@ public class MerchantTest {
     assertEquals("service-code-1", state.getMerchantKey().getServiceCode());
     assertEquals("account-from-1", state.getMerchantKey().getAccountFrom());
     assertEquals("account-to-1", state.getMerchantKey().getAccountTo());
-    assertEquals(0, state.getPaymentCount());
+    assertEquals(0, state.getPaymentIdSequenceNumber());
     assertEquals(1, state.getActiveDaysCount());
     assertEquals(epochDay, state.getActiveDays(0));
   }
@@ -74,29 +66,11 @@ public class MerchantTest {
     var now = TimeTo.now();
     var epochDay = TimeTo.fromTimestamp(now).toEpochDay();
 
-    var response = testKit.addDay(
-        MerchantApi.AddDayCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochDay(epochDay)
-            .build());
+    var response = testKit.activateDay(activateDayCommand(epochDay));
+    response.getNextEventOfType(MerchantEntity.MerchantDayActivated.class);
 
-    response.getNextEventOfType(MerchantEntity.MerchantDayAdded.class);
-
-    response = testKit.addDay(
-        MerchantApi.AddDayCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochDay(epochDay)
-            .build());
-
-    response.getNextEventOfType(MerchantEntity.MerchantDayAdded.class);
+    response = testKit.activateDay(activateDayCommand(epochDay));
+    response.getNextEventOfType(MerchantEntity.MerchantDayActivated.class);
 
     var state = testKit.getState();
 
@@ -108,18 +82,9 @@ public class MerchantTest {
   public void merchantAggregationRequestTestWithNoDays() {
     MerchantTestKit testKit = MerchantTestKit.of(Merchant::new);
 
-    var response = testKit.merchantAggregationRequest(
-        MerchantApi.MerchantAggregationRequestCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .build());
+    var response = testKit.merchantAggregationRequest(merchantAggregationRequestCommand());
 
-    var allEvents = response.getAllEvents();
-
-    assertEquals(0, allEvents.size());
+    assertEquals(0, response.getAllEvents().size());
   }
 
   @Test
@@ -129,29 +94,14 @@ public class MerchantTest {
     var now = TimeTo.now();
     var epochDay = TimeTo.fromTimestamp(now).toEpochDay();
 
-    var response = testKit.addDay(
-        MerchantApi.AddDayCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochDay(epochDay)
-            .build());
+    var response = testKit.activateDay(activateDayCommand(epochDay));
 
-    response.getNextEventOfType(MerchantEntity.MerchantDayAdded.class);
+    response.getNextEventOfType(MerchantEntity.MerchantDayActivated.class);
 
     assertEquals(1, testKit.getState().getActiveDaysCount());
     assertEquals(epochDay, testKit.getState().getActiveDays(0));
 
-    response = testKit.merchantAggregationRequest(
-        MerchantApi.MerchantAggregationRequestCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .build());
+    response = testKit.merchantAggregationRequest(merchantAggregationRequestCommand());
 
     var merchantAggregationRequested = response.getNextEventOfType(MerchantEntity.MerchantAggregationRequested.class);
 
@@ -160,7 +110,7 @@ public class MerchantTest {
     assertEquals("account-from-1", merchantAggregationRequested.getMerchantKey().getAccountFrom());
     assertEquals("account-to-1", merchantAggregationRequested.getMerchantKey().getAccountTo());
     assertEquals("payment-1", merchantAggregationRequested.getPaymentId());
-    assertEquals(epochDay, merchantAggregationRequested.getEpochDay());
+    // assertEquals(epochDay, merchantAggregationRequested.getEpochDay());
     assertTrue(merchantAggregationRequested.getAggregateRequestTimestamp().getSeconds() > 0);
 
     assertEquals(0, testKit.getState().getActiveDaysCount());
@@ -175,65 +125,25 @@ public class MerchantTest {
     var epochDay2 = TimeTo.fromEpochDay(epochDay1).plus().days(1).toEpochDay();
     var epochDay3 = TimeTo.fromEpochDay(epochDay1).plus().days(2).toEpochDay();
 
-    testKit.addDay(
-        MerchantApi.AddDayCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochDay(epochDay1)
-            .build());
-
-    testKit.addDay(
-        MerchantApi.AddDayCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochDay(epochDay2)
-            .build());
-
-    testKit.addDay(
-        MerchantApi.AddDayCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochDay(epochDay3)
-            .build());
+    testKit.activateDay(activateDayCommand(epochDay1));
+    testKit.activateDay(activateDayCommand(epochDay2));
+    testKit.activateDay(activateDayCommand(epochDay3));
 
     assertEquals(3, testKit.getState().getActiveDaysCount());
     assertEquals(epochDay1, testKit.getState().getActiveDays(0));
     assertEquals(epochDay2, testKit.getState().getActiveDays(1));
     assertEquals(epochDay3, testKit.getState().getActiveDays(2));
 
-    var response = testKit.merchantAggregationRequest(
-        MerchantApi.MerchantAggregationRequestCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .build());
+    var response = testKit.merchantAggregationRequest(merchantAggregationRequestCommand());
 
+    assertEquals(1, response.getAllEvents().size());
     var merchantAggregationRequestedDay1 = response.getNextEventOfType(MerchantEntity.MerchantAggregationRequested.class);
-    var merchantAggregationRequestedDay2 = response.getNextEventOfType(MerchantEntity.MerchantAggregationRequested.class);
-    var merchantAggregationRequestedDay3 = response.getNextEventOfType(MerchantEntity.MerchantAggregationRequested.class);
 
-    assertEquals(epochDay1, merchantAggregationRequestedDay1.getEpochDay());
+    // assertEquals(epochDay1, merchantAggregationRequestedDay1.getEpochDay());
     assertTrue(merchantAggregationRequestedDay1.getAggregateRequestTimestamp().getSeconds() > 0);
 
-    assertEquals(epochDay2, merchantAggregationRequestedDay2.getEpochDay());
-    assertTrue(merchantAggregationRequestedDay2.getAggregateRequestTimestamp().getSeconds() > 0);
-
-    assertEquals(epochDay3, merchantAggregationRequestedDay3.getEpochDay());
-    assertTrue(merchantAggregationRequestedDay3.getAggregateRequestTimestamp().getSeconds() > 0);
-
     assertEquals(0, testKit.getState().getActiveDaysCount());
-    assertEquals(0, testKit.getState().getPaymentCount());
+    assertEquals(0, testKit.getState().getPaymentIdSequenceNumber());
   }
 
   @Test
@@ -245,105 +155,36 @@ public class MerchantTest {
     var epochDay2 = TimeTo.fromEpochDay(epochDay1).plus().days(1).toEpochDay();
     var epochDay3 = TimeTo.fromEpochDay(epochDay1).plus().days(2).toEpochDay();
 
-    testKit.addDay(
-        MerchantApi.AddDayCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochDay(epochDay1)
-            .build());
+    testKit.activateDay(activateDayCommand(epochDay1));
+    testKit.activateDay(activateDayCommand(epochDay2));
+    testKit.activateDay(activateDayCommand(epochDay3));
 
-    testKit.addDay(
-        MerchantApi.AddDayCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochDay(epochDay2)
-            .build());
-
-    testKit.addDay(
-        MerchantApi.AddDayCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochDay(epochDay3)
-            .build());
-
-    testKit.merchantAggregationRequest(
-        MerchantApi.MerchantAggregationRequestCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .build());
+    testKit.merchantAggregationRequest(merchantAggregationRequestCommand());
 
     // start a new payment
-    testKit.addDay(
-        MerchantApi.AddDayCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochDay(epochDay2)
-            .build());
-
-    testKit.addDay(
-        MerchantApi.AddDayCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochDay(epochDay3)
-            .build());
+    testKit.activateDay(activateDayCommand(epochDay2));
+    testKit.activateDay(activateDayCommand(epochDay3));
 
     assertEquals(2, testKit.getState().getActiveDaysCount());
     assertEquals(epochDay2, testKit.getState().getActiveDays(0));
     assertEquals(epochDay3, testKit.getState().getActiveDays(1));
 
-    var response = testKit.merchantAggregationRequest(
-        MerchantApi.MerchantAggregationRequestCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .build());
+    var response = testKit.merchantAggregationRequest(merchantAggregationRequestCommand());
 
-    var merchantAggregationRequestedDay2 = response.getNextEventOfType(MerchantEntity.MerchantAggregationRequested.class);
-    var merchantAggregationRequestedDay3 = response.getNextEventOfType(MerchantEntity.MerchantAggregationRequested.class);
+    var event = response.getNextEventOfType(MerchantEntity.MerchantAggregationRequested.class);
 
-    assertEquals("payment-1", merchantAggregationRequestedDay2.getPaymentId());
-    assertEquals(epochDay2, merchantAggregationRequestedDay2.getEpochDay());
-    assertTrue(merchantAggregationRequestedDay2.getAggregateRequestTimestamp().getSeconds() > 0);
+    assertEquals(2, event.getActiveDaysCount());
+    assertEquals(epochDay2, event.getActiveDays(0));
+    assertEquals(epochDay3, event.getActiveDays(1));
 
-    assertEquals("payment-1", merchantAggregationRequestedDay3.getPaymentId());
-    assertEquals(epochDay3, merchantAggregationRequestedDay3.getEpochDay());
-    assertTrue(merchantAggregationRequestedDay3.getAggregateRequestTimestamp().getSeconds() > 0);
-
-    assertEquals(0, testKit.getState().getPaymentCount());
+    assertEquals(0, testKit.getState().getPaymentIdSequenceNumber());
   }
 
   @Test
   public void merchantPaymentRequestTestWithNoDays() {
     MerchantTestKit testKit = MerchantTestKit.of(Merchant::new);
 
-    var response = testKit.merchantPaymentRequest(
-        MerchantApi.MerchantPaymentRequestCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .build());
+    var response = testKit.merchantPaymentRequest(merchantPaymentRequestCommand());
 
     var merchantPaymentRequested = response.getNextEventOfType(MerchantEntity.MerchantPaymentRequested.class);
 
@@ -361,43 +202,28 @@ public class MerchantTest {
     var now = TimeTo.now();
     var epochDay = TimeTo.fromTimestamp(now).toEpochDay();
 
-    var response = testKit.addDay(
-        MerchantApi.AddDayCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochDay(epochDay)
-            .build());
+    var response = testKit.activateDay(activateDayCommand(epochDay));
 
-    response.getNextEventOfType(MerchantEntity.MerchantDayAdded.class);
+    response.getNextEventOfType(MerchantEntity.MerchantDayActivated.class);
 
     assertEquals(1, testKit.getState().getActiveDaysCount());
     assertEquals(epochDay, testKit.getState().getActiveDays(0));
 
-    response = testKit.merchantPaymentRequest(
-        MerchantApi.MerchantPaymentRequestCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .build());
+    response = testKit.merchantPaymentRequest(merchantPaymentRequestCommand());
 
-    response.getNextEventOfType(MerchantEntity.MerchantPaymentRequested.class);
-    var merchantAggregationRequested = response.getNextEventOfType(MerchantEntity.MerchantAggregationRequested.class);
+    var event = response.getNextEventOfType(MerchantEntity.MerchantPaymentRequested.class);
 
-    assertEquals("merchant-1", merchantAggregationRequested.getMerchantKey().getMerchantId());
-    assertEquals("service-code-1", merchantAggregationRequested.getMerchantKey().getServiceCode());
-    assertEquals("account-from-1", merchantAggregationRequested.getMerchantKey().getAccountFrom());
-    assertEquals("account-to-1", merchantAggregationRequested.getMerchantKey().getAccountTo());
-    assertEquals("payment-1", merchantAggregationRequested.getPaymentId());
-    assertEquals(epochDay, merchantAggregationRequested.getEpochDay());
-    assertTrue(merchantAggregationRequested.getAggregateRequestTimestamp().getSeconds() > 0);
+    assertEquals("merchant-1", event.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", event.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", event.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", event.getMerchantKey().getAccountTo());
+    assertEquals("payment-1", event.getPaymentId());
+    assertEquals(1, event.getActiveDaysCount());
+    assertEquals(epochDay, event.getActiveDays(0));
+    assertTrue(event.getAggregateRequestTimestamp().getSeconds() > 0);
 
     assertEquals(0, testKit.getState().getActiveDaysCount());
-    assertEquals(1, testKit.getState().getPaymentCount());
+    assertEquals(1, testKit.getState().getPaymentIdSequenceNumber());
   }
 
   @Test
@@ -409,66 +235,21 @@ public class MerchantTest {
     var epochDay2 = TimeTo.fromEpochDay(epochDay1).plus().days(1).toEpochDay();
     var epochDay3 = TimeTo.fromEpochDay(epochDay1).plus().days(2).toEpochDay();
 
-    testKit.addDay(
-        MerchantApi.AddDayCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochDay(epochDay1)
-            .build());
-
-    testKit.addDay(
-        MerchantApi.AddDayCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochDay(epochDay2)
-            .build());
-
-    testKit.addDay(
-        MerchantApi.AddDayCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochDay(epochDay3)
-            .build());
+    testKit.activateDay(activateDayCommand(epochDay1));
+    testKit.activateDay(activateDayCommand(epochDay2));
+    testKit.activateDay(activateDayCommand(epochDay3));
 
     assertEquals(3, testKit.getState().getActiveDaysCount());
     assertEquals(epochDay1, testKit.getState().getActiveDays(0));
     assertEquals(epochDay2, testKit.getState().getActiveDays(1));
     assertEquals(epochDay3, testKit.getState().getActiveDays(2));
 
-    var response = testKit.merchantPaymentRequest(
-        MerchantApi.MerchantPaymentRequestCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .build());
+    var response = testKit.merchantPaymentRequest(merchantPaymentRequestCommand());
 
     response.getNextEventOfType(MerchantEntity.MerchantPaymentRequested.class);
-    var merchantAggregationRequestedDay1 = response.getNextEventOfType(MerchantEntity.MerchantAggregationRequested.class);
-    var merchantAggregationRequestedDay2 = response.getNextEventOfType(MerchantEntity.MerchantAggregationRequested.class);
-    var merchantAggregationRequestedDay3 = response.getNextEventOfType(MerchantEntity.MerchantAggregationRequested.class);
-
-    assertEquals(epochDay1, merchantAggregationRequestedDay1.getEpochDay());
-    assertTrue(merchantAggregationRequestedDay1.getAggregateRequestTimestamp().getSeconds() > 0);
-
-    assertEquals(epochDay2, merchantAggregationRequestedDay2.getEpochDay());
-    assertTrue(merchantAggregationRequestedDay2.getAggregateRequestTimestamp().getSeconds() > 0);
-
-    assertEquals(epochDay3, merchantAggregationRequestedDay3.getEpochDay());
-    assertTrue(merchantAggregationRequestedDay3.getAggregateRequestTimestamp().getSeconds() > 0);
 
     assertEquals(0, testKit.getState().getActiveDaysCount());
-    assertEquals(1, testKit.getState().getPaymentCount());
+    assertEquals(1, testKit.getState().getPaymentIdSequenceNumber());
   }
 
   @Test
@@ -480,95 +261,58 @@ public class MerchantTest {
     var epochDay2 = TimeTo.fromEpochDay(epochDay1).plus().days(1).toEpochDay();
     var epochDay3 = TimeTo.fromEpochDay(epochDay1).plus().days(2).toEpochDay();
 
-    testKit.addDay(
-        MerchantApi.AddDayCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochDay(epochDay1)
-            .build());
+    testKit.activateDay(activateDayCommand(epochDay1));
+    testKit.activateDay(activateDayCommand(epochDay2));
+    testKit.activateDay(activateDayCommand(epochDay3));
 
-    testKit.addDay(
-        MerchantApi.AddDayCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochDay(epochDay2)
-            .build());
+    var response = testKit.merchantPaymentRequest(merchantPaymentRequestCommand());
 
-    testKit.addDay(
-        MerchantApi.AddDayCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochDay(epochDay3)
-            .build());
-
-    var response = testKit.merchantAggregationRequest(
-        MerchantApi.MerchantAggregationRequestCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .build());
-
-    response.getNextEventOfType(MerchantEntity.MerchantAggregationRequested.class);
-    response.getNextEventOfType(MerchantEntity.MerchantAggregationRequested.class);
-    response.getNextEventOfType(MerchantEntity.MerchantAggregationRequested.class);
+    response.getNextEventOfType(MerchantEntity.MerchantPaymentRequested.class);
 
     // start a new aggregation and payment
-    testKit.addDay(
-        MerchantApi.AddDayCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochDay(epochDay2)
-            .build());
-
-    testKit.addDay(
-        MerchantApi.AddDayCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochDay(epochDay3)
-            .build());
+    testKit.activateDay(activateDayCommand(epochDay2));
+    testKit.activateDay(activateDayCommand(epochDay3));
 
     assertEquals(2, testKit.getState().getActiveDaysCount());
     assertEquals(epochDay2, testKit.getState().getActiveDays(0));
     assertEquals(epochDay3, testKit.getState().getActiveDays(1));
 
-    response = testKit.merchantPaymentRequest(
-        MerchantApi.MerchantPaymentRequestCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .build());
+    response = testKit.merchantPaymentRequest(merchantPaymentRequestCommand());
 
-    response.getNextEventOfType(MerchantEntity.MerchantPaymentRequested.class);
-    var merchantAggregationRequestedDay2 = response.getNextEventOfType(MerchantEntity.MerchantAggregationRequested.class);
-    var merchantAggregationRequestedDay3 = response.getNextEventOfType(MerchantEntity.MerchantAggregationRequested.class);
+    var event = response.getNextEventOfType(MerchantEntity.MerchantPaymentRequested.class);
 
-    assertEquals("payment-1", merchantAggregationRequestedDay2.getPaymentId());
-    assertEquals(epochDay2, merchantAggregationRequestedDay2.getEpochDay());
-    assertTrue(merchantAggregationRequestedDay2.getAggregateRequestTimestamp().getSeconds() > 0);
+    assertEquals(2, testKit.getState().getPaymentIdSequenceNumber());
+    assertEquals("payment-2", event.getPaymentId());
+  }
 
-    assertEquals("payment-1", merchantAggregationRequestedDay3.getPaymentId());
-    assertEquals(epochDay3, merchantAggregationRequestedDay3.getEpochDay());
-    assertTrue(merchantAggregationRequestedDay3.getAggregateRequestTimestamp().getSeconds() > 0);
+  static MerchantApi.ActivateDayCommand activateDayCommand(long epochDay) {
+    return MerchantApi.ActivateDayCommand
+        .newBuilder()
+        .setMerchantId("merchant-1")
+        .setServiceCode("service-code-1")
+        .setAccountFrom("account-from-1")
+        .setAccountTo("account-to-1")
+        .setEpochDay(epochDay)
+        .build();
+  }
 
-    assertEquals(1, testKit.getState().getPaymentCount());
+  static MerchantApi.MerchantAggregationRequestCommand merchantAggregationRequestCommand() {
+    return MerchantApi.MerchantAggregationRequestCommand
+        .newBuilder()
+        .setMerchantId("merchant-1")
+        .setServiceCode("service-code-1")
+        .setAccountFrom("account-from-1")
+        .setAccountTo("account-to-1")
+        .build();
+  }
+
+  static MerchantApi.MerchantPaymentRequestCommand merchantPaymentRequestCommand() {
+    return MerchantApi.MerchantPaymentRequestCommand
+        .newBuilder()
+        .setMerchantId("merchant-1")
+        .setServiceCode("service-code-1")
+        .setAccountFrom("account-from-1")
+        .setAccountTo("account-to-1")
+        .build();
   }
 }

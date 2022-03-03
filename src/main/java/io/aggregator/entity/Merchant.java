@@ -1,8 +1,6 @@
 package io.aggregator.entity;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import com.akkaserverless.javasdk.eventsourcedentity.EventSourcedEntityContext;
 import com.google.protobuf.Empty;
@@ -31,7 +29,7 @@ public class Merchant extends AbstractMerchant {
   }
 
   @Override
-  public Effect<Empty> addDay(MerchantEntity.MerchantState state, MerchantApi.AddDayCommand command) {
+  public Effect<Empty> activateDay(MerchantEntity.MerchantState state, MerchantApi.ActivateDayCommand command) {
     return handle(state, command);
   }
 
@@ -46,7 +44,7 @@ public class Merchant extends AbstractMerchant {
   }
 
   @Override
-  public MerchantEntity.MerchantState merchantDayAdded(MerchantEntity.MerchantState state, MerchantEntity.MerchantDayAdded event) {
+  public MerchantEntity.MerchantState merchantDayActivated(MerchantEntity.MerchantState state, MerchantEntity.MerchantDayActivated event) {
     return handle(state, event);
   }
 
@@ -92,8 +90,8 @@ public class Merchant extends AbstractMerchant {
     return Optional.empty();
   }
 
-  private Effect<Empty> handle(MerchantEntity.MerchantState state, MerchantApi.AddDayCommand command) {
-    log.info("state: {}\nAddDayCommand: {}", state, command);
+  private Effect<Empty> handle(MerchantEntity.MerchantState state, MerchantApi.ActivateDayCommand command) {
+    log.info("state: {}\nActivateDayCommand: {}", state, command);
 
     return effects()
         .emitEvent(eventFor(state, command))
@@ -103,23 +101,35 @@ public class Merchant extends AbstractMerchant {
   private Effect<Empty> handle(MerchantEntity.MerchantState state, MerchantApi.MerchantAggregationRequestCommand command) {
     log.info("state: {}\nMerchantAggregationRequestCommand: {}", state, command);
 
-    return effects()
-        .emitEvents(eventsFor(state, command))
-        .thenReply(newState -> Empty.getDefaultInstance());
+    var event = eventFor(state, command);
+
+    if (event.isPresent()) {
+      return effects()
+          .emitEvent(event.get())
+          .thenReply(newState -> Empty.getDefaultInstance());
+    } else {
+      return effects().reply(Empty.getDefaultInstance());
+    }
   }
 
   private Effect<Empty> handle(MerchantEntity.MerchantState state, MerchantApi.MerchantPaymentRequestCommand command) {
     log.info("state: {}\nMerchantPaymentRequestCommand: {}", state, command);
 
-    return effects()
-        .emitEvents(eventsFor(state, command))
-        .thenReply(newState -> Empty.getDefaultInstance());
+    var event = eventFor(state, command);
+
+    if (event.isPresent()) {
+      return effects()
+          .emitEvent(event.get())
+          .thenReply(newState -> Empty.getDefaultInstance());
+    } else {
+      return effects().reply(Empty.getDefaultInstance());
+    }
   }
 
-  private MerchantEntity.MerchantState handle(MerchantEntity.MerchantState state, MerchantEntity.MerchantDayAdded event) {
-    var alreadyAddedDay = state.getActiveDaysList().stream().anyMatch(epochDay -> epochDay == event.getEpochDay());
+  private MerchantEntity.MerchantState handle(MerchantEntity.MerchantState state, MerchantEntity.MerchantDayActivated event) {
+    var alreadyActivatedDay = state.getActiveDaysList().stream().anyMatch(epochDay -> epochDay == event.getEpochDay());
 
-    if (!alreadyAddedDay) {
+    if (!alreadyActivatedDay) {
       state = state.toBuilder()
           .addActiveDays(event.getEpochDay())
           .build();
@@ -144,7 +154,7 @@ public class Merchant extends AbstractMerchant {
   private MerchantEntity.MerchantState handle(MerchantEntity.MerchantState state, MerchantEntity.MerchantPaymentRequested event) {
     return state.toBuilder()
         .clearActiveDays()
-        .setPaymentCount(state.getPaymentCount() + 1)
+        .setPaymentIdSequenceNumber(state.getPaymentIdSequenceNumber() + 1)
         .build();
   }
 
@@ -154,8 +164,8 @@ public class Merchant extends AbstractMerchant {
         .build();
   }
 
-  private MerchantEntity.MerchantDayAdded eventFor(MerchantEntity.MerchantState state, MerchantApi.AddDayCommand command) {
-    return MerchantEntity.MerchantDayAdded
+  private MerchantEntity.MerchantDayActivated eventFor(MerchantEntity.MerchantState state, MerchantApi.ActivateDayCommand command) {
+    return MerchantEntity.MerchantDayActivated
         .newBuilder()
         .setMerchantKey(
             TransactionMerchantKey.MerchantKey
@@ -169,36 +179,25 @@ public class Merchant extends AbstractMerchant {
         .build();
   }
 
-  private List<?> eventsFor(MerchantEntity.MerchantState state, MerchantApi.MerchantAggregationRequestCommand command) {
+  private Optional<MerchantEntity.MerchantAggregationRequested> eventFor(MerchantEntity.MerchantState state, MerchantApi.MerchantAggregationRequestCommand command) {
     if (state.getActiveDaysCount() == 0) {
-      return List.of();
+      return Optional.empty();
     }
 
-    return state.getActiveDaysList().stream()
-        .map(epochDay -> toMerchantAggregationRequested(state, toMerchantKey(command), epochDay))
-        .toList();
+    return Optional.of(toMerchantAggregationRequested(state, toMerchantKey(command)));
   }
 
-  private List<?> eventsFor(MerchantEntity.MerchantState state, MerchantApi.MerchantPaymentRequestCommand command) {
-    if (state.getActiveDaysCount() == 0) {
-      return List.of(toMerchantPaymentRequested(state, toMerchantKey(command)));
-    }
-
-    var requests = state.getActiveDaysList().stream()
-        .map(epochDay -> toMerchantAggregationRequested(state, toMerchantKey(command), epochDay));
-
-    var request = toMerchantPaymentRequested(state, toMerchantKey(command));
-
-    return Stream.concat(Stream.of(request), requests).toList();
+  private Optional<MerchantEntity.MerchantPaymentRequested> eventFor(MerchantEntity.MerchantState state, MerchantApi.MerchantPaymentRequestCommand command) {
+    return Optional.of(toMerchantPaymentRequested(state, toMerchantKey(command)));
   }
 
-  private MerchantEntity.MerchantAggregationRequested toMerchantAggregationRequested(MerchantEntity.MerchantState state, TransactionMerchantKey.MerchantKey merchantKey, Long epochDay) {
+  private MerchantEntity.MerchantAggregationRequested toMerchantAggregationRequested(MerchantEntity.MerchantState state, TransactionMerchantKey.MerchantKey merchantKey) {
     return MerchantEntity.MerchantAggregationRequested
         .newBuilder()
         .setMerchantKey(merchantKey)
-        .setEpochDay(epochDay)
         .setPaymentId(paymentIdNext(state))
         .setAggregateRequestTimestamp(TimeTo.now())
+        .addAllActiveDays(state.getActiveDaysList())
         .build();
   }
 
@@ -207,6 +206,8 @@ public class Merchant extends AbstractMerchant {
         .newBuilder()
         .setMerchantKey(merchantKey)
         .setPaymentId(paymentIdNext(state))
+        .setAggregateRequestTimestamp(TimeTo.now())
+        .addAllActiveDays(state.getActiveDaysList())
         .build();
   }
 
@@ -231,6 +232,6 @@ public class Merchant extends AbstractMerchant {
   }
 
   static String paymentIdNext(MerchantEntity.MerchantState state) {
-    return String.format("payment-%d", state.getPaymentCount() + 1);
+    return String.format("payment-%d", state.getPaymentIdSequenceNumber() + 1);
   }
 }
