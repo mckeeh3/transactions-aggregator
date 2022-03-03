@@ -170,7 +170,7 @@ public class Payment extends AbstractPayment {
     return state.toBuilder()
         .clearAggregations()
         .addAllAggregations(state.getAggregationsList().stream()
-            .map(agg -> updateAggregation(event, agg))
+            .map(aggregation -> updateAggregation(event, aggregation))
             .toList())
         .build();
   }
