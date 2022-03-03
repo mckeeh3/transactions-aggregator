@@ -33,7 +33,7 @@ public class Day extends AbstractDay {
   }
 
   @Override
-  public Effect<Empty> addHour(DayEntity.DayState state, DayApi.AddHourCommand command) {
+  public Effect<Empty> activateHour(DayEntity.DayState state, DayApi.ActivateHourCommand command) {
     return handle(state, command);
   }
 
@@ -53,7 +53,7 @@ public class Day extends AbstractDay {
   }
 
   @Override
-  public DayEntity.DayState hourAdded(DayEntity.DayState state, DayEntity.HourAdded event) {
+  public DayEntity.DayState hourActivated(DayEntity.DayState state, DayEntity.HourActivated event) {
     return handle(state, event);
   }
 
@@ -72,8 +72,8 @@ public class Day extends AbstractDay {
     return handle(state, event);
   }
 
-  private Effect<Empty> handle(DayEntity.DayState state, DayApi.AddHourCommand command) {
-    log.info("state: {}\nAddHourCommand: {}", state, command);
+  private Effect<Empty> handle(DayEntity.DayState state, DayApi.ActivateHourCommand command) {
+    log.info("state: {}\nActivateHourCommand: {}", state, command);
 
     return effects()
         .emitEvents(eventsFor(state, command))
@@ -110,11 +110,11 @@ public class Day extends AbstractDay {
         .build();
   }
 
-  static DayEntity.DayState handle(DayEntity.DayState state, DayEntity.HourAdded event) {
-    var alreadyAdded = state.getActiveHoursList().stream()
+  static DayEntity.DayState handle(DayEntity.DayState state, DayEntity.HourActivated event) {
+    var alreadyActivated = state.getActiveHoursList().stream()
         .anyMatch(activeHour -> activeHour.getEpochHour() == event.getEpochHour());
 
-    if (alreadyAdded) {
+    if (alreadyActivated) {
       return state;
     } else {
       return state.toBuilder()
@@ -196,8 +196,8 @@ public class Day extends AbstractDay {
         .toList();
   }
 
-  static List<?> eventsFor(DayEntity.DayState state, DayApi.AddHourCommand command) {
-    var hourAdded = DayEntity.HourAdded
+  static List<?> eventsFor(DayEntity.DayState state, DayApi.ActivateHourCommand command) {
+    var hourActivated = DayEntity.HourActivated
         .newBuilder()
         .setMerchantKey(
             TransactionMerchantKey.MerchantKey
@@ -224,9 +224,9 @@ public class Day extends AbstractDay {
           .setEpochDay(command.getEpochDay())
           .build();
 
-      return List.of(dayActivated, hourAdded);
+      return List.of(dayActivated, hourActivated);
     } else {
-      return List.of(hourAdded);
+      return List.of(hourActivated);
     }
   }
 

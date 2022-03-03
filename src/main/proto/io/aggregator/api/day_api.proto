@@ -17,7 +17,7 @@ service Day {
       state: "io.aggregator.entity.DayState"
       events: [
         "io.aggregator.entity.DayActivated",
-        "io.aggregator.entity.HourAdded",
+        "io.aggregator.entity.HourActivated",
         "io.aggregator.entity.DayAggregationRequested",
         "io.aggregator.entity.DayAggregated",
         "io.aggregator.entity.ActiveHourAggregated"  //
@@ -25,9 +25,9 @@ service Day {
     }
   };
 
-  rpc AddHour(AddHourCommand) returns (google.protobuf.Empty) {
+  rpc ActivateHour(ActivateHourCommand) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      post: "/day/add-hour"
+      post: "/day/activate-hour"
       body: "*"
     };
   }
@@ -47,7 +47,7 @@ service Day {
   }
 }
 
-message AddHourCommand {
+message ActivateHourCommand {
   string merchant_id = 1 [(akkaserverless.field).entity_key = true];
   string service_code = 2 [(akkaserverless.field).entity_key = true];
   string account_from = 3 [(akkaserverless.field).entity_key = true];

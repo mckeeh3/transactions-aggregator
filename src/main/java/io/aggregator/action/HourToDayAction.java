@@ -20,8 +20,8 @@ public class HourToDayAction extends AbstractHourToDayAction {
 
   @Override
   public Effect<Empty> onHourCreated(HourEntity.HourCreated hourCreated) {
-    return effects().forward(components().day().addHour(
-        DayApi.AddHourCommand
+    return effects().forward(components().day().activateHour(
+        DayApi.ActivateHourCommand
             .newBuilder()
             .setMerchantId(hourCreated.getMerchantKey().getMerchantId())
             .setServiceCode(hourCreated.getMerchantKey().getServiceCode())
