@@ -159,41 +159,51 @@ public class Payment extends AbstractPayment {
       if (aggregationDayAlreadyAdded) {
         return state; // idempotent because aggregation and aggregation day are already present
       } else {
-        return state.toBuilder()
-            .clearAggregations()
-            .addAllAggregations(state.getAggregationsList().stream()
-                .map(agg -> {
-                  if (agg.getAggregateRequestTimestamp().equals(event.getAggregateRequestTimestamp())) {
-                    return agg.toBuilder()
-                        .addAggregationDays(
-                            PaymentEntity.AggregationDay
-                                .newBuilder()
-                                .setEpochDay(event.getEpochDay())
-                                .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
-                                .build())
-                        .build();
-                  } else {
-                    return agg;
-                  }
-                })
-                .toList())
-            .build();
+        return updateAggregation(state, event);
       }
     } else {
-      return state.toBuilder()
-          .addAggregations(
-              PaymentEntity.Aggregation
+      return addAggregation(state, event);
+    }
+  }
+
+  static PaymentEntity.PaymentState updateAggregation(PaymentEntity.PaymentState state, PaymentEntity.PaymentDayAggregationRequested event) {
+    return state.toBuilder()
+        .clearAggregations()
+        .addAllAggregations(state.getAggregationsList().stream()
+            .map(agg -> updateAggregation(event, agg))
+            .toList())
+        .build();
+  }
+
+  static PaymentEntity.Aggregation updateAggregation(PaymentEntity.PaymentDayAggregationRequested event, PaymentEntity.Aggregation aggregation) {
+    if (aggregation.getAggregateRequestTimestamp().equals(event.getAggregateRequestTimestamp())) {
+      return aggregation.toBuilder()
+          .addAggregationDays(
+              PaymentEntity.AggregationDay
                   .newBuilder()
+                  .setEpochDay(event.getEpochDay())
                   .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
-                  .addAggregationDays(
-                      PaymentEntity.AggregationDay
-                          .newBuilder()
-                          .setEpochDay(event.getEpochDay())
-                          .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
-                          .build())
                   .build())
           .build();
+    } else {
+      return aggregation;
     }
+  }
+
+  static PaymentEntity.PaymentState addAggregation(PaymentEntity.PaymentState state, PaymentEntity.PaymentDayAggregationRequested event) {
+    return state.toBuilder()
+        .addAggregations(
+            PaymentEntity.Aggregation
+                .newBuilder()
+                .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
+                .addAggregationDays(
+                    PaymentEntity.AggregationDay
+                        .newBuilder()
+                        .setEpochDay(event.getEpochDay())
+                        .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
+                        .build())
+                .build())
+        .build();
   }
 
   static PaymentEntity.PaymentState handle(PaymentEntity.PaymentState state, PaymentEntity.PaymentRequested event) {
