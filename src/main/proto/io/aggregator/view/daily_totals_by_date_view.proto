@@ -28,7 +28,7 @@ service DailyTotalsByDate {
     };
   }
 
-  rpc OnDayCreated(entity.DayCreated) returns (DailyTotal) {
+  rpc OnDayActivated(entity.DayActivated) returns (DailyTotal) {
     option (akkaserverless.method).eventing.in = {
       event_sourced_entity: "day"
     };

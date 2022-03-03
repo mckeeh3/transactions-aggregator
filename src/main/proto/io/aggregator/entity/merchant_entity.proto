@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+import "io/aggregator/entity/transaction_merchant_key.proto";
+
+package io.aggregator.entity;
+
+option java_outer_classname = "MerchantEntity";
+
+message MerchantDayAdded {
+  MerchantKey merchant_key = 1;
+  int64 epoch_day = 2;
+}
+
+message MerchantPaymentRequested {
+  MerchantKey merchant_key = 1;
+  string payment_id = 2;
+}
+
+message MerchantAggregationRequested {
+  MerchantKey merchant_key = 1;
+  int64 epoch_day = 2;
+  string payment_id = 3;
+  google.protobuf.Timestamp aggregate_request_timestamp = 4;
+}
+
+message MerchantState {
+  MerchantKey merchant_key = 1;
+  int64 payment_count = 2;
+  repeated int64 active_days = 3;
+}

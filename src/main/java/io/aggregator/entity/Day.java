@@ -48,7 +48,7 @@ public class Day extends AbstractDay {
   }
 
   @Override
-  public DayEntity.DayState dayCreated(DayEntity.DayState state, DayEntity.DayCreated event) {
+  public DayEntity.DayState dayActivated(DayEntity.DayState state, DayEntity.DayActivated event) {
     return handle(state, event);
   }
 
@@ -96,7 +96,7 @@ public class Day extends AbstractDay {
         .thenReply(newState -> Empty.getDefaultInstance());
   }
 
-  static DayEntity.DayState handle(DayEntity.DayState state, DayEntity.DayCreated event) {
+  static DayEntity.DayState handle(DayEntity.DayState state, DayEntity.DayActivated event) {
     return state.toBuilder()
         .setMerchantKey(
             TransactionMerchantKey.MerchantKey
@@ -210,8 +210,8 @@ public class Day extends AbstractDay {
         .setEpochHour(command.getEpochHour())
         .build();
 
-    if (state.getMerchantKey().getMerchantId().isEmpty()) {
-      var dayCreated = DayEntity.DayCreated
+    if (state.getActiveHoursCount() == 0) {
+      var dayActivated = DayEntity.DayActivated
           .newBuilder()
           .setMerchantKey(
               TransactionMerchantKey.MerchantKey
@@ -224,7 +224,7 @@ public class Day extends AbstractDay {
           .setEpochDay(command.getEpochDay())
           .build();
 
-      return List.of(dayCreated, hourAdded);
+      return List.of(dayActivated, hourAdded);
     } else {
       return List.of(hourAdded);
     }
@@ -332,7 +332,7 @@ public class Day extends AbstractDay {
   }
 
   static DayEntity.ActiveHourAggregated toActiveHourAggregated(DayApi.HourAggregationCommand command) {
-    var activeHourAggregated = DayEntity.ActiveHourAggregated
+    return DayEntity.ActiveHourAggregated
         .newBuilder()
         .setMerchantKey(
             TransactionMerchantKey.MerchantKey
@@ -349,7 +349,6 @@ public class Day extends AbstractDay {
         .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
         .setPaymentId(command.getPaymentId())
         .build();
-    return activeHourAggregated;
   }
 
   static DayEntity.DayAggregated toDayAggregated(DayEntity.DayState state, HourAggregationCommand command, List<ActiveHour> activeHours) {

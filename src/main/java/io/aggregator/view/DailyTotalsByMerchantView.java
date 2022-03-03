@@ -22,8 +22,8 @@ public class DailyTotalsByMerchantView extends AbstractDailyTotalsByMerchantView
   }
 
   @Override
-  public UpdateEffect<DailyTotalsModel.DailyTotal> onDayCreated(DailyTotalsModel.DailyTotal state, DayEntity.DayCreated dayCreated) {
-    return effects().updateState(DailyTotalsEventHandler.handle(state, dayCreated));
+  public UpdateEffect<DailyTotalsModel.DailyTotal> onDayActivated(DailyTotalsModel.DailyTotal state, DayEntity.DayActivated dayActivated) {
+    return effects().updateState(DailyTotalsEventHandler.handle(state, dayActivated));
   }
 
   @Override

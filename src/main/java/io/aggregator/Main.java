@@ -13,6 +13,7 @@ import io.aggregator.action.SubSecondToSecondAction;
 import io.aggregator.action.TransactionToSubSecondAction;
 import io.aggregator.entity.Day;
 import io.aggregator.entity.Hour;
+import io.aggregator.entity.Merchant;
 import io.aggregator.entity.Minute;
 import io.aggregator.entity.Payment;
 import io.aggregator.entity.Second;
@@ -40,6 +41,7 @@ public final class Main {
     return AkkaServerlessFactory.withComponents(
       Day::new,
       Hour::new,
+      Merchant::new,
       Minute::new,
       Payment::new,
       Second::new,

@@ -3,6 +3,7 @@ package io.aggregator;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Comparator;
 
 import com.google.protobuf.Timestamp;
@@ -25,20 +26,6 @@ public class TimeTo {
         .build();
   }
 
-  public static Timestamp max(Timestamp a, Timestamp b) {
-    if (a.getSeconds() > b.getSeconds()) {
-      return a;
-    } else if (a.getSeconds() < b.getSeconds()) {
-      return b;
-    } else {
-      if (a.getNanos() > b.getNanos()) {
-        return a;
-      } else {
-        return b;
-      }
-    }
-  }
-
   public static int compare(Timestamp timestamp1, Timestamp timestamp2) {
     if (timestamp1.getSeconds() < timestamp2.getSeconds()) {
       return -1;
@@ -55,6 +42,12 @@ public class TimeTo {
 
   public static Comparator<Timestamp> comparator() {
     return (timestamp1, timestamp2) -> compare(timestamp1, timestamp2);
+  }
+
+  public static Timestamp max(Timestamp... timestamps) {
+    return Arrays.stream(timestamps)
+        .max(comparator())
+        .orElse(zero());
   }
 
   public static From fromEpochSubSecond(long epochSubSecond) {

@@ -16,35 +16,54 @@ service Payment {
       entity_type: "payment"
       state: "io.aggregator.entity.PaymentState"
       events: [
-        "io.aggregator.entity.PaymentCreated",
-        "io.aggregator.entity.PaymentAggregationRequested",
-        "io.aggregator.entity.PaymentDayAggregated"  //
+        "io.aggregator.entity.ActiveDayAggregated",
+        "io.aggregator.entity.PaymentDayAggregationRequested",
+        "io.aggregator.entity.PaymentRequested",
+        "io.aggregator.entity.PaymentAggregated"  //
       ]
     }
   };
 
-  rpc PaymentAggregationRequest(PaymentAggregationRequestCommand) returns (google.protobuf.Empty) {
+  rpc AggregationRequest(AggregationRequestCommand) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      post: "/payment/create"
+      post: "/payment/aggregation-request"
+      body: "*"
+    };
+  }
+
+  rpc PaymentRequest(PaymentRequestCommand) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/payment/payment-request"
       body: "*"
     };
   }
 
   rpc DayAggregation(DayAggregationCommand) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      post: "/payment/aggregation"
+      post: "/payment/day-aggregation"
       body: "*"
     };
   }
 }
 
-message PaymentAggregationRequestCommand {
+message AggregationRequestCommand {
   string merchant_id = 1 [(akkaserverless.field).entity_key = true];
   string service_code = 2 [(akkaserverless.field).entity_key = true];
   string account_from = 3 [(akkaserverless.field).entity_key = true];
   string account_to = 4 [(akkaserverless.field).entity_key = true];
   string payment_id = 5 [(akkaserverless.field).entity_key = true];
   google.protobuf.Timestamp aggregate_request_timestamp = 6;
+  repeated int64 epoch_days = 7;
+}
+
+message PaymentRequestCommand {
+  string merchant_id = 1 [(akkaserverless.field).entity_key = true];
+  string service_code = 2 [(akkaserverless.field).entity_key = true];
+  string account_from = 3 [(akkaserverless.field).entity_key = true];
+  string account_to = 4 [(akkaserverless.field).entity_key = true];
+  string payment_id = 5 [(akkaserverless.field).entity_key = true];
+  google.protobuf.Timestamp aggregate_request_timestamp = 6;
+  repeated int64 epoch_days = 7;
 }
 
 message DayAggregationCommand {
@@ -53,8 +72,9 @@ message DayAggregationCommand {
   string account_from = 3 [(akkaserverless.field).entity_key = true];
   string account_to = 4 [(akkaserverless.field).entity_key = true];
   string payment_id = 5 [(akkaserverless.field).entity_key = true];
-  double transaction_total_amount = 6;
-  int32 transaction_count = 7;
-  google.protobuf.Timestamp last_update_timestamp = 8;
-  google.protobuf.Timestamp aggregate_request_timestamp = 9;
+  int64 epoch_day = 6;
+  double transaction_total_amount = 7;
+  int32 transaction_count = 8;
+  google.protobuf.Timestamp last_update_timestamp = 9;
+  google.protobuf.Timestamp aggregate_request_timestamp = 10;
 }

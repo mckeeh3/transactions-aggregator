@@ -6,7 +6,7 @@ import io.aggregator.entity.TransactionMerchantKey;
 
 class DailyTotalsEventHandler {
 
-  static DailyTotalsModel.DailyTotal handle(DailyTotalsModel.DailyTotal state, DayEntity.DayCreated event) {
+  static DailyTotalsModel.DailyTotal handle(DailyTotalsModel.DailyTotal state, DayEntity.DayActivated event) {
     return state
         .toBuilder()
         .setMerchantKey(

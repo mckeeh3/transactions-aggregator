@@ -1,56 +1,66 @@
 syntax = "proto3";
 
 import "google/protobuf/timestamp.proto";
+import "io/aggregator/entity/transaction_merchant_key.proto";
 
 package io.aggregator.entity;
 
 option java_outer_classname = "PaymentEntity";
 
-message PaymentCreated {
-  string merchant_id = 1;
-  string service_code = 2;
-  string account_from = 3;
-  string account_to = 4;
-  string payment_id = 5;
-  google.protobuf.Timestamp aggregate_request_timestamp = 6;
+message PaymentDayAggregationRequested {
+  MerchantKey merchant_key = 1;
+  int64 epoch_day = 2;
+  string payment_id = 3;
+  google.protobuf.Timestamp aggregate_request_timestamp = 4;
 }
 
-message PaymentAggregationRequested {
-  string merchant_id = 1;
-  string service_code = 2;
-  string account_from = 3;
-  string account_to = 4;
-  string payment_id = 5;
+message ActiveDayAggregated {
+  MerchantKey merchant_key = 1;
+  int64 epoch_day = 2;
+  double transaction_total_amount = 3;
+  int32 transaction_count = 4;
+  google.protobuf.Timestamp last_update_timestamp = 5;
   google.protobuf.Timestamp aggregate_request_timestamp = 6;
+  string payment_id = 7;
 }
 
-message PaymentDayAggregated {
-  string merchant_id = 1;
-  string service_code = 2;
-  string account_from = 3;
-  string account_to = 4;
-  string payment_id = 5;
-  double transaction_total_amount = 6;
-  int32 transaction_count = 7;
-  google.protobuf.Timestamp last_update_timestamp = 8;
-  google.protobuf.Timestamp aggregate_request_timestamp = 9;
+message PaymentRequested {
+  MerchantKey merchant_key = 1;
+  string payment_id = 2;
+  google.protobuf.Timestamp aggregate_request_timestamp = 3;
+}
+
+message PaymentAggregated {
+  MerchantKey merchant_key = 1;
+  string payment_id = 2;
+  double transaction_total_amount = 3;
+  int32 transaction_count = 4;
+  google.protobuf.Timestamp last_update_timestamp = 5;
+  google.protobuf.Timestamp aggregate_request_timestamp = 6;
 }
 
 message PaymentState {
-  string merchant_id = 1;
-  string service_code = 2;
-  string account_from = 3;
-  string account_to = 4;
-  string payment_id = 5;
-  google.protobuf.Timestamp last_update_timestamp = 6;
-  google.protobuf.Timestamp aggregate_request_timestamp = 7;
-  repeated ActiveDay active_days = 8;
+  MerchantKey merchant_key = 1;
+  string payment_id = 2;
+  double transaction_total_amount = 3;
+  int32 transaction_count = 4;
+  google.protobuf.Timestamp last_update_timestamp = 5;
+  google.protobuf.Timestamp aggregate_request_timestamp = 6;
+  repeated Aggregation aggregations = 7;
+  bool paymentRequested = 8;
+  bool paymentAggregated = 9;
 }
 
-message ActiveDay {
+message Aggregation {
+  google.protobuf.Timestamp aggregate_request_timestamp = 5;
+  repeated AggregationDay aggregation_days = 6;
+}
+
+message AggregationDay {
   int64 epoch_day = 1;
-  double transaction_total_amount = 6;
-  int32 transaction_count = 7;
-  google.protobuf.Timestamp last_update_timestamp = 8;
-  google.protobuf.Timestamp aggregate_request_timestamp = 9;
+  double transaction_total_amount = 2;
+  int32 transaction_count = 3;
+  google.protobuf.Timestamp last_update_timestamp = 4;
+  google.protobuf.Timestamp aggregate_request_timestamp = 5;
+  bool aggregated = 6;
 }
