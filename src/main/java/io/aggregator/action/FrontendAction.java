@@ -4,7 +4,6 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.akkaserverless.javasdk.action.ActionCreationContext;
@@ -56,7 +55,7 @@ public class FrontendAction extends AbstractFrontendAction {
               .build();
         })
         .map(command -> components().transaction().createTransaction(command).execute())
-        .collect(Collectors.toList());
+        .toList();
 
     var result = CompletableFuture.allOf(results.toArray(new CompletableFuture[results.size()]))
         .thenApply(reply -> effects().reply(Empty.getDefaultInstance()));
@@ -94,7 +93,7 @@ public class FrontendAction extends AbstractFrontendAction {
 
     var results = response.getDailyTotalsList().stream()
         .map(dailyTotal -> toAggregateDayCommand(dailyTotal, day))
-        .collect(Collectors.toList());
+        .toList();
 
     return CompletableFuture.allOf(results.toArray(new CompletableFuture[results.size()]))
         .thenApply(reply -> Empty.getDefaultInstance());

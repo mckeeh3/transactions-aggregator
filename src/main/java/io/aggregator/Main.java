@@ -2,14 +2,19 @@ package io.aggregator;
 
 import com.akkaserverless.javasdk.AkkaServerless;
 import io.aggregator.action.DayToHourAction;
+import io.aggregator.action.DayToMerchantAction;
+import io.aggregator.action.DayToPaymentAction;
 import io.aggregator.action.FrontendAction;
 import io.aggregator.action.HourToDayAction;
 import io.aggregator.action.HourToMinuteAction;
+import io.aggregator.action.MerchantToDayAction;
+import io.aggregator.action.MerchantToPaymentAction;
 import io.aggregator.action.MinuteToHourAction;
 import io.aggregator.action.MinuteToSecondAction;
 import io.aggregator.action.SecondToMinuteAction;
 import io.aggregator.action.SecondToSubSecondAction;
 import io.aggregator.action.SubSecondToSecondAction;
+import io.aggregator.action.SubSecondToTransactionAction;
 import io.aggregator.action.TransactionToSubSecondAction;
 import io.aggregator.entity.Day;
 import io.aggregator.entity.Hour;
@@ -50,14 +55,19 @@ public final class Main {
       DailyTotalsByDateView::new,
       DailyTotalsByMerchantView::new,
       DayToHourAction::new,
+      DayToMerchantAction::new,
+      DayToPaymentAction::new,
       FrontendAction::new,
       HourToDayAction::new,
       HourToMinuteAction::new,
+      MerchantToDayAction::new,
+      MerchantToPaymentAction::new,
       MinuteToHourAction::new,
       MinuteToSecondAction::new,
       SecondToMinuteAction::new,
       SecondToSubSecondAction::new,
       SubSecondToSecondAction::new,
+      SubSecondToTransactionAction::new,
       TransactionToSubSecondAction::new);
   }
 

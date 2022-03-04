@@ -25,7 +25,7 @@ service Merchant {
 
   rpc ActivateDay(ActivateDayCommand) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      post: "/merchant/add-day"
+      post: "/merchant/activate-day"
       body: "*"
     };
   }

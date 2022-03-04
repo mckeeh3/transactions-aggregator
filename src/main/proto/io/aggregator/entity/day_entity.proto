@@ -19,31 +19,31 @@ message HourActivated {
 
 message DayAggregated {
   MerchantKey merchant_key = 1;
-  int64 epoch_day = 2;
-  double transaction_total_amount = 3;
-  int32 transaction_count = 4;
-  google.protobuf.Timestamp last_update_timestamp = 5;
-  google.protobuf.Timestamp aggregate_request_timestamp = 6;
-  string payment_id = 7;
+  string payment_id = 2;
+  int64 epoch_day = 3;
+  double transaction_total_amount = 4;
+  int32 transaction_count = 5;
+  google.protobuf.Timestamp last_update_timestamp = 6;
+  google.protobuf.Timestamp aggregate_request_timestamp = 7;
   google.protobuf.Timestamp aggregation_completed_timestamp = 8;
 }
 
 message ActiveHourAggregated {
   MerchantKey merchant_key = 1;
-  int64 epoch_hour = 2;
-  double transaction_total_amount = 3;
-  int32 transaction_count = 4;
-  google.protobuf.Timestamp last_update_timestamp = 5;
-  google.protobuf.Timestamp aggregate_request_timestamp = 6;
-  string payment_id = 7;
+  string payment_id = 2;
+  int64 epoch_hour = 3;
+  double transaction_total_amount = 4;
+  int32 transaction_count = 5;
+  google.protobuf.Timestamp last_update_timestamp = 6;
+  google.protobuf.Timestamp aggregate_request_timestamp = 7;
 }
 
 message DayAggregationRequested {
   MerchantKey merchant_key = 1;
-  int64 epoch_day = 2;
-  repeated int64 epoch_hours = 3;
-  google.protobuf.Timestamp aggregate_request_timestamp = 4;
-  string payment_id = 5;
+  string payment_id = 2;
+  int64 epoch_day = 3;
+  repeated int64 epoch_hours = 4;
+  google.protobuf.Timestamp aggregate_request_timestamp = 5;
   google.protobuf.Timestamp aggregation_started_timestamp = 6;
 }
 
