@@ -21,16 +21,16 @@ public class SecondToSubSecondAction extends AbstractSecondToSubSecondAction {
   }
 
   @Override
-  public Effect<Empty> onSecondAggregationRequested(SecondEntity.SecondAggregationRequested secondAggregationRequested) {
-    var results = secondAggregationRequested.getEpochSubSecondsList().stream()
+  public Effect<Empty> onSecondAggregationRequested(SecondEntity.SecondAggregationRequested event) {
+    var results = event.getEpochSubSecondsList().stream()
         .map(epochSubSecond -> SubSecondApi.AggregateSubSecondCommand
             .newBuilder()
-            .setMerchantId(secondAggregationRequested.getMerchantKey().getMerchantId())
-            .setServiceCode(secondAggregationRequested.getMerchantKey().getServiceCode())
-            .setAccountFrom(secondAggregationRequested.getMerchantKey().getAccountFrom())
-            .setAccountTo(secondAggregationRequested.getMerchantKey().getAccountTo())
+            .setMerchantId(event.getMerchantKey().getMerchantId())
+            .setServiceCode(event.getMerchantKey().getServiceCode())
+            .setAccountFrom(event.getMerchantKey().getAccountFrom())
+            .setAccountTo(event.getMerchantKey().getAccountTo())
             .setEpochSubSecond(epochSubSecond)
-            .setAggregateRequestTimestamp(secondAggregationRequested.getAggregateRequestTimestamp())
+            .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
             .build())
         .map(command -> components().subSecond().aggregateSubSecond(command).execute())
         .collect(Collectors.toList());

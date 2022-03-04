@@ -21,16 +21,16 @@ public class HourToMinuteAction extends AbstractHourToMinuteAction {
   }
 
   @Override
-  public Effect<Empty> onHourAggregationRequested(HourEntity.HourAggregationRequested hourAggregationRequested) {
-    var results = hourAggregationRequested.getEpochMinutesList().stream()
+  public Effect<Empty> onHourAggregationRequested(HourEntity.HourAggregationRequested event) {
+    var results = event.getEpochMinutesList().stream()
         .map(epochMinute -> MinuteApi.AggregateMinuteCommand
             .newBuilder()
-            .setMerchantId(hourAggregationRequested.getMerchantKey().getMerchantId())
-            .setServiceCode(hourAggregationRequested.getMerchantKey().getServiceCode())
-            .setAccountFrom(hourAggregationRequested.getMerchantKey().getAccountFrom())
-            .setAccountTo(hourAggregationRequested.getMerchantKey().getAccountTo())
+            .setMerchantId(event.getMerchantKey().getMerchantId())
+            .setServiceCode(event.getMerchantKey().getServiceCode())
+            .setAccountFrom(event.getMerchantKey().getAccountFrom())
+            .setAccountTo(event.getMerchantKey().getAccountTo())
             .setEpochMinute(epochMinute)
-            .setAggregateRequestTimestamp(hourAggregationRequested.getAggregateRequestTimestamp())
+            .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
             .build())
         .map(command -> components().minute().aggregateMinute(command).execute())
         .collect(Collectors.toList());

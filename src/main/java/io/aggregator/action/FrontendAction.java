@@ -33,20 +33,20 @@ public class FrontendAction extends AbstractFrontendAction {
   }
 
   @Override
-  public Effect<Empty> generateTransactions(FrontendService.GenerateTransactionsRequest generateTransactionsRequest) {
-    log.info("generateTransactions: {}", generateTransactionsRequest);
+  public Effect<Empty> generateTransactions(FrontendService.GenerateTransactionsRequest request) {
+    log.info("generateTransactions: {}", request);
 
-    var transactionIntervalMs = generateTransactionsRequest.getTransactionIntervalMs();
+    var transactionIntervalMs = request.getTransactionIntervalMs();
     var intervalMs = transactionIntervalMs == 0 ? 10 : transactionIntervalMs;
 
-    var results = IntStream.range(0, generateTransactionsRequest.getTransactionCount())
+    var results = IntStream.range(0, request.getTransactionCount())
         .mapToObj(i -> {
-          var timestamp = TimeTo.fromTimestamp(generateTransactionsRequest.getDay()).plus().milliSeconds(i * intervalMs).toTimestamp();
+          var timestamp = TimeTo.fromTimestamp(request.getDay()).plus().milliSeconds(i * intervalMs).toTimestamp();
 
           return TransactionApi.CreateTransactionCommand
               .newBuilder()
               .setTransactionId(UUID.randomUUID().toString())
-              .setMerchantId("merchant-" + random.nextInt(generateTransactionsRequest.getMerchantIdRange()))
+              .setMerchantId("merchant-" + random.nextInt(request.getMerchantIdRange()))
               .setServiceCode("service-code-" + random.nextInt(3) + 1)
               .setAccountFrom("account-from-" + random.nextInt(3) + 1)
               .setAccountTo("account-to-" + random.nextInt(3) + 3)
@@ -64,10 +64,10 @@ public class FrontendAction extends AbstractFrontendAction {
   }
 
   @Override
-  public Effect<Empty> collectMerchantTotals(FrontendService.CollectMerchantTotalsRequest collectMerchantTotalsRequest) {
-    log.info("collectMerchantTotals: {}", collectMerchantTotalsRequest);
+  public Effect<Empty> collectMerchantTotals(FrontendService.CollectMerchantTotalsRequest request) {
+    log.info("collectMerchantTotals: {}", request);
 
-    return effects().asyncReply(queryMerchants(collectMerchantTotalsRequest.getDay()));
+    return effects().asyncReply(queryMerchants(request.getDay()));
   }
 
   private CompletionStage<Empty> queryMerchants(Timestamp day) {

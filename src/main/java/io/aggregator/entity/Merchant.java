@@ -126,7 +126,7 @@ public class Merchant extends AbstractMerchant {
     }
   }
 
-  private MerchantEntity.MerchantState handle(MerchantEntity.MerchantState state, MerchantEntity.MerchantDayActivated event) {
+  static MerchantEntity.MerchantState handle(MerchantEntity.MerchantState state, MerchantEntity.MerchantDayActivated event) {
     var alreadyActivatedDay = state.getActiveDaysList().stream().anyMatch(epochDay -> epochDay == event.getEpochDay());
 
     if (!alreadyActivatedDay) {
@@ -151,20 +151,20 @@ public class Merchant extends AbstractMerchant {
     }
   }
 
-  private MerchantEntity.MerchantState handle(MerchantEntity.MerchantState state, MerchantEntity.MerchantPaymentRequested event) {
+  static MerchantEntity.MerchantState handle(MerchantEntity.MerchantState state, MerchantEntity.MerchantPaymentRequested event) {
     return state.toBuilder()
         .clearActiveDays()
         .setPaymentIdSequenceNumber(state.getPaymentIdSequenceNumber() + 1)
         .build();
   }
 
-  private MerchantEntity.MerchantState handle(MerchantEntity.MerchantState state, MerchantEntity.MerchantAggregationRequested event) {
+  static MerchantEntity.MerchantState handle(MerchantEntity.MerchantState state, MerchantEntity.MerchantAggregationRequested event) {
     return state.toBuilder()
         .clearActiveDays()
         .build();
   }
 
-  private MerchantEntity.MerchantDayActivated eventFor(MerchantEntity.MerchantState state, MerchantApi.ActivateDayCommand command) {
+  static MerchantEntity.MerchantDayActivated eventFor(MerchantEntity.MerchantState state, MerchantApi.ActivateDayCommand command) {
     return MerchantEntity.MerchantDayActivated
         .newBuilder()
         .setMerchantKey(
@@ -179,7 +179,7 @@ public class Merchant extends AbstractMerchant {
         .build();
   }
 
-  private Optional<MerchantEntity.MerchantAggregationRequested> eventFor(MerchantEntity.MerchantState state, MerchantApi.MerchantAggregationRequestCommand command) {
+  static Optional<MerchantEntity.MerchantAggregationRequested> eventFor(MerchantEntity.MerchantState state, MerchantApi.MerchantAggregationRequestCommand command) {
     if (state.getActiveDaysCount() == 0) {
       return Optional.empty();
     }
@@ -187,11 +187,11 @@ public class Merchant extends AbstractMerchant {
     return Optional.of(toMerchantAggregationRequested(state, toMerchantKey(command)));
   }
 
-  private Optional<MerchantEntity.MerchantPaymentRequested> eventFor(MerchantEntity.MerchantState state, MerchantApi.MerchantPaymentRequestCommand command) {
+  static Optional<MerchantEntity.MerchantPaymentRequested> eventFor(MerchantEntity.MerchantState state, MerchantApi.MerchantPaymentRequestCommand command) {
     return Optional.of(toMerchantPaymentRequested(state, toMerchantKey(command)));
   }
 
-  private MerchantEntity.MerchantAggregationRequested toMerchantAggregationRequested(MerchantEntity.MerchantState state, TransactionMerchantKey.MerchantKey merchantKey) {
+  static MerchantEntity.MerchantAggregationRequested toMerchantAggregationRequested(MerchantEntity.MerchantState state, TransactionMerchantKey.MerchantKey merchantKey) {
     return MerchantEntity.MerchantAggregationRequested
         .newBuilder()
         .setMerchantKey(merchantKey)
@@ -201,7 +201,7 @@ public class Merchant extends AbstractMerchant {
         .build();
   }
 
-  private MerchantEntity.MerchantPaymentRequested toMerchantPaymentRequested(MerchantEntity.MerchantState state, TransactionMerchantKey.MerchantKey merchantKey) {
+  static MerchantEntity.MerchantPaymentRequested toMerchantPaymentRequested(MerchantEntity.MerchantState state, TransactionMerchantKey.MerchantKey merchantKey) {
     return MerchantEntity.MerchantPaymentRequested
         .newBuilder()
         .setMerchantKey(merchantKey)
@@ -211,7 +211,7 @@ public class Merchant extends AbstractMerchant {
         .build();
   }
 
-  private TransactionMerchantKey.MerchantKey toMerchantKey(MerchantApi.MerchantAggregationRequestCommand command) {
+  static TransactionMerchantKey.MerchantKey toMerchantKey(MerchantApi.MerchantAggregationRequestCommand command) {
     return TransactionMerchantKey.MerchantKey
         .newBuilder()
         .setMerchantId(command.getMerchantId())
@@ -221,7 +221,7 @@ public class Merchant extends AbstractMerchant {
         .build();
   }
 
-  private TransactionMerchantKey.MerchantKey toMerchantKey(MerchantApi.MerchantPaymentRequestCommand command) {
+  static TransactionMerchantKey.MerchantKey toMerchantKey(MerchantApi.MerchantPaymentRequestCommand command) {
     return TransactionMerchantKey.MerchantKey
         .newBuilder()
         .setMerchantId(command.getMerchantId())

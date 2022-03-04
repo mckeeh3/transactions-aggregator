@@ -21,16 +21,16 @@ public class MinuteToSecondAction extends AbstractMinuteToSecondAction {
   }
 
   @Override
-  public Effect<Empty> onMinuteAggregationRequested(MinuteEntity.MinuteAggregationRequested minuteAggregationRequested) {
-    var results = minuteAggregationRequested.getEpochSecondsList().stream()
+  public Effect<Empty> onMinuteAggregationRequested(MinuteEntity.MinuteAggregationRequested event) {
+    var results = event.getEpochSecondsList().stream()
         .map(epochSecond -> SecondApi.AggregateSecondCommand
             .newBuilder()
-            .setMerchantId(minuteAggregationRequested.getMerchantKey().getMerchantId())
-            .setServiceCode(minuteAggregationRequested.getMerchantKey().getServiceCode())
-            .setAccountFrom(minuteAggregationRequested.getMerchantKey().getAccountFrom())
-            .setAccountTo(minuteAggregationRequested.getMerchantKey().getAccountTo())
+            .setMerchantId(event.getMerchantKey().getMerchantId())
+            .setServiceCode(event.getMerchantKey().getServiceCode())
+            .setAccountFrom(event.getMerchantKey().getAccountFrom())
+            .setAccountTo(event.getMerchantKey().getAccountTo())
             .setEpochSecond(epochSecond)
-            .setAggregateRequestTimestamp(minuteAggregationRequested.getAggregateRequestTimestamp())
+            .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
             .build())
         .map(command -> components().second().aggregateSecond(command).execute())
         .collect(Collectors.toList());

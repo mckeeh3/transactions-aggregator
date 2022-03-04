@@ -19,34 +19,34 @@ public class MinuteToHourAction extends AbstractMinuteToHourAction {
   }
 
   @Override
-  public Effect<Empty> onMinuteCreated(MinuteEntity.MinuteCreated minuteCreated) {
+  public Effect<Empty> onMinuteCreated(MinuteEntity.MinuteCreated event) {
     return effects().forward(components().hour().addMinute(
         HourApi.AddMinuteCommand
             .newBuilder()
-            .setMerchantId(minuteCreated.getMerchantKey().getMerchantId())
-            .setServiceCode(minuteCreated.getMerchantKey().getServiceCode())
-            .setAccountFrom(minuteCreated.getMerchantKey().getAccountFrom())
-            .setAccountTo(minuteCreated.getMerchantKey().getAccountTo())
-            .setEpochHour(TimeTo.fromEpochMinute(minuteCreated.getEpochMinute()).toEpochHour())
-            .setEpochMinute(minuteCreated.getEpochMinute())
+            .setMerchantId(event.getMerchantKey().getMerchantId())
+            .setServiceCode(event.getMerchantKey().getServiceCode())
+            .setAccountFrom(event.getMerchantKey().getAccountFrom())
+            .setAccountTo(event.getMerchantKey().getAccountTo())
+            .setEpochHour(TimeTo.fromEpochMinute(event.getEpochMinute()).toEpochHour())
+            .setEpochMinute(event.getEpochMinute())
             .build()));
   }
 
   @Override
-  public Effect<Empty> onMinuteAggregated(MinuteEntity.MinuteAggregated minuteAggregated) {
+  public Effect<Empty> onMinuteAggregated(MinuteEntity.MinuteAggregated event) {
     return effects().forward(components().hour().minuteAggregation(
         HourApi.MinuteAggregationCommand
             .newBuilder()
-            .setMerchantId(minuteAggregated.getMerchantKey().getMerchantId())
-            .setServiceCode(minuteAggregated.getMerchantKey().getServiceCode())
-            .setAccountFrom(minuteAggregated.getMerchantKey().getAccountFrom())
-            .setAccountTo(minuteAggregated.getMerchantKey().getAccountTo())
-            .setEpochHour(TimeTo.fromEpochMinute(minuteAggregated.getEpochMinute()).toEpochHour())
-            .setEpochMinute(minuteAggregated.getEpochMinute())
-            .setTransactionTotalAmount(minuteAggregated.getTransactionTotalAmount())
-            .setTransactionCount(minuteAggregated.getTransactionCount())
-            .setLastUpdateTimestamp(minuteAggregated.getLastUpdateTimestamp())
-            .setAggregateRequestTimestamp(minuteAggregated.getAggregateRequestTimestamp())
+            .setMerchantId(event.getMerchantKey().getMerchantId())
+            .setServiceCode(event.getMerchantKey().getServiceCode())
+            .setAccountFrom(event.getMerchantKey().getAccountFrom())
+            .setAccountTo(event.getMerchantKey().getAccountTo())
+            .setEpochHour(TimeTo.fromEpochMinute(event.getEpochMinute()).toEpochHour())
+            .setEpochMinute(event.getEpochMinute())
+            .setTransactionTotalAmount(event.getTransactionTotalAmount())
+            .setTransactionCount(event.getTransactionCount())
+            .setLastUpdateTimestamp(event.getLastUpdateTimestamp())
+            .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
             .build()));
   }
 

@@ -24,19 +24,19 @@ public class TransactionToSubSecondAction extends AbstractTransactionToSubSecond
   }
 
   @Override
-  public Effect<Empty> onTransactionCreated(TransactionEntity.TransactionCreated transactionCreated) {
-    log.info("onTransactionCreated: {}", transactionCreated);
+  public Effect<Empty> onTransactionCreated(TransactionEntity.TransactionCreated event) {
+    log.info("onTransactionCreated: {}", event);
 
-    var timestamp = transactionCreated.getTransactionTimestamp();
+    var timestamp = event.getTransactionTimestamp();
     var epochSubSecond = TimeTo.fromTimestamp(timestamp).toEpochSubSecond();
 
     return effects().forward(components().subSecond().addTransaction(
         SubSecondApi.AddTransactionCommand
             .newBuilder()
-            .setMerchantId(transactionCreated.getMerchantId())
+            .setMerchantId(event.getMerchantId())
             .setEpochSubSecond(epochSubSecond)
-            .setTransactionId(transactionCreated.getTransactionKey().getTransactionId())
-            .setAmount(transactionCreated.getTransactionAmount())
+            .setTransactionId(event.getTransactionKey().getTransactionId())
+            .setAmount(event.getTransactionAmount())
             .setTimestamp(timestamp)
             .build()));
   }

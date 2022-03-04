@@ -99,7 +99,7 @@ public class Transaction extends AbstractTransaction {
             .build());
   }
 
-  private TransactionEntity.TransactionState handle(TransactionEntity.TransactionState state, TransactionEntity.TransactionCreated event) {
+  static TransactionEntity.TransactionState handle(TransactionEntity.TransactionState state, TransactionEntity.TransactionCreated event) {
     return TransactionEntity.TransactionState
         .newBuilder()
         .setTransactionKey(
@@ -117,13 +117,13 @@ public class Transaction extends AbstractTransaction {
         .build();
   }
 
-  private TransactionEntity.TransactionState handle(TransactionEntity.TransactionState state, TransactionEntity.PaymentAdded event) {
+  static TransactionEntity.TransactionState handle(TransactionEntity.TransactionState state, TransactionEntity.PaymentAdded event) {
     return state.toBuilder()
         .setPaymentId(event.getPaymentId())
         .build();
   }
 
-  private TransactionEntity.TransactionCreated eventFor(TransactionEntity.TransactionState state, TransactionApi.CreateTransactionCommand command) {
+  static TransactionEntity.TransactionCreated eventFor(TransactionEntity.TransactionState state, TransactionApi.CreateTransactionCommand command) {
     return TransactionEntity.TransactionCreated
         .newBuilder()
         .setTransactionKey(
@@ -141,7 +141,7 @@ public class Transaction extends AbstractTransaction {
         .build();
   }
 
-  private TransactionEntity.PaymentAdded eventFor(TransactionEntity.TransactionState state, TransactionApi.AddPaymentCommand command) {
+  static TransactionEntity.PaymentAdded eventFor(TransactionEntity.TransactionState state, TransactionApi.AddPaymentCommand command) {
     return TransactionEntity.PaymentAdded
         .newBuilder()
         .setTransactionKey(

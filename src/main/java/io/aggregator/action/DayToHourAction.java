@@ -21,16 +21,16 @@ public class DayToHourAction extends AbstractDayToHourAction {
   }
 
   @Override
-  public Effect<Empty> onDayAggregationRequested(DayEntity.DayAggregationRequested dayAggregationRequested) {
-    var results = dayAggregationRequested.getEpochHoursList().stream()
+  public Effect<Empty> onDayAggregationRequested(DayEntity.DayAggregationRequested event) {
+    var results = event.getEpochHoursList().stream()
         .map(epochHour -> HourApi.AggregateHourCommand
             .newBuilder()
-            .setMerchantId(dayAggregationRequested.getMerchantKey().getMerchantId())
-            .setServiceCode(dayAggregationRequested.getMerchantKey().getServiceCode())
-            .setAccountFrom(dayAggregationRequested.getMerchantKey().getAccountFrom())
-            .setAccountTo(dayAggregationRequested.getMerchantKey().getAccountTo())
+            .setMerchantId(event.getMerchantKey().getMerchantId())
+            .setServiceCode(event.getMerchantKey().getServiceCode())
+            .setAccountFrom(event.getMerchantKey().getAccountFrom())
+            .setAccountTo(event.getMerchantKey().getAccountTo())
             .setEpochHour(epochHour)
-            .setAggregateRequestTimestamp(dayAggregationRequested.getAggregateRequestTimestamp())
+            .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
             .build())
         .map(command -> components().hour().aggregateHour(command).execute())
         .collect(Collectors.toList());
