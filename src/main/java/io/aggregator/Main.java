@@ -24,8 +24,8 @@ import io.aggregator.entity.Payment;
 import io.aggregator.entity.Second;
 import io.aggregator.entity.SubSecond;
 import io.aggregator.entity.Transaction;
-import io.aggregator.view.DailyTotalsByDateView;
-import io.aggregator.view.DailyTotalsByMerchantView;
+import io.aggregator.view.MerchantPaymentsByDateView;
+import io.aggregator.view.MerchantPaymentsByMerchantByDateView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,14 +52,14 @@ public final class Main {
       Second::new,
       SubSecond::new,
       Transaction::new,
-      DailyTotalsByDateView::new,
-      DailyTotalsByMerchantView::new,
       DayToHourAction::new,
       DayToMerchantAction::new,
       DayToPaymentAction::new,
       FrontendAction::new,
       HourToDayAction::new,
       HourToMinuteAction::new,
+      MerchantPaymentsByDateView::new,
+      MerchantPaymentsByMerchantByDateView::new,
       MerchantToDayAction::new,
       MerchantToPaymentAction::new,
       MinuteToHourAction::new,

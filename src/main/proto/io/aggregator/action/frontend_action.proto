@@ -20,13 +20,6 @@ service Frontend {
       body: "*"
     };
   }
-
-  rpc CollectMerchantTotals(CollectMerchantTotalsRequest) returns (google.protobuf.Empty) {
-    option (google.api.http) = {
-      post: "/collect-merchant-totals"
-      body: "*"
-    };
-  }
 }
 
 message GenerateTransactionsRequest {
@@ -34,8 +27,4 @@ message GenerateTransactionsRequest {
   int32 transaction_count = 2;
   int32 transaction_interval_ms = 3;
   google.protobuf.Timestamp day = 4;
-}
-
-message CollectMerchantTotalsRequest {
-  google.protobuf.Timestamp day = 1;
 }

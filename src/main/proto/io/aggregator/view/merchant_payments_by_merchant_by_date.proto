@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package io.aggregator.view;
+
+import "google/api/annotations.proto";
+import "google/protobuf/any.proto";
+import "akkaserverless/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "io/aggregator/entity/payment_entity.proto";
+import "io/aggregator/view/merchant_payments.proto";
+
+option java_outer_classname = "MerchantPaymentsByMerchantByDateModel";
+
+service MerchantPaymentsByMerchantByDate {
+  option (akkaserverless.codegen) = {
+    view: {}
+  };
+
+  rpc GetMerchantPaymentsByDate(MerchantPaymentsByMerchantByDateRequest) returns (MerchantPaymentsByMerchantByDateResponse) {
+    option (akkaserverless.method).view.query = {
+      query: "SELECT * AS merchant_payments"
+             "  FROM merchant_payments_by_date"
+             " WHERE payment_timestamp.seconds >= :`from_date.seconds`"
+             "   AND payment_timestamp.seconds < :`to_date.seconds`"
+             "   AND merchant_id = :merchant_id"
+    };
+    option (google.api.http) = {
+      get: "/merchant-payments-by-date"
+    };
+  }
+
+  rpc OnPaymentAggregated(entity.PaymentAggregated) returns (MerchantPayment) {
+    option (akkaserverless.method).eventing.in = {
+      event_sourced_entity: "payment"
+    };
+    option (akkaserverless.method).view.update = {
+      table: "merchant_payments_by_date"
+      transform_updates: true
+    };
+  }
+
+  rpc IgnoreOtherEvents(google.protobuf.Any) returns (MerchantPayment) {
+    option (akkaserverless.method).eventing.in = {
+      event_sourced_entity: "payment"
+    };
+    option (akkaserverless.method).view.update = {
+      table: "merchant_payments_by_date"
+      transform_updates: true
+    };
+  }
+}
+
+message MerchantPaymentsByMerchantByDateRequest {
+  string merchant_id = 1;
+  google.protobuf.Timestamp from_date = 2;
+  google.protobuf.Timestamp to_date = 3;
+}
+
+message MerchantPaymentsByMerchantByDateResponse {
+  repeated MerchantPayment merchant_payments = 1;
+}

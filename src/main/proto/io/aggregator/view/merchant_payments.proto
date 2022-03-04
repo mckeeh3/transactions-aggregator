@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package io.aggregator.view;
+
+import "google/protobuf/timestamp.proto";
+import "io/aggregator/entity/transaction_merchant_key.proto";
+
+option java_outer_classname = "MerchantPaymentsModel";
+
+message MerchantPayment {
+  entity.MerchantKey merchant_key = 1;
+  string payment_id = 2;
+  double transaction_total_amount = 3;
+  int32 transaction_count = 4;
+  google.protobuf.Timestamp payment_timestamp = 5;
+}
