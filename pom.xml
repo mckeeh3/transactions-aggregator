@@ -4,7 +4,7 @@
 
   <groupId>io.aggregator</groupId>
   <artifactId>transactions-aggregator</artifactId>
-  <version>v1</version>
+  <version>v2</version>
   <packaging>jar</packaging>
 
   <name>transactions-aggregator</name>

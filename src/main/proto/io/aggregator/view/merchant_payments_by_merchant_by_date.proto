@@ -16,16 +16,16 @@ service MerchantPaymentsByMerchantByDate {
     view: {}
   };
 
-  rpc GetMerchantPaymentsByDate(MerchantPaymentsByMerchantByDateRequest) returns (MerchantPaymentsByMerchantByDateResponse) {
+  rpc GetMerchantPaymentsByMerchantByDate(MerchantPaymentsByMerchantByDateRequest) returns (MerchantPaymentsByMerchantByDateResponse) {
     option (akkaserverless.method).view.query = {
       query: "SELECT * AS merchant_payments"
-             "  FROM merchant_payments_by_date"
+             "  FROM merchant_payments_by_merchant_by_date"
              " WHERE payment_timestamp.seconds >= :`from_date.seconds`"
              "   AND payment_timestamp.seconds < :`to_date.seconds`"
              "   AND merchant_id = :merchant_id"
     };
     option (google.api.http) = {
-      get: "/merchant-payments-by-date"
+      get: "/merchant-payments-by-merchant-by-date"
     };
   }
 
@@ -34,7 +34,7 @@ service MerchantPaymentsByMerchantByDate {
       event_sourced_entity: "payment"
     };
     option (akkaserverless.method).view.update = {
-      table: "merchant_payments_by_date"
+      table: "merchant_payments_by_merchant_by_date"
       transform_updates: true
     };
   }
@@ -44,7 +44,7 @@ service MerchantPaymentsByMerchantByDate {
       event_sourced_entity: "payment"
     };
     option (akkaserverless.method).view.update = {
-      table: "merchant_payments_by_date"
+      table: "merchant_payments_by_merchant_by_date"
       transform_updates: true
     };
   }
