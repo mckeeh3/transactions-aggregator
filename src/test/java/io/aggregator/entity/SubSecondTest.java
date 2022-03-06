@@ -2,6 +2,8 @@ package io.aggregator.entity;
 
 import static org.junit.Assert.*;
 
+import com.google.protobuf.Timestamp;
+
 import org.junit.Test;
 
 import io.aggregator.TimeTo;
@@ -36,18 +38,7 @@ public class SubSecondTest {
 
     var epochSubSecond = TimeTo.fromTimestamp(TimeTo.now()).toEpochSubSecond();
 
-    var response = testKit.addTransaction(
-        SubSecondApi.AddTransactionCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochSubSecond(epochSubSecond)
-            .setTransactionId("transaction-1")
-            .setAmount(1.23)
-            .setTimestamp(TimeTo.now())
-            .build());
+    var response = testKit.addTransaction(addTransactionCommand(epochSubSecond, "transaction-1", 1.23));
 
     var subSecondActivated = response.getNextEventOfType(SubSecondEntity.SubSecondActivated.class);
     var transactionAdded = response.getNextEventOfType(SubSecondEntity.SubSecondTransactionAdded.class);
@@ -90,31 +81,8 @@ public class SubSecondTest {
     assertEquals(1.23, transaction.getAmount(), 0.0);
     assertTrue(transaction.getTimestamp().getSeconds() > 0);
 
-    testKit.addTransaction(
-        SubSecondApi.AddTransactionCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochSubSecond(epochSubSecond)
-            .setTransactionId("transaction-2")
-            .setAmount(4.56)
-            .setTimestamp(TimeTo.now())
-            .build());
-
-    response = testKit.addTransaction( // try adding the same transaction again - should be idempotent
-        SubSecondApi.AddTransactionCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochSubSecond(epochSubSecond)
-            .setTransactionId("transaction-2")
-            .setAmount(4.56)
-            .setTimestamp(TimeTo.now())
-            .build());
+    testKit.addTransaction(addTransactionCommand(epochSubSecond, "transaction-2", 4.56));
+    response = testKit.addTransaction(addTransactionCommand(epochSubSecond, "transaction-2", 4.56)); // try adding the same transaction again - should be idempotent
 
     transactionAdded = response.getNextEventOfType(SubSecondEntity.SubSecondTransactionAdded.class);
     assertNotNull(transactionAdded);
@@ -140,71 +108,18 @@ public class SubSecondTest {
 
     var epochSubSecond = TimeTo.fromNow().toEpochSubSecond();
 
-    testKit.addTransaction(
-        SubSecondApi.AddTransactionCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochSubSecond(epochSubSecond)
-            .setTransactionId("transaction-1")
-            .setAmount(1.23)
-            .setTimestamp(TimeTo.fromEpochSubSecond(epochSubSecond).toTimestamp())
-            .build());
+    testKit.addTransaction(addTransactionCommand(epochSubSecond, "transaction-1", 1.23, TimeTo.fromEpochSubSecond(epochSubSecond).toTimestamp()));
+    testKit.addTransaction(addTransactionCommand(epochSubSecond, "transaction-2", 4.56, TimeTo.fromEpochSubSecond(epochSubSecond).plus().nanos(10).toTimestamp()));
+    testKit.addTransaction(addTransactionCommand(epochSubSecond, "transaction-2", 4.56, TimeTo.fromEpochSubSecond(epochSubSecond).plus().nanos(10).toTimestamp())); // idempotent
+    testKit.addTransaction(addTransactionCommand(epochSubSecond, "transaction-3", 7.89, TimeTo.fromEpochSubSecond(epochSubSecond).plus().nanos(20).toTimestamp()));
 
-    testKit.addTransaction(
-        SubSecondApi.AddTransactionCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochSubSecond(epochSubSecond)
-            .setTransactionId("transaction-2")
-            .setAmount(4.56)
-            .setTimestamp(TimeTo.fromEpochSubSecond(epochSubSecond).plus().nanos(10).toTimestamp())
-            .build());
+    var response = testKit.aggregateSubSecond(aggregateSubSecondCommand("payment-1", epochSubSecond, TimeTo.fromEpochSubSecond(epochSubSecond).plus().hours(2).toTimestamp()));
 
-    testKit.addTransaction( // try adding the same transaction again - should be idempotent
-        SubSecondApi.AddTransactionCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochSubSecond(epochSubSecond)
-            .setTransactionId("transaction-2")
-            .setAmount(4.56)
-            .setTimestamp(TimeTo.fromEpochSubSecond(epochSubSecond).plus().nanos(10).toTimestamp())
-            .build());
-
-    testKit.addTransaction(
-        SubSecondApi.AddTransactionCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochSubSecond(epochSubSecond)
-            .setTransactionId("transaction-3")
-            .setAmount(7.89)
-            .setTimestamp(TimeTo.fromEpochSubSecond(epochSubSecond).plus().nanos(20).toTimestamp())
-            .build());
-
-    var response = testKit.aggregateSubSecond(
-        SubSecondApi.AggregateSubSecondCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochSubSecond(epochSubSecond)
-            .setAggregateRequestTimestamp(TimeTo.fromEpochSubSecond(epochSubSecond).plus().hours(2).toTimestamp())
-            .setPaymentId("payment-1")
-            .build());
-
+    assertEquals(4, response.getAllEvents().size());
     var aggregated = response.getNextEventOfType(SubSecondEntity.SubSecondAggregated.class);
+    response.getNextEventOfType(SubSecondEntity.TransactionPaid.class);
+    response.getNextEventOfType(SubSecondEntity.TransactionPaid.class);
+    response.getNextEventOfType(SubSecondEntity.TransactionPaid.class);
 
     assertNotNull(aggregated);
     assertEquals("merchant-1", aggregated.getMerchantKey().getMerchantId());
@@ -219,18 +134,9 @@ public class SubSecondTest {
     assertEquals("payment-1", aggregated.getPaymentId());
 
     // when the same aggregate command is received again, all of the processed transactions should be ignored
-    response = testKit.aggregateSubSecond(
-        SubSecondApi.AggregateSubSecondCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochSubSecond(epochSubSecond)
-            .setAggregateRequestTimestamp(TimeTo.fromEpochSubSecond(epochSubSecond).plus().hours(2).toTimestamp())
-            .setPaymentId("payment-1")
-            .build());
+    response = testKit.aggregateSubSecond(aggregateSubSecondCommand("payment-1", epochSubSecond, TimeTo.fromEpochSubSecond(epochSubSecond).plus().hours(2).toTimestamp()));
 
+    assertEquals(1, response.getAllEvents().size());
     aggregated = response.getNextEventOfType(SubSecondEntity.SubSecondAggregated.class);
 
     assertNotNull(aggregated);
@@ -246,45 +152,15 @@ public class SubSecondTest {
     assertEquals("payment-1", aggregated.getPaymentId());
 
     // add more transactions after aggregation
-    testKit.addTransaction(
-        SubSecondApi.AddTransactionCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setEpochSubSecond(epochSubSecond)
-            .setTransactionId("transaction-4")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setAmount(6.54)
-            .setTimestamp(TimeTo.fromEpochSubSecond(epochSubSecond).plus().nanos(30).toTimestamp())
-            .build());
+    testKit.addTransaction(addTransactionCommand(epochSubSecond, "transaction-4", 6.54, TimeTo.fromEpochSubSecond(epochSubSecond).plus().nanos(30).toTimestamp()));
+    testKit.addTransaction(addTransactionCommand(epochSubSecond, "transaction-5", 3.21, TimeTo.fromEpochSubSecond(epochSubSecond).plus().nanos(40).toTimestamp()));
 
-    testKit.addTransaction(
-        SubSecondApi.AddTransactionCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setEpochSubSecond(epochSubSecond)
-            .setTransactionId("transaction-5")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setAmount(3.21)
-            .setTimestamp(TimeTo.fromEpochSubSecond(epochSubSecond).plus().nanos(40).toTimestamp())
-            .build());
+    response = testKit.aggregateSubSecond(aggregateSubSecondCommand("payment-2", epochSubSecond, TimeTo.fromEpochSubSecond(epochSubSecond).plus().hours(3).toTimestamp()));
 
-    response = testKit.aggregateSubSecond(
-        SubSecondApi.AggregateSubSecondCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochSubSecond(epochSubSecond)
-            .setAggregateRequestTimestamp(TimeTo.fromEpochSubSecond(epochSubSecond).plus().hours(3).toTimestamp())
-            .setPaymentId("payment-2")
-            .build());
-
+    assertEquals(3, response.getAllEvents().size());
     aggregated = response.getNextEventOfType(SubSecondEntity.SubSecondAggregated.class);
+    response.getNextEventOfType(SubSecondEntity.TransactionPaid.class);
+    response.getNextEventOfType(SubSecondEntity.TransactionPaid.class);
 
     assertNotNull(aggregated);
     assertEquals("merchant-1", aggregated.getMerchantKey().getMerchantId());
@@ -316,6 +192,37 @@ public class SubSecondTest {
         .setServiceCode("service-code-1")
         .setAccountFrom("account-from-1")
         .setAccountTo("account-to-1")
+        .build();
+  }
+
+  static SubSecondApi.AddTransactionCommand addTransactionCommand(long epochSubSecond, String transactionId, double amount) {
+    return addTransactionCommand(epochSubSecond, transactionId, amount, TimeTo.now());
+  }
+
+  static SubSecondApi.AddTransactionCommand addTransactionCommand(long epochSubSecond, String transactionId, double amount, Timestamp timestamp) {
+    return SubSecondApi.AddTransactionCommand
+        .newBuilder()
+        .setMerchantId("merchant-1")
+        .setServiceCode("service-code-1")
+        .setAccountFrom("account-from-1")
+        .setAccountTo("account-to-1")
+        .setEpochSubSecond(epochSubSecond)
+        .setTransactionId(transactionId)
+        .setAmount(amount)
+        .setTimestamp(timestamp)
+        .build();
+  }
+
+  static SubSecondApi.AggregateSubSecondCommand aggregateSubSecondCommand(String paymentId, long epochSubSecond, Timestamp timestamp) {
+    return SubSecondApi.AggregateSubSecondCommand
+        .newBuilder()
+        .setMerchantId("merchant-1")
+        .setServiceCode("service-code-1")
+        .setAccountFrom("account-from-1")
+        .setAccountTo("account-to-1")
+        .setEpochSubSecond(epochSubSecond)
+        .setAggregateRequestTimestamp(timestamp)
+        .setPaymentId(paymentId)
         .build();
   }
 }
