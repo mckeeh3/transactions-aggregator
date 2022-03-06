@@ -19,7 +19,7 @@ public class HourToDayAction extends AbstractHourToDayAction {
   }
 
   @Override
-  public Effect<Empty> onHourCreated(HourEntity.HourCreated event) {
+  public Effect<Empty> onHourActivated(HourEntity.HourActivated event) {
     return effects().forward(components().day().activateHour(
         DayApi.ActivateHourCommand
             .newBuilder()
@@ -47,6 +47,7 @@ public class HourToDayAction extends AbstractHourToDayAction {
             .setTransactionCount(event.getTransactionCount())
             .setLastUpdateTimestamp(event.getLastUpdateTimestamp())
             .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
+            .setPaymentId(event.getPaymentId())
             .build()));
   }
 

@@ -49,14 +49,14 @@ public class SubSecondTest {
             .setTimestamp(TimeTo.now())
             .build());
 
-    var subSecondCreated = response.getNextEventOfType(SubSecondEntity.SubSecondCreated.class);
+    var subSecondActivated = response.getNextEventOfType(SubSecondEntity.SubSecondActivated.class);
     var transactionAdded = response.getNextEventOfType(SubSecondEntity.SubSecondTransactionAdded.class);
 
-    assertEquals("merchant-1", subSecondCreated.getMerchantKey().getMerchantId());
-    assertEquals("service-code-1", subSecondCreated.getMerchantKey().getServiceCode());
-    assertEquals("account-from-1", subSecondCreated.getMerchantKey().getAccountFrom());
-    assertEquals("account-to-1", subSecondCreated.getMerchantKey().getAccountTo());
-    assertTrue(subSecondCreated.getEpochSubSecond() > 0);
+    assertEquals("merchant-1", subSecondActivated.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", subSecondActivated.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", subSecondActivated.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", subSecondActivated.getMerchantKey().getAccountTo());
+    assertTrue(subSecondActivated.getEpochSubSecond() > 0);
 
     assertEquals("merchant-1", transactionAdded.getMerchantKey().getMerchantId());
     assertEquals("service-code-1", transactionAdded.getMerchantKey().getServiceCode());

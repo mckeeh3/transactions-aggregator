@@ -17,7 +17,7 @@ service Day {
       state: "io.aggregator.entity.DayState"
       events: [
         "io.aggregator.entity.DayActivated",
-        "io.aggregator.entity.HourActivated",
+        "io.aggregator.entity.HourAdded",
         "io.aggregator.entity.DayAggregationRequested",
         "io.aggregator.entity.DayAggregated",
         "io.aggregator.entity.ActiveHourAggregated"  //

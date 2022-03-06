@@ -14,7 +14,7 @@ service HourToDay {
     action: {}
   };
 
-  rpc OnHourCreated(entity.HourCreated) returns (google.protobuf.Empty) {
+  rpc OnHourActivated(entity.HourActivated) returns (google.protobuf.Empty) {
     option (akkaserverless.method).eventing.in = {
       event_sourced_entity: "hour"
     };

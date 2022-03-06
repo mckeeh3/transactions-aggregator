@@ -53,7 +53,7 @@ public class Day extends AbstractDay {
   }
 
   @Override
-  public DayEntity.DayState hourActivated(DayEntity.DayState state, DayEntity.HourActivated event) {
+  public DayEntity.DayState hourAdded(DayEntity.DayState state, DayEntity.HourAdded event) {
     return handle(state, event);
   }
 
@@ -110,7 +110,7 @@ public class Day extends AbstractDay {
         .build();
   }
 
-  static DayEntity.DayState handle(DayEntity.DayState state, DayEntity.HourActivated event) {
+  static DayEntity.DayState handle(DayEntity.DayState state, DayEntity.HourAdded event) {
     var alreadyActivated = state.getActiveHoursList().stream()
         .anyMatch(activeHour -> activeHour.getEpochHour() == event.getEpochHour());
 
@@ -197,7 +197,7 @@ public class Day extends AbstractDay {
   }
 
   static List<?> eventsFor(DayEntity.DayState state, DayApi.ActivateHourCommand command) {
-    var hourActivated = DayEntity.HourActivated
+    var hourAdded = DayEntity.HourAdded
         .newBuilder()
         .setMerchantKey(
             TransactionMerchantKey.MerchantKey
@@ -224,9 +224,9 @@ public class Day extends AbstractDay {
           .setEpochDay(command.getEpochDay())
           .build();
 
-      return List.of(dayActivated, hourActivated);
+      return List.of(dayActivated, hourAdded);
     } else {
-      return List.of(hourActivated);
+      return List.of(hourAdded);
     }
   }
 

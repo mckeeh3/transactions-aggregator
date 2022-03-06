@@ -16,7 +16,7 @@ service Hour {
       entity_type: "hour"
       state: "io.aggregator.entity.HourState"
       events: [
-        "io.aggregator.entity.HourCreated",
+        "io.aggregator.entity.HourActivated",
         "io.aggregator.entity.MinuteAdded",
         "io.aggregator.entity.HourAggregationRequested",
         "io.aggregator.entity.HourAggregated",

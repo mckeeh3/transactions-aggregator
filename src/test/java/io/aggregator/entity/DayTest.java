@@ -1,11 +1,14 @@
 package io.aggregator.entity;
 
-import io.aggregator.TimeTo;
-import io.aggregator.api.DayApi;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import com.google.protobuf.Timestamp;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import io.aggregator.TimeTo;
+import io.aggregator.api.DayApi;
 
 // This class was initially generated based on the .proto definition by Akka Serverless tooling.
 //
@@ -38,19 +41,10 @@ public class DayTest {
     var epochHour = TimeTo.fromEpochDay(epochDay).toEpochHour();
     var nextEpochHour = TimeTo.fromEpochHour(epochHour).plus().hours(1).toEpochHour();
 
-    var response = testKit.activateHour(
-        DayApi.ActivateHourCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochDay(epochDay)
-            .setEpochHour(epochHour)
-            .build());
+    var response = testKit.activateHour(activateHourCommand(epochHour));
 
     var dayActivated = response.getNextEventOfType(DayEntity.DayActivated.class);
-    var hourActivated = response.getNextEventOfType(DayEntity.HourActivated.class);
+    var hourAdded = response.getNextEventOfType(DayEntity.HourAdded.class);
 
     assertEquals("merchant-1", dayActivated.getMerchantKey().getMerchantId());
     assertEquals("service-code-1", dayActivated.getMerchantKey().getServiceCode());
@@ -58,11 +52,11 @@ public class DayTest {
     assertEquals("account-to-1", dayActivated.getMerchantKey().getAccountTo());
     assertEquals(epochDay, dayActivated.getEpochDay());
 
-    assertEquals("merchant-1", hourActivated.getMerchantKey().getMerchantId());
-    assertEquals("service-code-1", hourActivated.getMerchantKey().getServiceCode());
-    assertEquals("account-from-1", hourActivated.getMerchantKey().getAccountFrom());
-    assertEquals("account-to-1", hourActivated.getMerchantKey().getAccountTo());
-    assertEquals(epochHour, hourActivated.getEpochHour());
+    assertEquals("merchant-1", hourAdded.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", hourAdded.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", hourAdded.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", hourAdded.getMerchantKey().getAccountTo());
+    assertEquals(epochHour, hourAdded.getEpochHour());
 
     var state = testKit.getState();
 
@@ -77,24 +71,15 @@ public class DayTest {
 
     assertEquals(epochHour, activeHour.getEpochHour());
 
-    response = testKit.activateHour(
-        DayApi.ActivateHourCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochDay(epochDay)
-            .setEpochHour(nextEpochHour)
-            .build());
+    response = testKit.activateHour(activateHourCommand(nextEpochHour));
 
-    hourActivated = response.getNextEventOfType(DayEntity.HourActivated.class);
+    hourAdded = response.getNextEventOfType(DayEntity.HourAdded.class);
 
-    assertEquals("merchant-1", hourActivated.getMerchantKey().getMerchantId());
-    assertEquals("service-code-1", hourActivated.getMerchantKey().getServiceCode());
-    assertEquals("account-from-1", hourActivated.getMerchantKey().getAccountFrom());
-    assertEquals("account-to-1", hourActivated.getMerchantKey().getAccountTo());
-    assertEquals(nextEpochHour, hourActivated.getEpochHour());
+    assertEquals("merchant-1", hourAdded.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", hourAdded.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", hourAdded.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", hourAdded.getMerchantKey().getAccountTo());
+    assertEquals(nextEpochHour, hourAdded.getEpochHour());
 
     state = testKit.getState();
 
@@ -119,39 +104,10 @@ public class DayTest {
     var nextEpochHour = TimeTo.fromEpochHour(epochHour).plus().hours(1).toEpochHour();
     var now = TimeTo.fromEpochDay(epochDay).toTimestamp();
 
-    testKit.activateHour(
-        DayApi.ActivateHourCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochDay(epochDay)
-            .setEpochHour(epochHour)
-            .build());
+    testKit.activateHour(activateHourCommand(epochHour));
+    testKit.activateHour(activateHourCommand(nextEpochHour));
 
-    testKit.activateHour(
-        DayApi.ActivateHourCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochDay(epochDay)
-            .setEpochHour(nextEpochHour)
-            .build());
-
-    var response = testKit.aggregateDay(
-        DayApi.AggregateDayCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochDay(epochDay)
-            .setAggregateRequestTimestamp(now)
-            .setPaymentId("payment-1")
-            .build());
+    var response = testKit.aggregateDay(aggregateDayCommand(epochDay, now));
 
     var dayAggregationRequested = response.getNextEventOfType(DayEntity.DayAggregationRequested.class);
 
@@ -182,16 +138,7 @@ public class DayTest {
     var epochDay = TimeTo.fromNow().toEpochDay();
     var now = TimeTo.fromEpochDay(epochDay).toTimestamp();
 
-    var response = testKit.aggregateDay(
-        DayApi.AggregateDayCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochDay(epochDay)
-            .setAggregateRequestTimestamp(now)
-            .build());
+    var response = testKit.aggregateDay(aggregateDayCommand(epochDay, now));
 
     var dayAggregated = response.getNextEventOfType(DayEntity.DayAggregated.class);
 
@@ -216,55 +163,12 @@ public class DayTest {
     var nextEpochHour = TimeTo.fromEpochHour(epochHour).plus().hours(1).toEpochHour();
     var aggregateRequestTimestamp = TimeTo.fromEpochDay(epochDay).toTimestamp();
 
-    testKit.activateHour(
-        DayApi.ActivateHourCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochDay(epochDay)
-            .setEpochHour(epochHour)
-            .build());
+    testKit.activateHour(activateHourCommand(epochHour));
+    testKit.activateHour(activateHourCommand(nextEpochHour));
 
-    testKit.activateHour(
-        DayApi.ActivateHourCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochDay(epochDay)
-            .setEpochHour(nextEpochHour)
-            .build());
+    testKit.aggregateDay(aggregateDayCommand(epochDay, aggregateRequestTimestamp));
 
-    testKit.aggregateDay(
-        DayApi.AggregateDayCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochDay(epochDay)
-            .setAggregateRequestTimestamp(aggregateRequestTimestamp)
-            .setPaymentId("payment-1")
-            .build());
-
-    var response = testKit.hourAggregation(
-        DayApi.HourAggregationCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochDay(epochDay)
-            .setEpochHour(epochHour)
-            .setTransactionTotalAmount(123.45)
-            .setTransactionCount(10)
-            .setLastUpdateTimestamp(aggregateRequestTimestamp)
-            .setAggregateRequestTimestamp(aggregateRequestTimestamp)
-            .setPaymentId("payment-1")
-            .build());
+    var response = testKit.hourAggregation(hourAggregationCommand(epochHour, 123.45, 10, aggregateRequestTimestamp));
 
     var activeHourAggregated = response.getNextEventOfType(DayEntity.ActiveHourAggregated.class);
 
@@ -279,21 +183,7 @@ public class DayTest {
     assertEquals(aggregateRequestTimestamp, activeHourAggregated.getAggregateRequestTimestamp());
     assertEquals("payment-1", activeHourAggregated.getPaymentId());
 
-    response = testKit.hourAggregation(
-        DayApi.HourAggregationCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochDay(epochDay)
-            .setEpochHour(nextEpochHour)
-            .setTransactionTotalAmount(678.90)
-            .setTransactionCount(20)
-            .setLastUpdateTimestamp(aggregateRequestTimestamp)
-            .setAggregateRequestTimestamp(aggregateRequestTimestamp)
-            .setPaymentId("payment-1")
-            .build());
+    response = testKit.hourAggregation(hourAggregationCommand(nextEpochHour, 678.90, 20, aggregateRequestTimestamp));
 
     var dayAggregated = response.getNextEventOfType(DayEntity.DayAggregated.class);
     activeHourAggregated = response.getNextEventOfType(DayEntity.ActiveHourAggregated.class);
@@ -323,47 +213,14 @@ public class DayTest {
     // this sequence re-activates the day and hour aggregation
     aggregateRequestTimestamp = TimeTo.fromEpochDay(epochDay).plus().minutes(1).toTimestamp();
 
-    response = testKit.activateHour(
-        DayApi.ActivateHourCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochDay(epochDay)
-            .setEpochHour(epochHour)
-            .build());
+    response = testKit.activateHour(activateHourCommand(epochHour));
 
     response.getNextEventOfType(DayEntity.DayActivated.class);
-    response.getNextEventOfType(DayEntity.HourActivated.class);
+    response.getNextEventOfType(DayEntity.HourAdded.class);
 
-    testKit.aggregateDay(
-        DayApi.AggregateDayCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochDay(epochDay)
-            .setAggregateRequestTimestamp(aggregateRequestTimestamp)
-            .setPaymentId("payment-1")
-            .build());
+    testKit.aggregateDay(aggregateDayCommand(epochDay, aggregateRequestTimestamp));
 
-    response = testKit.hourAggregation(
-        DayApi.HourAggregationCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochDay(epochDay)
-            .setEpochHour(epochHour)
-            .setTransactionTotalAmount(543.21)
-            .setTransactionCount(321)
-            .setLastUpdateTimestamp(aggregateRequestTimestamp)
-            .setAggregateRequestTimestamp(aggregateRequestTimestamp)
-            .setPaymentId("payment-1")
-            .build());
+    response = testKit.hourAggregation(hourAggregationCommand(epochHour, 543.21, 321, aggregateRequestTimestamp));
 
     dayAggregated = response.getNextEventOfType(DayEntity.DayAggregated.class);
     activeHourAggregated = response.getNextEventOfType(DayEntity.ActiveHourAggregated.class);
@@ -389,5 +246,47 @@ public class DayTest {
     assertEquals(aggregateRequestTimestamp, dayAggregated.getLastUpdateTimestamp());
     assertEquals(aggregateRequestTimestamp, dayAggregated.getAggregateRequestTimestamp());
     assertEquals("payment-1", dayAggregated.getPaymentId());
+  }
+
+  static DayApi.ActivateHourCommand activateHourCommand(long epochHour) {
+    return DayApi.ActivateHourCommand
+        .newBuilder()
+        .setMerchantId("merchant-1")
+        .setServiceCode("service-code-1")
+        .setAccountFrom("account-from-1")
+        .setAccountTo("account-to-1")
+        .setEpochDay(TimeTo.fromEpochHour(epochHour).toEpochDay())
+        .setEpochHour(epochHour)
+        .build();
+  }
+
+  static DayApi.AggregateDayCommand aggregateDayCommand(long epochDay, Timestamp timestamp) {
+    return DayApi.AggregateDayCommand
+        .newBuilder()
+        .setMerchantId("merchant-1")
+        .setServiceCode("service-code-1")
+        .setAccountFrom("account-from-1")
+        .setAccountTo("account-to-1")
+        .setEpochDay(epochDay)
+        .setAggregateRequestTimestamp(timestamp)
+        .setPaymentId("payment-1")
+        .build();
+  }
+
+  static DayApi.HourAggregationCommand hourAggregationCommand(long epochHour, double amount, int count, Timestamp timestamp) {
+    return DayApi.HourAggregationCommand
+        .newBuilder()
+        .setMerchantId("merchant-1")
+        .setServiceCode("service-code-1")
+        .setAccountFrom("account-from-1")
+        .setAccountTo("account-to-1")
+        .setEpochDay(TimeTo.fromEpochHour(epochHour).toEpochDay())
+        .setEpochHour(epochHour)
+        .setTransactionTotalAmount(amount)
+        .setTransactionCount(count)
+        .setLastUpdateTimestamp(timestamp)
+        .setAggregateRequestTimestamp(timestamp)
+        .setPaymentId("payment-1")
+        .build();
   }
 }

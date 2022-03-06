@@ -19,9 +19,9 @@ public class SubSecondToSecondAction extends AbstractSubSecondToSecondAction {
   }
 
   @Override
-  public Effect<Empty> onSubSecondCreated(SubSecondEntity.SubSecondCreated event) {
-    return effects().forward(components().second().addSubSecond(
-        SecondApi.AddSubSecondCommand
+  public Effect<Empty> onSubSecondActivated(SubSecondEntity.SubSecondActivated event) {
+    return effects().forward(components().second().activateSubSecond(
+        SecondApi.ActivateSubSecondCommand
             .newBuilder()
             .setMerchantId(event.getMerchantKey().getMerchantId())
             .setServiceCode(event.getMerchantKey().getServiceCode())
@@ -47,6 +47,7 @@ public class SubSecondToSecondAction extends AbstractSubSecondToSecondAction {
             .setTransactionCount(event.getTransactionCount())
             .setLastUpdateTimestamp(event.getLastUpdateTimestamp())
             .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
+            .setPaymentId(event.getPaymentId())
             .build()));
   }
 

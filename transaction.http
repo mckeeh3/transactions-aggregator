@@ -1,0 +1,39 @@
+
+# Curl commands used with VS Code REST Client extension
+
+@urlPrefix = https://lively-truth-3781.us-east1.akkaserverless.app
+@transactionId = transaction-1
+@serviceCode = service-code-1
+@accountFrom = account-from-1
+@accountTo = account-to-1
+@transactionAmount = 200.00
+@merchantId = merchant-id-1
+@shopId = shop-id-1
+@transactionTimestamp = 2022-03-01T00:00:00.000Z
+@epochSubSecond = 19200000
+
+### io.aggregator.api.Transaction.CreateTransaction
+
+curl -XPOST -H "Content-Type: application/json" -d '{
+  "transaction_id":"{{transactionId}}",
+  "service_code":"{{serviceCode}}",
+  "account_from":"{{accountFrom}}",
+  "account_to":"{{accountTo}}",
+  "transaction_amount":{{transactionAmount}},
+  "merchant_id":"{{merchantId}}",
+  "shop_id":"{{shopId}}",
+  "transaction_timestamp":"{{transactionTimestamp}}"}'
+  {{urlPrefix}}/transaction/create
+
+### io.aggregator.api.SubSecond.AddTransaction
+
+curl -XPOST -H "Content-Type: application/json" -d '{
+  "merchant_id":"{{merchantId}}",
+  "service_code":"{{serviceCode}}",
+  "account_from":"{{accountFrom}}",
+  "account_to":"{{accountTo}}",
+  "epoch_sub_second":{{epochSubSecond}},
+  "transaction_id":"{{transactionId}}",
+  "amount":{{transactionAmount}},
+  "timestamp":"{{transactionTimestamp}}"}'
+  {{urlPrefix}}/sub_second/add-transaction

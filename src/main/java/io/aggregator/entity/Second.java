@@ -31,7 +31,7 @@ public class Second extends AbstractSecond {
   }
 
   @Override
-  public Effect<Empty> addSubSecond(SecondEntity.SecondState state, SecondApi.AddSubSecondCommand command) {
+  public Effect<Empty> activateSubSecond(SecondEntity.SecondState state, SecondApi.ActivateSubSecondCommand command) {
     return handle(state, command);
   }
 
@@ -46,7 +46,7 @@ public class Second extends AbstractSecond {
   }
 
   @Override
-  public SecondEntity.SecondState secondCreated(SecondEntity.SecondState state, SecondEntity.SecondCreated event) {
+  public SecondEntity.SecondState secondActivated(SecondEntity.SecondState state, SecondEntity.SecondActivated event) {
     return handle(state, event);
   }
 
@@ -70,8 +70,8 @@ public class Second extends AbstractSecond {
     return handle(state, event);
   }
 
-  private Effect<Empty> handle(SecondEntity.SecondState state, SecondApi.AddSubSecondCommand command) {
-    log.info("state: {}\nAddSubSecondCommand: {}", state, command);
+  private Effect<Empty> handle(SecondEntity.SecondState state, SecondApi.ActivateSubSecondCommand command) {
+    log.info("state: {}\nActivateSubSecondCommand: {}", state, command);
 
     return effects()
         .emitEvents(eventsFor(state, command))
@@ -94,7 +94,7 @@ public class Second extends AbstractSecond {
         .thenReply(newState -> Empty.getDefaultInstance());
   }
 
-  static SecondEntity.SecondState handle(SecondEntity.SecondState state, SecondEntity.SecondCreated event) {
+  static SecondEntity.SecondState handle(SecondEntity.SecondState state, SecondEntity.SecondActivated event) {
     return state.toBuilder()
         .setMerchantKey(
             TransactionMerchantKey.MerchantKey
@@ -111,10 +111,10 @@ public class Second extends AbstractSecond {
   }
 
   static SecondEntity.SecondState handle(SecondEntity.SecondState state, SecondEntity.SubSecondAdded event) {
-    var alreadyAdded = state.getActiveSubSecondsList().stream()
+    var alreadyActivated = state.getActiveSubSecondsList().stream()
         .anyMatch(activeSecond -> activeSecond.getEpochSubSecond() == event.getEpochSubSecond());
 
-    if (alreadyAdded) {
+    if (alreadyActivated) {
       return state;
     } else {
       return state.toBuilder()
@@ -195,7 +195,7 @@ public class Second extends AbstractSecond {
         .toList();
   }
 
-  static List<?> eventsFor(SecondEntity.SecondState state, SecondApi.AddSubSecondCommand command) {
+  static List<?> eventsFor(SecondEntity.SecondState state, SecondApi.ActivateSubSecondCommand command) {
     var subSecondAdded = SecondEntity.SubSecondAdded
         .newBuilder()
         .setMerchantKey(
@@ -209,8 +209,8 @@ public class Second extends AbstractSecond {
         .setEpochSubSecond(command.getEpochSubSecond())
         .build();
 
-    if (state.getMerchantKey().getMerchantId().isEmpty()) {
-      var secondCreated = SecondEntity.SecondCreated
+    if (state.getActiveSubSecondsCount() == 0) {
+      var secondActivated = SecondEntity.SecondActivated
           .newBuilder()
           .setMerchantKey(
               TransactionMerchantKey.MerchantKey
@@ -223,7 +223,7 @@ public class Second extends AbstractSecond {
           .setEpochSecond(command.getEpochSecond())
           .build();
 
-      return List.of(secondCreated, subSecondAdded);
+      return List.of(secondActivated, subSecondAdded);
     } else {
       return List.of(subSecondAdded);
     }

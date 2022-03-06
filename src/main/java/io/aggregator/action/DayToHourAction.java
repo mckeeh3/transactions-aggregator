@@ -31,6 +31,7 @@ public class DayToHourAction extends AbstractDayToHourAction {
             .setAccountTo(event.getMerchantKey().getAccountTo())
             .setEpochHour(epochHour)
             .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
+            .setPaymentId(event.getPaymentId())
             .build())
         .map(command -> components().hour().aggregateHour(command).execute())
         .collect(Collectors.toList());

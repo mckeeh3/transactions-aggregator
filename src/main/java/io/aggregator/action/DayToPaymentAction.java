@@ -28,6 +28,11 @@ public class DayToPaymentAction extends AbstractDayToPaymentAction {
             .setAccountFrom(event.getMerchantKey().getAccountFrom())
             .setAccountTo(event.getMerchantKey().getAccountTo())
             .setPaymentId(event.getPaymentId())
+            .setEpochDay(event.getEpochDay())
+            .setTransactionTotalAmount(event.getTransactionTotalAmount())
+            .setTransactionCount(event.getTransactionCount())
+            .setLastUpdateTimestamp(event.getLastUpdateTimestamp())
+            .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
             .build()));
   }
 

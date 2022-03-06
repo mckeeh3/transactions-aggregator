@@ -39,7 +39,7 @@ public class SubSecond extends AbstractSubSecond {
   }
 
   @Override
-  public SubSecondEntity.SubSecondState subSecondCreated(SubSecondEntity.SubSecondState state, SubSecondEntity.SubSecondCreated event) {
+  public SubSecondEntity.SubSecondState subSecondActivated(SubSecondEntity.SubSecondState state, SubSecondEntity.SubSecondActivated event) {
     return handle(state, event);
   }
 
@@ -74,7 +74,7 @@ public class SubSecond extends AbstractSubSecond {
         .thenReply(newState -> Empty.getDefaultInstance());
   }
 
-  static SubSecondEntity.SubSecondState handle(SubSecondEntity.SubSecondState state, SubSecondEntity.SubSecondCreated event) {
+  static SubSecondEntity.SubSecondState handle(SubSecondEntity.SubSecondState state, SubSecondEntity.SubSecondActivated event) {
     return state.toBuilder()
         .setMerchantKey(
             TransactionMerchantKey.MerchantKey
@@ -160,7 +160,7 @@ public class SubSecond extends AbstractSubSecond {
         .allMatch(transaction -> transaction.getAggregateRequestTimestamp().getSeconds() > 0);
 
     if (isInactive) {
-      var secondCreated = SubSecondEntity.SubSecondCreated
+      var secondCreated = SubSecondEntity.SubSecondActivated
           .newBuilder()
           .setMerchantKey(
               TransactionMerchantKey.MerchantKey

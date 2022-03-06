@@ -1,0 +1,25 @@
+# Curl commands used with VS Code REST Client extension
+
+@urlPrefix = https://lively-truth-3781.us-east1.akkaserverless.app
+@merchantId = merchant-id-1
+@serviceCode = service-code-1
+@accountFrom = account-from-1
+@accountTo = account-to-1
+
+### io.aggregator.api.Merchant.MerchantAggregationRequest
+
+curl -XPOST -H "Content-Type: application/json" -d '{
+  "merchant_id":"{{merchantId}}",
+  "service_code":"{{serviceCode}}",
+  "account_from":"{{accountFrom}}",
+  "account_to":"{{accountTo}}"}'
+  {{urlPrefix}}/merchant/aggregation-request
+
+### io.aggregator.api.Merchant.MerchantPaymentRequest
+
+curl -XPOST -H "Content-Type: application/json" -d '{
+  "merchant_id":"{{merchantId}}",
+  "service_code":"{{serviceCode}}",
+  "account_from":"{{accountFrom}}",
+  "account_to":"{{accountTo}}"}'
+  {{urlPrefix}}/merchant/payment-request

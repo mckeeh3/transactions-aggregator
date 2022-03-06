@@ -31,6 +31,7 @@ public class HourToMinuteAction extends AbstractHourToMinuteAction {
             .setAccountTo(event.getMerchantKey().getAccountTo())
             .setEpochMinute(epochMinute)
             .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
+            .setPaymentId(event.getPaymentId())
             .build())
         .map(command -> components().minute().aggregateMinute(command).execute())
         .collect(Collectors.toList());

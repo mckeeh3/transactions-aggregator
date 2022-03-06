@@ -49,14 +49,14 @@ public class MinuteTest {
             .setEpochSecond(epochSecond)
             .build());
 
-    var minuteCreated = response.getNextEventOfType(MinuteEntity.MinuteCreated.class);
+    var minuteActivated = response.getNextEventOfType(MinuteEntity.MinuteActivated.class);
     var secondAdded = response.getNextEventOfType(MinuteEntity.SecondAdded.class);
 
-    assertEquals("merchant-1", minuteCreated.getMerchantKey().getMerchantId());
-    assertEquals("service-code-1", minuteCreated.getMerchantKey().getServiceCode());
-    assertEquals("account-from-1", minuteCreated.getMerchantKey().getAccountFrom());
-    assertEquals("account-to-1", minuteCreated.getMerchantKey().getAccountTo());
-    assertEquals(epochMinute, minuteCreated.getEpochMinute());
+    assertEquals("merchant-1", minuteActivated.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", minuteActivated.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", minuteActivated.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", minuteActivated.getMerchantKey().getAccountTo());
+    assertEquals(epochMinute, minuteActivated.getEpochMinute());
 
     assertEquals("merchant-1", secondAdded.getMerchantKey().getMerchantId());
     assertEquals("service-code-1", secondAdded.getMerchantKey().getServiceCode());
@@ -323,7 +323,7 @@ public class MinuteTest {
     // this sequence re-activates the second and minute aggregation
     aggregateRequestTimestamp = TimeTo.fromEpochSecond(epochSecond).plus().minutes(1).toTimestamp();
 
-    testKit.addSecond(
+    response = testKit.addSecond(
         MinuteApi.AddSecondCommand
             .newBuilder()
             .setMerchantId("merchant-1")
@@ -333,6 +333,9 @@ public class MinuteTest {
             .setEpochMinute(epochMinute)
             .setEpochSecond(epochSecond)
             .build());
+
+    response.getNextEventOfType(MinuteEntity.MinuteActivated.class);
+    response.getNextEventOfType(MinuteEntity.SecondAdded.class);
 
     testKit.aggregateMinute(
         MinuteApi.AggregateMinuteCommand

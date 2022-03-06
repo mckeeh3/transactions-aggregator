@@ -12,7 +12,7 @@ message DayActivated {
   int64 epoch_day = 2;
 }
 
-message HourActivated {
+message HourAdded {
   MerchantKey merchant_key = 1;
   int64 epoch_hour = 2;
 }

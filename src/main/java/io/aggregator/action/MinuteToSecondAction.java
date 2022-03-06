@@ -31,6 +31,7 @@ public class MinuteToSecondAction extends AbstractMinuteToSecondAction {
             .setAccountTo(event.getMerchantKey().getAccountTo())
             .setEpochSecond(epochSecond)
             .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
+            .setPaymentId(event.getPaymentId())
             .build())
         .map(command -> components().second().aggregateSecond(command).execute())
         .collect(Collectors.toList());

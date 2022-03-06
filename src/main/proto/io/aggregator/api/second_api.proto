@@ -16,7 +16,7 @@ service Second {
       entity_type: "second"
       state: "io.aggregator.entity.SecondState"
       events: [
-        "io.aggregator.entity.SecondCreated",
+        "io.aggregator.entity.SecondActivated",
         "io.aggregator.entity.SubSecondAdded",
         "io.aggregator.entity.SecondAggregationRequested",
         "io.aggregator.entity.SecondAggregated",
@@ -25,7 +25,7 @@ service Second {
     }
   };
 
-  rpc AddSubSecond(AddSubSecondCommand) returns (google.protobuf.Empty) {
+  rpc ActivateSubSecond(ActivateSubSecondCommand) returns (google.protobuf.Empty) {
     option (google.api.http) = {
       post: "/second/add-sub-second"
       body: "*"
@@ -47,7 +47,7 @@ service Second {
   }
 }
 
-message AddSubSecondCommand {
+message ActivateSubSecondCommand {
   string merchant_id = 1 [(akkaserverless.field).entity_key = true];
   string service_code = 2 [(akkaserverless.field).entity_key = true];
   string account_from = 3 [(akkaserverless.field).entity_key = true];

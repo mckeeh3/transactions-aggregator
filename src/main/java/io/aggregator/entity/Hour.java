@@ -46,7 +46,7 @@ public class Hour extends AbstractHour {
   }
 
   @Override
-  public HourEntity.HourState hourCreated(HourEntity.HourState state, HourEntity.HourCreated event) {
+  public HourEntity.HourState hourActivated(HourEntity.HourState state, HourEntity.HourActivated event) {
     return handle(state, event);
   }
 
@@ -94,7 +94,7 @@ public class Hour extends AbstractHour {
         .thenReply(newState -> Empty.getDefaultInstance());
   }
 
-  static HourEntity.HourState handle(HourEntity.HourState state, HourEntity.HourCreated event) {
+  static HourEntity.HourState handle(HourEntity.HourState state, HourEntity.HourActivated event) {
     return state.toBuilder()
         .setMerchantKey(
             TransactionMerchantKey.MerchantKey
@@ -208,8 +208,8 @@ public class Hour extends AbstractHour {
         .setEpochMinute(command.getEpochMinute())
         .build();
 
-    if (state.getMerchantKey().getMerchantId().isEmpty()) {
-      var hourCreated = HourEntity.HourCreated
+    if (state.getActiveMinutesCount() == 0) {
+      var hourActivated = HourEntity.HourActivated
           .newBuilder()
           .setMerchantKey(
               TransactionMerchantKey.MerchantKey
@@ -222,7 +222,7 @@ public class Hour extends AbstractHour {
           .setEpochHour(command.getEpochHour())
           .build();
 
-      return List.of(hourCreated, minuteAdded);
+      return List.of(hourActivated, minuteAdded);
     } else {
       return List.of(minuteAdded);
     }

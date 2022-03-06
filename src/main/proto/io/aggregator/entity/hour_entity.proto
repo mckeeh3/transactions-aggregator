@@ -7,7 +7,7 @@ package io.aggregator.entity;
 
 option java_outer_classname = "HourEntity";
 
-message HourCreated {
+message HourActivated {
   MerchantKey merchant_key = 1;
   int64 epoch_hour = 2;
 }

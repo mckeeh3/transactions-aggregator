@@ -31,6 +31,7 @@ public class SecondToSubSecondAction extends AbstractSecondToSubSecondAction {
             .setAccountTo(event.getMerchantKey().getAccountTo())
             .setEpochSubSecond(epochSubSecond)
             .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
+            .setPaymentId(event.getPaymentId())
             .build())
         .map(command -> components().subSecond().aggregateSubSecond(command).execute())
         .collect(Collectors.toList());

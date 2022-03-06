@@ -19,7 +19,7 @@ public class MinuteToHourAction extends AbstractMinuteToHourAction {
   }
 
   @Override
-  public Effect<Empty> onMinuteCreated(MinuteEntity.MinuteCreated event) {
+  public Effect<Empty> onMinuteActivated(MinuteEntity.MinuteActivated event) {
     return effects().forward(components().hour().addMinute(
         HourApi.AddMinuteCommand
             .newBuilder()
@@ -47,6 +47,7 @@ public class MinuteToHourAction extends AbstractMinuteToHourAction {
             .setTransactionCount(event.getTransactionCount())
             .setLastUpdateTimestamp(event.getLastUpdateTimestamp())
             .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
+            .setPaymentId(event.getPaymentId())
             .build()));
   }
 

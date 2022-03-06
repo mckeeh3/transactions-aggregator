@@ -16,7 +16,7 @@ service Minute {
       entity_type: "minute"
       state: "io.aggregator.entity.MinuteState"
       events: [
-        "io.aggregator.entity.MinuteCreated",
+        "io.aggregator.entity.MinuteActivated",
         "io.aggregator.entity.SecondAdded",
         "io.aggregator.entity.MinuteAggregationRequested",
         "io.aggregator.entity.MinuteAggregated",

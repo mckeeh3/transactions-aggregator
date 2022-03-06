@@ -46,7 +46,7 @@ public class Minute extends AbstractMinute {
   }
 
   @Override
-  public MinuteEntity.MinuteState minuteCreated(MinuteEntity.MinuteState state, MinuteEntity.MinuteCreated event) {
+  public MinuteEntity.MinuteState minuteActivated(MinuteEntity.MinuteState state, MinuteEntity.MinuteActivated event) {
     return handle(state, event);
   }
 
@@ -94,7 +94,7 @@ public class Minute extends AbstractMinute {
         .thenReply(newState -> Empty.getDefaultInstance());
   }
 
-  static MinuteEntity.MinuteState handle(MinuteEntity.MinuteState state, MinuteEntity.MinuteCreated event) {
+  static MinuteEntity.MinuteState handle(MinuteEntity.MinuteState state, MinuteEntity.MinuteActivated event) {
     return state.toBuilder()
         .setMerchantKey(
             TransactionMerchantKey.MerchantKey
@@ -209,8 +209,8 @@ public class Minute extends AbstractMinute {
         .setEpochSecond(command.getEpochSecond())
         .build();
 
-    if (state.getMerchantKey().getMerchantId().isEmpty()) {
-      var minuteCreated = MinuteEntity.MinuteCreated
+    if (state.getActiveSecondsCount() == 0) {
+      var minuteActivated = MinuteEntity.MinuteActivated
           .newBuilder()
           .setMerchantKey(
               TransactionMerchantKey.MerchantKey
@@ -223,7 +223,7 @@ public class Minute extends AbstractMinute {
           .setEpochMinute(command.getEpochMinute())
           .build();
 
-      return List.of(minuteCreated, secondAdded);
+      return List.of(minuteActivated, secondAdded);
     } else {
       return List.of(secondAdded);
     }
