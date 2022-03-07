@@ -1,0 +1,72 @@
+syntax = "proto3";
+
+package io.aggregator.view;
+
+import "google/api/annotations.proto";
+import "google/protobuf/any.proto";
+import "akkaserverless/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "io/aggregator/entity/transaction_entity.proto";
+import "io/aggregator/view/transaction.proto";
+
+option java_outer_classname = "TransactionsNotPaidByDateModel";
+
+service TransactionsNotPaidByDate {
+  option (akkaserverless.codegen) = {
+    view: {}
+  };
+
+  rpc GetTransactionsNotPaidByDate(TransactionsNotPaidByDateRequest) returns (TransactionsNotPaidByDateResponse) {
+    option (akkaserverless.method).view.query = {
+      query: "SELECT * AS transactions"
+             "  FROM transactions_not_paid OFFSET :transaction_offset LIMIT :transaction_limit"
+             " WHERE transaction_timestamp.seconds >= :`from_date.seconds`"
+             "   AND transaction_timestamp.seconds < :`to_date.seconds`"
+             "   AND payment_id = ''"
+    };
+    option (google.api.http) = {
+      get: "/transactions-not-paid-by-date"
+    };
+  }
+
+  rpc OnTransactionCreated(entity.TransactionCreated) returns (Transaction) {
+    option (akkaserverless.method).eventing.in = {
+      event_sourced_entity: "transaction"
+    };
+    option (akkaserverless.method).view.update = {
+      table: "transactions_not_paid"
+      transform_updates: true
+    };
+  }
+
+  rpc OnPaymentAdded(entity.PaymentAdded) returns (Transaction) {
+    option (akkaserverless.method).eventing.in = {
+      event_sourced_entity: "transaction"
+    };
+    option (akkaserverless.method).view.update = {
+      table: "transactions_not_paid"
+      transform_updates: true
+    };
+  }
+
+  rpc IgnoreOtherEvents(google.protobuf.Any) returns (Transaction) {
+    option (akkaserverless.method).eventing.in = {
+      event_sourced_entity: "transaction"
+    };
+    option (akkaserverless.method).view.update = {
+      table: "transactions_not_paid"
+      transform_updates: true
+    };
+  }
+}
+
+message TransactionsNotPaidByDateRequest {
+  google.protobuf.Timestamp from_date = 1;
+  google.protobuf.Timestamp to_date = 2;
+  int32 transaction_offset = 3;
+  int32 transaction_limit = 4;
+}
+
+message TransactionsNotPaidByDateResponse {
+  repeated Transaction transactions = 1;
+}

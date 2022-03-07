@@ -1,0 +1,18 @@
+
+# Curl commands used with VS Code REST Client extension
+
+@urlPrefix = https://lively-truth-3781.us-east1.akkaserverless.app
+@paymentId = payment-1
+@fromDate = 2022-01-01T00:00:00.000-05:00
+@toDate = 2023-01-01T00:00:00.000-05:00
+@offset = 0
+@limit = 100
+
+### io.aggregator.view.TransactionsPaidByPaymentByDate.GetTransactionsPaidByPaymentByDate
+
+curl -XGET -H "Content-Type: application/json"
+  '{{urlPrefix}}/transactions-paid-by-payment-by-date?payment_id={{paymentId}}&from_date={{fromDate}}&to_date={{toDate}}&transaction_offset={{offset}}&transaction_limit={{limit}}'
+
+### io.aggregator.view.TransactionsNotPaidByDate.GetTransactionsNotPaidByDate
+
+curl -XGET -H "Content-Type: application/json" '{{urlPrefix}}/transactions-not-paid-by-date?from_date={{fromDate}}&to_date={{toDate}}&transaction_offset={{offset}}&transaction_limit={{limit}}'

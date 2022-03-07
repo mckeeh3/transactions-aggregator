@@ -28,6 +28,7 @@ public class MerchantToPaymentAction extends AbstractMerchantToPaymentAction {
             .setAccountFrom(event.getMerchantKey().getAccountFrom())
             .setAccountTo(event.getMerchantKey().getAccountTo())
             .setPaymentId(event.getPaymentId())
+            .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
             .addAllEpochDays(event.getActiveDaysList())
             .build()));
   }
@@ -42,6 +43,7 @@ public class MerchantToPaymentAction extends AbstractMerchantToPaymentAction {
             .setAccountFrom(event.getMerchantKey().getAccountFrom())
             .setAccountTo(event.getMerchantKey().getAccountTo())
             .setPaymentId(event.getPaymentId())
+            .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
             .addAllEpochDays(event.getActiveDaysList())
             .build()));
   }

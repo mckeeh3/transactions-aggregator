@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package io.aggregator.view;
+
+import "google/protobuf/timestamp.proto";
+
+option java_outer_classname = "TransactionModel";
+
+message Transaction {
+  string transaction_id = 1;
+  string service_code = 2;
+  string account_from = 3;
+  string account_to = 4;
+  string merchant_id = 5;
+  string shop_id = 6;
+  double transaction_amount = 7;
+  google.protobuf.Timestamp transaction_timestamp = 8;
+  string payment_id = 9;
+}

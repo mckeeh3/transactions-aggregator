@@ -26,6 +26,8 @@ import io.aggregator.entity.SubSecond;
 import io.aggregator.entity.Transaction;
 import io.aggregator.view.MerchantPaymentsByDateView;
 import io.aggregator.view.MerchantPaymentsByMerchantByDateView;
+import io.aggregator.view.TransactionsNotPaidByDateView;
+import io.aggregator.view.TransactionsPaidByPaymentByDateView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,7 +70,9 @@ public final class Main {
       SecondToSubSecondAction::new,
       SubSecondToSecondAction::new,
       SubSecondToTransactionAction::new,
-      TransactionToSubSecondAction::new);
+      TransactionToSubSecondAction::new,
+      TransactionsNotPaidByDateView::new,
+      TransactionsPaidByPaymentByDateView::new);
   }
 
   public static void main(String[] args) throws Exception {

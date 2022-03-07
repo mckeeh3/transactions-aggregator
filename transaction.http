@@ -2,14 +2,14 @@
 # Curl commands used with VS Code REST Client extension
 
 @urlPrefix = https://lively-truth-3781.us-east1.akkaserverless.app
-@transactionId = transaction-4
+@transactionId = transaction-1
 @serviceCode = service-code-1
 @accountFrom = account-from-1
 @accountTo = account-to-1
 @transactionAmount = 100.00
 @merchantId = merchant-id-1
 @shopId = shop-id-1
-@transactionTimestamp = 2022-03-02T00:00:02.000Z
+@transactionTimestamp = 2022-03-01T00:00:02.000Z
 @epochSubSecond = 19200000
 
 ### io.aggregator.api.Transaction.CreateTransaction

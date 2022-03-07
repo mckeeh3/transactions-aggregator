@@ -7,6 +7,8 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+import com.google.protobuf.Timestamp;
+
 // This class was initially generated based on the .proto definition by Akka Serverless tooling.
 //
 // As long as this file exists it will not be overwritten: you can maintain it yourself,
@@ -34,20 +36,11 @@ public class MinuteTest {
   public void addSecondTest() {
     MinuteTestKit testKit = MinuteTestKit.of(Minute::new);
 
-    var epochSecond = TimeTo.fromNow().toEpochSecond();
+    var epochMinute = TimeTo.fromNow().toEpochMinute();
+    var epochSecond = TimeTo.fromEpochMinute(epochMinute).toEpochSecond();
     var nextEpochSecond = TimeTo.fromEpochSecond(epochSecond).plus().seconds(1).toEpochSecond();
-    var epochMinute = TimeTo.fromEpochSecond(epochSecond).toEpochMinute();
 
-    var response = testKit.addSecond(
-        MinuteApi.AddSecondCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochMinute(epochMinute)
-            .setEpochSecond(epochSecond)
-            .build());
+    var response = testKit.addSecond(addSecondCommand(epochSecond));
 
     var minuteActivated = response.getNextEventOfType(MinuteEntity.MinuteActivated.class);
     var secondAdded = response.getNextEventOfType(MinuteEntity.SecondAdded.class);
@@ -77,16 +70,7 @@ public class MinuteTest {
 
     assertEquals(epochSecond, activeSecond.getEpochSecond());
 
-    response = testKit.addSecond(
-        MinuteApi.AddSecondCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochMinute(epochMinute)
-            .setEpochSecond(nextEpochSecond)
-            .build());
+    response = testKit.addSecond(addSecondCommand(nextEpochSecond));
 
     secondAdded = response.getNextEventOfType(MinuteEntity.SecondAdded.class);
 
@@ -114,44 +98,15 @@ public class MinuteTest {
   public void aggregateMinuteTest() {
     MinuteTestKit testKit = MinuteTestKit.of(Minute::new);
 
-    var epochSecond = TimeTo.fromNow().toEpochSecond();
+    var epochMinute = TimeTo.fromNow().toEpochMinute();
+    var epochSecond = TimeTo.fromEpochMinute(epochMinute).toEpochSecond();
     var nextEpochSecond = TimeTo.fromEpochSecond(epochSecond).plus().seconds(1).toEpochSecond();
-    var epochMinute = TimeTo.fromEpochSecond(epochSecond).toEpochMinute();
     var now = TimeTo.fromEpochSecond(epochSecond).toTimestamp();
 
-    testKit.addSecond(
-        MinuteApi.AddSecondCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochMinute(epochMinute)
-            .setEpochSecond(epochSecond)
-            .build());
+    testKit.addSecond(addSecondCommand(epochSecond));
+    testKit.addSecond(addSecondCommand(nextEpochSecond));
 
-    testKit.addSecond(
-        MinuteApi.AddSecondCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochMinute(epochMinute)
-            .setEpochSecond(nextEpochSecond)
-            .build());
-
-    var response = testKit.aggregateMinute(
-        MinuteApi.AggregateMinuteCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochMinute(epochMinute)
-            .setAggregateRequestTimestamp(now)
-            .setPaymentId("payment-1")
-            .build());
+    var response = testKit.aggregateMinute(aggregateMinuteCommand(epochMinute, now));
 
     var minuteAggregationRequested = response.getNextEventOfType(MinuteEntity.MinuteAggregationRequested.class);
 
@@ -179,21 +134,11 @@ public class MinuteTest {
   public void aggregateMinuteWithNoSecondsTest() {
     MinuteTestKit testKit = MinuteTestKit.of(Minute::new);
 
-    var epochSecond = TimeTo.fromNow().toEpochSecond();
-    var epochMinute = TimeTo.fromEpochSecond(epochSecond).toEpochMinute();
+    var epochMinute = TimeTo.fromNow().toEpochMinute();
+    var epochSecond = TimeTo.fromEpochMinute(epochMinute).toEpochSecond();
     var now = TimeTo.fromEpochSecond(epochSecond).toTimestamp();
 
-    var response = testKit.aggregateMinute(
-        MinuteApi.AggregateMinuteCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochMinute(epochMinute)
-            .setAggregateRequestTimestamp(now)
-            .setPaymentId("payment-1")
-            .build());
+    var response = testKit.aggregateMinute(aggregateMinuteCommand(epochMinute, now));
 
     var minuteAggregated = response.getNextEventOfType(MinuteEntity.MinuteAggregated.class);
 
@@ -211,60 +156,17 @@ public class MinuteTest {
   public void secondAggregationTest() {
     MinuteTestKit testKit = MinuteTestKit.of(Minute::new);
 
-    var epochSecond = TimeTo.fromNow().toEpochSecond();
+    var epochMinute = TimeTo.fromNow().toEpochMinute();
+    var epochSecond = TimeTo.fromEpochMinute(epochMinute).toEpochSecond();
     var nextEpochSecond = TimeTo.fromEpochSecond(epochSecond).plus().seconds(1).toEpochSecond();
-    var epochMinute = TimeTo.fromEpochSecond(epochSecond).toEpochMinute();
     var aggregateRequestTimestamp = TimeTo.fromEpochSecond(epochSecond).toTimestamp();
 
-    testKit.addSecond(
-        MinuteApi.AddSecondCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochMinute(epochMinute)
-            .setEpochSecond(epochSecond)
-            .build());
+    testKit.addSecond(addSecondCommand(epochSecond));
+    testKit.addSecond(addSecondCommand(nextEpochSecond));
 
-    testKit.addSecond(
-        MinuteApi.AddSecondCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochMinute(epochMinute)
-            .setEpochSecond(nextEpochSecond)
-            .build());
+    testKit.aggregateMinute(aggregateMinuteCommand(epochMinute, aggregateRequestTimestamp));
 
-    testKit.aggregateMinute(
-        MinuteApi.AggregateMinuteCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochMinute(epochMinute)
-            .setAggregateRequestTimestamp(aggregateRequestTimestamp)
-            .setPaymentId("payment-1")
-            .build());
-
-    var response = testKit.secondAggregation(
-        MinuteApi.SecondAggregationCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochMinute(epochMinute)
-            .setEpochSecond(epochSecond)
-            .setTransactionTotalAmount(123.45)
-            .setTransactionCount(10)
-            .setLastUpdateTimestamp(aggregateRequestTimestamp)
-            .setAggregateRequestTimestamp(aggregateRequestTimestamp)
-            .setPaymentId("payment-1")
-            .build());
+    var response = testKit.secondAggregation(secondAggregationCommand(epochSecond, 123.45, 10, aggregateRequestTimestamp));
 
     var activeSecondAggregated = response.getNextEventOfType(MinuteEntity.ActiveSecondAggregated.class);
 
@@ -279,21 +181,7 @@ public class MinuteTest {
     assertEquals(aggregateRequestTimestamp, activeSecondAggregated.getAggregateRequestTimestamp());
     assertEquals("payment-1", activeSecondAggregated.getPaymentId());
 
-    response = testKit.secondAggregation(
-        MinuteApi.SecondAggregationCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochMinute(epochMinute)
-            .setEpochSecond(nextEpochSecond)
-            .setTransactionTotalAmount(678.90)
-            .setTransactionCount(20)
-            .setLastUpdateTimestamp(aggregateRequestTimestamp)
-            .setAggregateRequestTimestamp(aggregateRequestTimestamp)
-            .setPaymentId("payment-1")
-            .build());
+    response = testKit.secondAggregation(secondAggregationCommand(nextEpochSecond, 678.90, 20, aggregateRequestTimestamp));
 
     var minuteAggregated = response.getNextEventOfType(MinuteEntity.MinuteAggregated.class);
     activeSecondAggregated = response.getNextEventOfType(MinuteEntity.ActiveSecondAggregated.class);
@@ -323,47 +211,14 @@ public class MinuteTest {
     // this sequence re-activates the second and minute aggregation
     aggregateRequestTimestamp = TimeTo.fromEpochSecond(epochSecond).plus().minutes(1).toTimestamp();
 
-    response = testKit.addSecond(
-        MinuteApi.AddSecondCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochMinute(epochMinute)
-            .setEpochSecond(epochSecond)
-            .build());
+    response = testKit.addSecond(addSecondCommand(epochSecond));
 
     response.getNextEventOfType(MinuteEntity.MinuteActivated.class);
     response.getNextEventOfType(MinuteEntity.SecondAdded.class);
 
-    testKit.aggregateMinute(
-        MinuteApi.AggregateMinuteCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochMinute(epochMinute)
-            .setAggregateRequestTimestamp(aggregateRequestTimestamp)
-            .setPaymentId("payment-1")
-            .build());
+    testKit.aggregateMinute(aggregateMinuteCommand(epochMinute, aggregateRequestTimestamp));
 
-    response = testKit.secondAggregation(
-        MinuteApi.SecondAggregationCommand
-            .newBuilder()
-            .setMerchantId("merchant-1")
-            .setServiceCode("service-code-1")
-            .setAccountFrom("account-from-1")
-            .setAccountTo("account-to-1")
-            .setEpochMinute(epochMinute)
-            .setEpochSecond(epochSecond)
-            .setTransactionTotalAmount(543.21)
-            .setTransactionCount(321)
-            .setLastUpdateTimestamp(aggregateRequestTimestamp)
-            .setAggregateRequestTimestamp(aggregateRequestTimestamp)
-            .setPaymentId("payment-1")
-            .build());
+    response = testKit.secondAggregation(secondAggregationCommand(epochSecond, 543.21, 321, aggregateRequestTimestamp));
 
     minuteAggregated = response.getNextEventOfType(MinuteEntity.MinuteAggregated.class);
     activeSecondAggregated = response.getNextEventOfType(MinuteEntity.ActiveSecondAggregated.class);
@@ -389,5 +244,47 @@ public class MinuteTest {
     assertEquals(aggregateRequestTimestamp, minuteAggregated.getLastUpdateTimestamp());
     assertEquals(aggregateRequestTimestamp, minuteAggregated.getAggregateRequestTimestamp());
     assertEquals("payment-1", minuteAggregated.getPaymentId());
+  }
+
+  static MinuteApi.AddSecondCommand addSecondCommand(long epochSecond) {
+    return MinuteApi.AddSecondCommand
+        .newBuilder()
+        .setMerchantId("merchant-1")
+        .setServiceCode("service-code-1")
+        .setAccountFrom("account-from-1")
+        .setAccountTo("account-to-1")
+        .setEpochMinute(TimeTo.fromEpochSecond(epochSecond).toEpochMinute())
+        .setEpochSecond(epochSecond)
+        .build();
+  }
+
+  static MinuteApi.AggregateMinuteCommand aggregateMinuteCommand(long epochMinute, Timestamp timestamp) {
+    return MinuteApi.AggregateMinuteCommand
+        .newBuilder()
+        .setMerchantId("merchant-1")
+        .setServiceCode("service-code-1")
+        .setAccountFrom("account-from-1")
+        .setAccountTo("account-to-1")
+        .setEpochMinute(epochMinute)
+        .setAggregateRequestTimestamp(timestamp)
+        .setPaymentId("payment-1")
+        .build();
+  }
+
+  static MinuteApi.SecondAggregationCommand secondAggregationCommand(long epochSecond, double amount, int count, Timestamp timestamp) {
+    return MinuteApi.SecondAggregationCommand
+        .newBuilder()
+        .setMerchantId("merchant-1")
+        .setServiceCode("service-code-1")
+        .setAccountFrom("account-from-1")
+        .setAccountTo("account-to-1")
+        .setEpochMinute(TimeTo.fromEpochSecond(epochSecond).toEpochMinute())
+        .setEpochSecond(epochSecond)
+        .setTransactionTotalAmount(amount)
+        .setTransactionCount(count)
+        .setLastUpdateTimestamp(timestamp)
+        .setAggregateRequestTimestamp(timestamp)
+        .setPaymentId("payment-1")
+        .build();
   }
 }

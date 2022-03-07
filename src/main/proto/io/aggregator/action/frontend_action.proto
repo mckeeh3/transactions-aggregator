@@ -20,6 +20,13 @@ service Frontend {
       body: "*"
     };
   }
+
+  rpc GenerateTransactionsSingleMerchant(GenerateTransactionsSingleMerchantRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/generate-transactions-single-merchant"
+      body: "*"
+    };
+  }
 }
 
 message GenerateTransactionsRequest {
@@ -27,4 +34,14 @@ message GenerateTransactionsRequest {
   int32 transaction_count = 2;
   int32 transaction_interval_ms = 3;
   google.protobuf.Timestamp day = 4;
+}
+
+message GenerateTransactionsSingleMerchantRequest {
+  string merchant_id = 1;
+  string service_code = 2;
+  string account_from = 3;
+  string account_to = 4;
+  int32 transaction_count = 5;
+  int32 transaction_interval_ms = 6;
+  google.protobuf.Timestamp day = 7;
 }
