@@ -29,6 +29,7 @@ public class TransactionToSubSecondActionTest {
   @Test
   public void onTransactionCreatedTest() {
     TransactionToSubSecondActionTestKit testKit = TransactionToSubSecondActionTestKit.of(TransactionToSubSecondAction::new);
+
     var timestamp = TimeTo.now();
     var epochSubSecond = TimeTo.fromTimestamp(timestamp).toEpochSubSecond();
 
