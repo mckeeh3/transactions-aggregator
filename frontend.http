@@ -1,0 +1,31 @@
+
+@urlPrefix = https://lively-truth-3781.us-east1.akkaserverless.app
+@merchantIdRange = 1
+@transactionCount = 10
+@transactionIntervalMs = 5
+@day = 2022-01-08T00:00:00.000Z
+@merchantId = merchant-1
+@serviceCode = service-code-1
+@accountFrom = account-from-1
+@accountTo = account-to-1
+
+### io.aggregator.action.Frontend.GenerateTransactions
+
+curl -XPOST -H "Content-Type: application/json" -d '{
+  "merchant_id_range":{{merchantIdRange}},
+  "transaction_count":{{transactionCount}},
+  "transaction_interval_ms":{{transactionIntervalMs}},
+  "day":"{{day}}"}'
+  {{urlPrefix}}/generate-transactions
+
+### io.aggregator.action.Frontend.GenerateTransactionsSingleMerchant
+
+curl -XPOST -H "Content-Type: application/json" -d '{
+  "merchant_id":"{{merchantId}}",
+  "service_code":"{{serviceCode}}",
+  "account_from":"{{accountFrom}}",
+  "account_to":"{{accountTo}}",
+  "transaction_count":{{transactionCount}},
+  "transaction_interval_ms":{{transactionIntervalMs}},
+  "day":"{{day}}"}'
+  {{urlPrefix}}/generate-transactions-single-merchant
