@@ -4,6 +4,9 @@ import com.akkaserverless.javasdk.action.ActionCreationContext;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.aggregator.api.TransactionApi;
 import io.aggregator.entity.SubSecondEntity;
 
@@ -14,19 +17,22 @@ import io.aggregator.entity.SubSecondEntity;
 // or delete it so it is regenerated as needed.
 
 public class SubSecondToTransactionAction extends AbstractSubSecondToTransactionAction {
+  static Logger log = LoggerFactory.getLogger(SubSecondToTransactionAction.class);
 
   public SubSecondToTransactionAction(ActionCreationContext creationContext) {
   }
 
   @Override
   public Effect<Empty> onTransactionPaid(SubSecondEntity.TransactionPaid event) {
+    log.info("onTransactionPaid: {}", event);
+
     return effects().forward(components().transaction().addPayment(
         TransactionApi.AddPaymentCommand
             .newBuilder()
             .setTransactionId(event.getTransactionKey().getTransactionId())
-            .setTransactionId(event.getTransactionKey().getServiceCode())
-            .setTransactionId(event.getTransactionKey().getAccountFrom())
-            .setTransactionId(event.getTransactionKey().getAccountTo())
+            .setServiceCode(event.getTransactionKey().getServiceCode())
+            .setAccountFrom(event.getTransactionKey().getAccountFrom())
+            .setAccountTo(event.getTransactionKey().getAccountTo())
             .setPaymentId(event.getPaymentId())
             .build()));
   }

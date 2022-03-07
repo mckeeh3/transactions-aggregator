@@ -9,7 +9,7 @@
 @transactionAmount = 100.00
 @merchantId = merchant-id-1
 @shopId = shop-id-1
-@transactionTimestamp = 2022-03-01T00:00:02.000Z
+@transactionTimestamp = 2022-03-02T00:00:02.000Z
 @epochSubSecond = 19200000
 
 ### io.aggregator.api.Transaction.CreateTransaction
@@ -37,3 +37,8 @@ curl -XPOST -H "Content-Type: application/json" -d '{
   "amount":{{transactionAmount}},
   "timestamp":"{{transactionTimestamp}}"}'
   {{urlPrefix}}/sub_second/add-transaction
+
+### io.aggregator.api.Transaction.GetTransaction
+
+curl -XGET -H "Content-Type: application/json"
+  '{{urlPrefix}}/transaction/{{transactionId}}/{{serviceCode}}/{{accountFrom}}/{{accountTo}}'

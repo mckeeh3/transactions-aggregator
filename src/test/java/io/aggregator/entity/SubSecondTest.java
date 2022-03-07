@@ -116,40 +116,48 @@ public class SubSecondTest {
     var response = testKit.aggregateSubSecond(aggregateSubSecondCommand("payment-1", epochSubSecond, TimeTo.fromEpochSubSecond(epochSubSecond).plus().hours(2).toTimestamp()));
 
     assertEquals(4, response.getAllEvents().size());
-    var aggregated = response.getNextEventOfType(SubSecondEntity.SubSecondAggregated.class);
+    var subSecondAggregated = response.getNextEventOfType(SubSecondEntity.SubSecondAggregated.class);
     response.getNextEventOfType(SubSecondEntity.TransactionPaid.class);
     response.getNextEventOfType(SubSecondEntity.TransactionPaid.class);
-    response.getNextEventOfType(SubSecondEntity.TransactionPaid.class);
+    var transactionPaid = response.getNextEventOfType(SubSecondEntity.TransactionPaid.class);
 
-    assertNotNull(aggregated);
-    assertEquals("merchant-1", aggregated.getMerchantKey().getMerchantId());
-    assertEquals("service-code-1", aggregated.getMerchantKey().getServiceCode());
-    assertEquals("account-from-1", aggregated.getMerchantKey().getAccountFrom());
-    assertEquals("account-to-1", aggregated.getMerchantKey().getAccountTo());
-    assertEquals(epochSubSecond, aggregated.getEpochSubSecond());
-    assertEquals(1.23 + 4.56 + 7.89, aggregated.getTransactionTotalAmount(), 0.0);
-    assertEquals(3, aggregated.getTransactionCount());
-    assertEquals(TimeTo.fromEpochSubSecond(epochSubSecond).plus().hours(2).toTimestamp(), aggregated.getAggregateRequestTimestamp());
-    assertEquals(TimeTo.fromEpochSubSecond(epochSubSecond).plus().nanos(20).toTimestamp(), aggregated.getLastUpdateTimestamp());
-    assertEquals("payment-1", aggregated.getPaymentId());
+    assertEquals("transaction-3", transactionPaid.getTransactionKey().getTransactionId());
+    assertEquals("service-code-1", transactionPaid.getTransactionKey().getServiceCode());
+    assertEquals("account-from-1", transactionPaid.getTransactionKey().getAccountFrom());
+    assertEquals("account-to-1", transactionPaid.getTransactionKey().getAccountTo());
+    assertEquals("merchant-1", transactionPaid.getMerchantId());
+    assertEquals("payment-1", transactionPaid.getPaymentId());
+    assertEquals(epochSubSecond, transactionPaid.getEpochSubSecond());
+
+    assertNotNull(subSecondAggregated);
+    assertEquals("merchant-1", subSecondAggregated.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", subSecondAggregated.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", subSecondAggregated.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", subSecondAggregated.getMerchantKey().getAccountTo());
+    assertEquals(epochSubSecond, subSecondAggregated.getEpochSubSecond());
+    assertEquals(1.23 + 4.56 + 7.89, subSecondAggregated.getTransactionTotalAmount(), 0.0);
+    assertEquals(3, subSecondAggregated.getTransactionCount());
+    assertEquals(TimeTo.fromEpochSubSecond(epochSubSecond).plus().hours(2).toTimestamp(), subSecondAggregated.getAggregateRequestTimestamp());
+    assertEquals(TimeTo.fromEpochSubSecond(epochSubSecond).plus().nanos(20).toTimestamp(), subSecondAggregated.getLastUpdateTimestamp());
+    assertEquals("payment-1", subSecondAggregated.getPaymentId());
 
     // when the same aggregate command is received again, all of the processed transactions should be ignored
     response = testKit.aggregateSubSecond(aggregateSubSecondCommand("payment-1", epochSubSecond, TimeTo.fromEpochSubSecond(epochSubSecond).plus().hours(2).toTimestamp()));
 
     assertEquals(1, response.getAllEvents().size());
-    aggregated = response.getNextEventOfType(SubSecondEntity.SubSecondAggregated.class);
+    subSecondAggregated = response.getNextEventOfType(SubSecondEntity.SubSecondAggregated.class);
 
-    assertNotNull(aggregated);
-    assertEquals("merchant-1", aggregated.getMerchantKey().getMerchantId());
-    assertEquals("service-code-1", aggregated.getMerchantKey().getServiceCode());
-    assertEquals("account-from-1", aggregated.getMerchantKey().getAccountFrom());
-    assertEquals("account-to-1", aggregated.getMerchantKey().getAccountTo());
-    assertEquals(epochSubSecond, aggregated.getEpochSubSecond());
-    assertEquals(0.0, aggregated.getTransactionTotalAmount(), 0.0);
-    assertEquals(0, aggregated.getTransactionCount());
-    assertEquals(TimeTo.fromEpochSubSecond(epochSubSecond).plus().hours(2).toTimestamp(), aggregated.getAggregateRequestTimestamp());
-    assertEquals(TimeTo.zero(), aggregated.getLastUpdateTimestamp());
-    assertEquals("payment-1", aggregated.getPaymentId());
+    assertNotNull(subSecondAggregated);
+    assertEquals("merchant-1", subSecondAggregated.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", subSecondAggregated.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", subSecondAggregated.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", subSecondAggregated.getMerchantKey().getAccountTo());
+    assertEquals(epochSubSecond, subSecondAggregated.getEpochSubSecond());
+    assertEquals(0.0, subSecondAggregated.getTransactionTotalAmount(), 0.0);
+    assertEquals(0, subSecondAggregated.getTransactionCount());
+    assertEquals(TimeTo.fromEpochSubSecond(epochSubSecond).plus().hours(2).toTimestamp(), subSecondAggregated.getAggregateRequestTimestamp());
+    assertEquals(TimeTo.zero(), subSecondAggregated.getLastUpdateTimestamp());
+    assertEquals("payment-1", subSecondAggregated.getPaymentId());
 
     // add more transactions after aggregation
     testKit.addTransaction(addTransactionCommand(epochSubSecond, "transaction-4", 6.54, TimeTo.fromEpochSubSecond(epochSubSecond).plus().nanos(30).toTimestamp()));
@@ -158,21 +166,21 @@ public class SubSecondTest {
     response = testKit.aggregateSubSecond(aggregateSubSecondCommand("payment-2", epochSubSecond, TimeTo.fromEpochSubSecond(epochSubSecond).plus().hours(3).toTimestamp()));
 
     assertEquals(3, response.getAllEvents().size());
-    aggregated = response.getNextEventOfType(SubSecondEntity.SubSecondAggregated.class);
+    subSecondAggregated = response.getNextEventOfType(SubSecondEntity.SubSecondAggregated.class);
     response.getNextEventOfType(SubSecondEntity.TransactionPaid.class);
     response.getNextEventOfType(SubSecondEntity.TransactionPaid.class);
 
-    assertNotNull(aggregated);
-    assertEquals("merchant-1", aggregated.getMerchantKey().getMerchantId());
-    assertEquals("service-code-1", aggregated.getMerchantKey().getServiceCode());
-    assertEquals("account-from-1", aggregated.getMerchantKey().getAccountFrom());
-    assertEquals("account-to-1", aggregated.getMerchantKey().getAccountTo());
-    assertEquals(epochSubSecond, aggregated.getEpochSubSecond());
-    assertEquals(6.54 + 3.21, aggregated.getTransactionTotalAmount(), 0.0);
-    assertEquals(2, aggregated.getTransactionCount());
-    assertEquals(TimeTo.fromEpochSubSecond(epochSubSecond).plus().hours(3).toTimestamp(), aggregated.getAggregateRequestTimestamp());
-    assertEquals(TimeTo.fromEpochSubSecond(epochSubSecond).plus().nanos(40).toTimestamp(), aggregated.getLastUpdateTimestamp());
-    assertEquals("payment-2", aggregated.getPaymentId());
+    assertNotNull(subSecondAggregated);
+    assertEquals("merchant-1", subSecondAggregated.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", subSecondAggregated.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", subSecondAggregated.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", subSecondAggregated.getMerchantKey().getAccountTo());
+    assertEquals(epochSubSecond, subSecondAggregated.getEpochSubSecond());
+    assertEquals(6.54 + 3.21, subSecondAggregated.getTransactionTotalAmount(), 0.0);
+    assertEquals(2, subSecondAggregated.getTransactionCount());
+    assertEquals(TimeTo.fromEpochSubSecond(epochSubSecond).plus().hours(3).toTimestamp(), subSecondAggregated.getAggregateRequestTimestamp());
+    assertEquals(TimeTo.fromEpochSubSecond(epochSubSecond).plus().nanos(40).toTimestamp(), subSecondAggregated.getLastUpdateTimestamp());
+    assertEquals("payment-2", subSecondAggregated.getPaymentId());
   }
 
   static TransactionMerchantKey.MerchantKey merchantKey(String merchantId) {

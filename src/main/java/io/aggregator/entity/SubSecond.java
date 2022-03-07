@@ -213,7 +213,7 @@ public class SubSecond extends AbstractSubSecond {
                       .setAccountFrom(transaction.getTransactionKey().getAccountFrom())
                       .setAccountTo(transaction.getTransactionKey().getAccountTo())
                       .build())
-              .setPaymentId(command.getPaymentId())
+              .setMerchantId(command.getMerchantId())
               .setEpochSubSecond(state.getEpochSubSecond())
               .setPaymentId(command.getPaymentId())
               .build());

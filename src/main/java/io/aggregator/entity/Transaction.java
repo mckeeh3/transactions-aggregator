@@ -20,7 +20,6 @@ public class Transaction extends AbstractTransaction {
   static final Logger log = LoggerFactory.getLogger(Transaction.class);
 
   public Transaction(EventSourcedEntityContext context) {
-    log.info("Transaction instance started, entityKey {}", context.entityId());
   }
 
   @Override
