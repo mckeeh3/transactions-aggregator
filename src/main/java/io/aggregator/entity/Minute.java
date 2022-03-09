@@ -71,7 +71,7 @@ public class Minute extends AbstractMinute {
   }
 
   private Effect<Empty> handle(MinuteEntity.MinuteState state, MinuteApi.AddSecondCommand command) {
-    log.info("state: {}\nAddSecondCommand: {}", state, command);
+    log.debug("state: {}\nAddSecondCommand: {}", state, command);
 
     return effects()
         .emitEvents(eventsFor(state, command))
@@ -79,7 +79,7 @@ public class Minute extends AbstractMinute {
   }
 
   private Effect<Empty> handle(MinuteEntity.MinuteState state, MinuteApi.AggregateMinuteCommand command) {
-    log.info("state: {}\nAggregateMinuteCommand: {}", state, command);
+    log.debug("state: {}\nAggregateMinuteCommand: {}", state, command);
 
     return effects()
         .emitEvents(eventsFor(state, command))
@@ -87,7 +87,7 @@ public class Minute extends AbstractMinute {
   }
 
   private Effect<Empty> handle(MinuteEntity.MinuteState state, MinuteApi.SecondAggregationCommand command) {
-    log.info("state: {}\nSecondAggregationCommand: {}", state, command);
+    log.debug("state: {}\nSecondAggregationCommand: {}", state, command);
 
     return effects()
         .emitEvents(eventsFor(state, command))

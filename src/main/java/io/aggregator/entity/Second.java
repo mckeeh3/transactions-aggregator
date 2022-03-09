@@ -71,7 +71,7 @@ public class Second extends AbstractSecond {
   }
 
   private Effect<Empty> handle(SecondEntity.SecondState state, SecondApi.ActivateSubSecondCommand command) {
-    log.info("state: {}\nActivateSubSecondCommand: {}", state, command);
+    log.debug("state: {}\nActivateSubSecondCommand: {}", state, command);
 
     return effects()
         .emitEvents(eventsFor(state, command))
@@ -79,7 +79,7 @@ public class Second extends AbstractSecond {
   }
 
   private Effect<Empty> handle(SecondEntity.SecondState state, SecondApi.AggregateSecondCommand command) {
-    log.info("state: {}\nAggregateSecondCommand: {}", state, command);
+    log.debug("state: {}\nAggregateSecondCommand: {}", state, command);
 
     return effects()
         .emitEvents(eventsFor(state, command))
@@ -87,7 +87,7 @@ public class Second extends AbstractSecond {
   }
 
   private Effect<Empty> handle(SecondEntity.SecondState state, SecondApi.SubSecondAggregationCommand command) {
-    log.info("state: {}\nSubSecondAggregationCommand: {}", state, command);
+    log.debug("state: {}\nSubSecondAggregationCommand: {}", state, command);
 
     return effects()
         .emitEvents(eventsFor(state, command))

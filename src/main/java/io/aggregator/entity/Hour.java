@@ -71,7 +71,7 @@ public class Hour extends AbstractHour {
   }
 
   private Effect<Empty> handle(HourEntity.HourState state, HourApi.AddMinuteCommand command) {
-    log.info("state: {}\nAddMinuteCommand: {}", state, command);
+    log.debug("state: {}\nAddMinuteCommand: {}", state, command);
 
     return effects()
         .emitEvents(eventsFor(state, command))
@@ -79,7 +79,7 @@ public class Hour extends AbstractHour {
   }
 
   private Effect<Empty> handle(HourEntity.HourState state, HourApi.AggregateHourCommand command) {
-    log.info("state: {}\nAggregateHourCommand: {}", state, command);
+    log.debug("state: {}\nAggregateHourCommand: {}", state, command);
 
     return effects()
         .emitEvents(eventsFor(state, command))
@@ -87,7 +87,7 @@ public class Hour extends AbstractHour {
   }
 
   private Effect<Empty> handle(HourEntity.HourState state, HourApi.MinuteAggregationCommand command) {
-    log.info("state: {}\nMinuteAggregationCommand: {}", state, command);
+    log.debug("state: {}\nMinuteAggregationCommand: {}", state, command);
 
     return effects()
         .emitEvents(eventsFor(state, command))

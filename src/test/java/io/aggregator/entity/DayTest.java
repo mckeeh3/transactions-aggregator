@@ -248,6 +248,32 @@ public class DayTest {
     assertEquals("payment-1", dayAggregated.getPaymentId());
   }
 
+  @Test
+  public void hourAggregationSameHourMultipleAggregations() {
+    DayTestKit testKit = DayTestKit.of(Day::new);
+
+    var epochDay = TimeTo.fromNow().toEpochDay();
+    var epochHour = TimeTo.fromEpochDay(epochDay).toEpochHour();
+    var aggregateRequestTimestamp1 = TimeTo.fromEpochHour(epochHour).toTimestamp();
+    var aggregateRequestTimestamp2 = TimeTo.fromEpochHour(epochHour).plus().seconds(1).toTimestamp();
+
+    testKit.activateHour(activateHourCommand(epochHour));
+    testKit.aggregateDay(aggregateDayCommand(epochDay, aggregateRequestTimestamp1));
+
+    testKit.activateHour(activateHourCommand(epochHour));
+    testKit.aggregateDay(aggregateDayCommand(epochDay, aggregateRequestTimestamp2));
+
+    var response = testKit.hourAggregation(hourAggregationCommand(epochHour, 123.45, 10, aggregateRequestTimestamp1));
+
+    response.getNextEventOfType(DayEntity.DayAggregated.class);
+    response.getNextEventOfType(DayEntity.ActiveHourAggregated.class);
+
+    response = testKit.hourAggregation(hourAggregationCommand(epochHour, 678.90, 20, aggregateRequestTimestamp2));
+
+    response.getNextEventOfType(DayEntity.DayAggregated.class);
+    response.getNextEventOfType(DayEntity.ActiveHourAggregated.class);
+  }
+
   static DayApi.ActivateHourCommand activateHourCommand(long epochHour) {
     return DayApi.ActivateHourCommand
         .newBuilder()

@@ -1,7 +1,7 @@
 
 @urlPrefix = https://lively-truth-3781.us-east1.akkaserverless.app
 @merchantIdRange = 1
-@transactionCount = 10000
+@transactionCount = 1000
 @transactionIntervalMs = 5
 @day = 2022-03-09T01:00:00.000Z
 @merchantId = merchant-2

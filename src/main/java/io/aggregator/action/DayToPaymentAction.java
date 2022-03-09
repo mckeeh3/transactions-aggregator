@@ -4,6 +4,9 @@ import com.akkaserverless.javasdk.action.ActionCreationContext;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.aggregator.api.PaymentApi;
 import io.aggregator.entity.DayEntity;
 
@@ -14,12 +17,15 @@ import io.aggregator.entity.DayEntity;
 // or delete it so it is regenerated as needed.
 
 public class DayToPaymentAction extends AbstractDayToPaymentAction {
+  static Logger log = LoggerFactory.getLogger(DayToPaymentAction.class);
 
   public DayToPaymentAction(ActionCreationContext creationContext) {
   }
 
   @Override
   public Effect<Empty> onDayAggregated(DayEntity.DayAggregated event) {
+    log.info("onDayAggregated: {}", event);
+
     return effects().forward(components().payment().dayAggregation(
         PaymentApi.DayAggregationCommand
             .newBuilder()

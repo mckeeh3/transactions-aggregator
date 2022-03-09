@@ -2,10 +2,10 @@
 # Curl commands used with VS Code REST Client extension
 
 @urlPrefix = https://lively-truth-3781.us-east1.akkaserverless.app
-@paymentId = payment-1
+@paymentId = payment-3
 @fromDate = 2022-03-08T00:00:00.000-00:00
 @toDate = 2023-01-01T00:00:00.000-00:00
-@offset = 195
+@offset = 995
 @limit = 10
 
 ### io.aggregator.view.TransactionsPaidByPaymentByDate.GetTransactionsPaidByPaymentByDate
