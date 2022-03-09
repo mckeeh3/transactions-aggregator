@@ -53,7 +53,7 @@ public class Transaction extends AbstractTransaction {
   }
 
   private Effect<Empty> handle(TransactionEntity.TransactionState state, TransactionApi.CreateTransactionCommand command) {
-    log.info("state: {}\nCreateTransactionCommand: {}", state, command);
+    log.debug("state: {}\nCreateTransactionCommand: {}", state, command);
 
     if (state.getTransactionKey().getTransactionId() != null && !state.getTransactionKey().getTransactionId().isEmpty()) {
       return effects().reply(Empty.getDefaultInstance()); // already created
@@ -64,7 +64,7 @@ public class Transaction extends AbstractTransaction {
   }
 
   private Effect<Empty> handle(TransactionEntity.TransactionState state, TransactionApi.AddPaymentCommand command) {
-    log.info("state: {}\nAddPaymentCommand: {}", state, command);
+    log.debug("state: {}\nAddPaymentCommand: {}", state, command);
 
     return effects()
         .emitEvent(eventFor(state, command))

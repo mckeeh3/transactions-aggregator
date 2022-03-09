@@ -59,7 +59,7 @@ public class SubSecond extends AbstractSubSecond {
   }
 
   private Effect<Empty> handle(SubSecondEntity.SubSecondState state, SubSecondApi.AddTransactionCommand command) {
-    log.info("state: {}\nAddTransactionCommand: {}", state, command);
+    log.debug("state: {}\nAddTransactionCommand: {}", state, command);
 
     return effects()
         .emitEvents(eventsFor(state, command))
@@ -67,7 +67,7 @@ public class SubSecond extends AbstractSubSecond {
   }
 
   private Effect<Empty> handle(SubSecondEntity.SubSecondState state, SubSecondApi.AggregateSubSecondCommand command) {
-    log.info("state: {}\nAggregateCommand: {}", state, command);
+    log.debug("state: {}\nAggregateCommand: {}", state, command);
 
     return effects()
         .emitEvents(eventsFor(state, command))

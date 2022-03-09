@@ -247,6 +247,61 @@ public class SecondTest {
     assertEquals("payment-1", secondAggregated.getPaymentId());
   }
 
+  @Test
+  public void multipleAggregationRequestsWithStaggeredResponses() {
+    SecondTestKit testKit = SecondTestKit.of(Second::new);
+
+    var epochSecond = TimeTo.fromNow().toEpochSecond();
+    var epochSubSecond1 = TimeTo.fromEpochSecond(epochSecond).toEpochSubSecond();
+    var epochSubSecond2 = TimeTo.fromEpochSubSecond(epochSubSecond1).plus().subSeconds(1).toEpochSubSecond();
+    var aggregateRequestTimestamp1 = TimeTo.fromEpochSubSecond(epochSubSecond1).toTimestamp();
+    var aggregateRequestTimestamp2 = TimeTo.fromEpochSubSecond(epochSubSecond1).plus().seconds(1).toTimestamp();
+
+    testKit.activateSubSecond(activateSubSecondCommand(epochSubSecond1));
+    testKit.aggregateSecond(aggregateSecondCommand(epochSecond, aggregateRequestTimestamp1));
+
+    testKit.activateSubSecond(activateSubSecondCommand(epochSubSecond2));
+    testKit.aggregateSecond(aggregateSecondCommand(epochSecond, aggregateRequestTimestamp2));
+
+    var response = testKit.subSecondAggregation(subSecondAggregationCommand(epochSubSecond2, 123.45, 10, aggregateRequestTimestamp2));
+
+    var secondAggregated = response.getNextEventOfType(SecondEntity.SecondAggregated.class);
+    var activeSubSecondAggregated = response.getNextEventOfType(SecondEntity.ActiveSubSecondAggregated.class);
+
+    assertEquals(epochSecond, secondAggregated.getEpochSecond());
+    assertEquals(123.45, secondAggregated.getTransactionTotalAmount(), 0.0);
+    assertEquals(10, secondAggregated.getTransactionCount());
+    assertEquals(aggregateRequestTimestamp2, secondAggregated.getLastUpdateTimestamp());
+    assertEquals(aggregateRequestTimestamp2, secondAggregated.getAggregateRequestTimestamp());
+    assertEquals("payment-1", secondAggregated.getPaymentId());
+
+    assertEquals(epochSubSecond2, activeSubSecondAggregated.getEpochSubSecond());
+    assertEquals(123.45, activeSubSecondAggregated.getTransactionTotalAmount(), 0.0);
+    assertEquals(10, activeSubSecondAggregated.getTransactionCount());
+    assertEquals(aggregateRequestTimestamp2, activeSubSecondAggregated.getLastUpdateTimestamp());
+    assertEquals(aggregateRequestTimestamp2, activeSubSecondAggregated.getAggregateRequestTimestamp());
+    assertEquals("payment-1", activeSubSecondAggregated.getPaymentId());
+
+    response = testKit.subSecondAggregation(subSecondAggregationCommand(epochSubSecond1, 678.90, 20, aggregateRequestTimestamp1));
+
+    secondAggregated = response.getNextEventOfType(SecondEntity.SecondAggregated.class);
+    activeSubSecondAggregated = response.getNextEventOfType(SecondEntity.ActiveSubSecondAggregated.class);
+
+    assertEquals(epochSecond, secondAggregated.getEpochSecond());
+    assertEquals(678.90, secondAggregated.getTransactionTotalAmount(), 0.0);
+    assertEquals(20, secondAggregated.getTransactionCount());
+    assertEquals(aggregateRequestTimestamp1, secondAggregated.getLastUpdateTimestamp());
+    assertEquals(aggregateRequestTimestamp1, secondAggregated.getAggregateRequestTimestamp());
+    assertEquals("payment-1", secondAggregated.getPaymentId());
+
+    assertEquals(epochSubSecond1, activeSubSecondAggregated.getEpochSubSecond());
+    assertEquals(678.90, activeSubSecondAggregated.getTransactionTotalAmount(), 0.0);
+    assertEquals(20, activeSubSecondAggregated.getTransactionCount());
+    assertEquals(aggregateRequestTimestamp1, activeSubSecondAggregated.getLastUpdateTimestamp());
+    assertEquals(aggregateRequestTimestamp1, activeSubSecondAggregated.getAggregateRequestTimestamp());
+    assertEquals("payment-1", activeSubSecondAggregated.getPaymentId());
+  }
+
   static SecondApi.ActivateSubSecondCommand activateSubSecondCommand(long epochSubSecond) {
     return SecondApi.ActivateSubSecondCommand
         .newBuilder()

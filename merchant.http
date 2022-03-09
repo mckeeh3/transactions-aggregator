@@ -1,7 +1,7 @@
 # Curl commands used with VS Code REST Client extension
 
 @urlPrefix = https://lively-truth-3781.us-east1.akkaserverless.app
-@merchantId = merchant-id-1
+@merchantId = merchant-2
 @serviceCode = service-code-1
 @accountFrom = account-from-1
 @accountTo = account-to-1
