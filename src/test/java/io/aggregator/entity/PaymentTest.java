@@ -325,6 +325,45 @@ public class PaymentTest {
     assertEquals(0, response.getAllEvents().size());
   }
 
+  @Test
+  public void aggregationWithOneAggregationOneDayAndOnePaymentNoDaysRequest() {
+    PaymentTestKit testKit = PaymentTestKit.of(Payment::new);
+
+    var now = TimeTo.now();
+    var epochDay = TimeTo.fromTimestamp(now).minus().days(1).toEpochDay();
+    var aggregateRequestTimestamp = TimeTo.fromTimestamp(now).plus().minutes(5).toTimestamp();
+
+    testKit.aggregationRequest(aggregationRequestCommand(aggregateRequestTimestamp, epochDay));
+    testKit.dayAggregation(dayAggregationCommand(epochDay, 12.34, 12, aggregateRequestTimestamp));
+
+    var response = testKit.paymentRequest(paymentRequestCommand(aggregateRequestTimestamp));
+
+    var paymentAggregated = response.getNextEventOfType(PaymentEntity.PaymentAggregated.class);
+
+    assertEquals("merchant-1", paymentAggregated.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", paymentAggregated.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", paymentAggregated.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", paymentAggregated.getMerchantKey().getAccountTo());
+    assertEquals("payment-1", paymentAggregated.getPaymentId());
+    assertEquals(12.34, paymentAggregated.getTransactionTotalAmount(), 0.0);
+    assertEquals(12, paymentAggregated.getTransactionCount());
+    assertEquals(aggregateRequestTimestamp, paymentAggregated.getLastUpdateTimestamp());
+    assertEquals(aggregateRequestTimestamp, paymentAggregated.getAggregateRequestTimestamp());
+
+    var state = testKit.getState();
+
+    assertEquals(1, state.getAggregationsList().size());
+    assertEquals(1, state.getAggregationsList().get(0).getAggregationDaysList().size());
+
+    var aggregationDay = state.getAggregationsList().get(0).getAggregationDaysList().get(0);
+
+    assertEquals(epochDay, aggregationDay.getEpochDay());
+    assertEquals(12.34, aggregationDay.getTransactionTotalAmount(), 0.0);
+    assertEquals(12, aggregationDay.getTransactionCount());
+    assertEquals(aggregateRequestTimestamp, aggregationDay.getLastUpdateTimestamp());
+    assertEquals(aggregateRequestTimestamp, aggregationDay.getAggregateRequestTimestamp());
+  }
+
   static PaymentApi.DayAggregationCommand dayAggregationCommand(long epochDay, double amount, int count, Timestamp timestamp) {
     return PaymentApi.DayAggregationCommand
         .newBuilder()

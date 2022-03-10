@@ -4,7 +4,7 @@
 @transactionCount = 1000
 @transactionIntervalMs = 5
 @day = 2022-03-09T01:00:00.000Z
-@merchantId = merchant-2
+@merchantId = merchant-1
 @serviceCode = service-code-1
 @accountFrom = account-from-1
 @accountTo = account-to-1

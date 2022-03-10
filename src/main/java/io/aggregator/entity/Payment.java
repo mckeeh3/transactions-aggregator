@@ -213,6 +213,8 @@ public class Payment extends AbstractPayment {
   }
 
   static PaymentEntity.PaymentState handle(PaymentEntity.PaymentState state, PaymentEntity.PaymentAggregated event) {
+    log.info("state: {}\nPaymentAggregated: {}", state, event);
+
     return state.toBuilder()
         .setTransactionTotalAmount(event.getTransactionTotalAmount())
         .setTransactionCount(event.getTransactionCount())
@@ -234,27 +236,7 @@ public class Payment extends AbstractPayment {
       return List.of();
     }
 
-    var activeDayAggregated = PaymentEntity.ActiveDayAggregated
-        .newBuilder()
-        .setMerchantKey(
-            TransactionMerchantKey.MerchantKey
-                .newBuilder()
-                .setMerchantId(command.getMerchantId())
-                .setServiceCode(command.getServiceCode())
-                .setAccountFrom(command.getAccountFrom())
-                .setAccountTo(command.getAccountTo())
-                .build())
-        .setPaymentId(command.getPaymentId())
-        .setEpochDay(command.getEpochDay())
-        .setTransactionTotalAmount(command.getTransactionTotalAmount())
-        .setTransactionCount(command.getTransactionCount())
-        .setLastUpdateTimestamp(command.getLastUpdateTimestamp())
-        .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
-        .build();
-
-    var allDaysAggregated = false;
-    var totalTransactionAmount = 0.0;
-    var totalTransactionCount = 0;
+    var activeDayAggregated = toActiveDayAggregated(command);
 
     var dayAlreadyAggregated = state.getAggregationsList().stream()
         .flatMap(aggregation -> aggregation.getAggregationDaysList().stream())
@@ -263,42 +245,7 @@ public class Payment extends AbstractPayment {
             && aggregationDay.getEpochDay() == command.getEpochDay());
 
     if (state.getPaymentRequested() && !dayAlreadyAggregated && allAggregationDays.size() == 1 + currentlyAggregatedDays.size()) {
-      allDaysAggregated = true;
-      totalTransactionAmount = command.getTransactionTotalAmount();
-      totalTransactionCount = command.getTransactionCount();
-    }
-
-    if (allDaysAggregated) {
-      var transactionTotalAmount = state.getAggregationsList().stream()
-          .flatMap(aggregation -> aggregation.getAggregationDaysList().stream())
-          .mapToDouble(aggregationDay -> aggregationDay.getTransactionTotalAmount())
-          .sum();
-      var transactionCount = state.getAggregationsList().stream()
-          .flatMap(aggregation -> aggregation.getAggregationDaysList().stream())
-          .mapToInt(aggregationDay -> aggregationDay.getTransactionCount())
-          .sum();
-      var lastUpdateTimestamp = state.getAggregationsList().stream()
-          .flatMap(aggregation -> aggregation.getAggregationDaysList().stream())
-          .map(aggregationDay -> aggregationDay.getLastUpdateTimestamp())
-          .max(TimeTo.comparator())
-          .get();
-
-      var paymentAggregated = PaymentEntity.PaymentAggregated
-          .newBuilder()
-          .setMerchantKey(
-              TransactionMerchantKey.MerchantKey
-                  .newBuilder()
-                  .setMerchantId(command.getMerchantId())
-                  .setServiceCode(command.getServiceCode())
-                  .setAccountFrom(command.getAccountFrom())
-                  .setAccountTo(command.getAccountTo())
-                  .build())
-          .setPaymentId(command.getPaymentId())
-          .setTransactionTotalAmount(transactionTotalAmount + totalTransactionAmount)
-          .setTransactionCount(transactionCount + totalTransactionCount)
-          .setLastUpdateTimestamp(TimeTo.max(lastUpdateTimestamp, command.getLastUpdateTimestamp()))
-          .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
-          .build();
+      var paymentAggregated = updatePaymentAggregated(toPaymentAggregated(state, command.getAggregateRequestTimestamp()), command);
 
       return List.of(paymentAggregated, activeDayAggregated);
     } else {
@@ -309,6 +256,14 @@ public class Payment extends AbstractPayment {
   static List<?> eventsFor(PaymentEntity.PaymentState state, PaymentApi.PaymentRequestCommand command) {
     if (state.getPaymentRequested()) {
       return List.of();
+    }
+
+    var allAggregated = state.getAggregationsList().stream()
+        .flatMap(aggregation -> aggregation.getAggregationDaysList().stream())
+        .allMatch(aggregationDay -> aggregationDay.getAggregated());
+
+    if (allAggregated && command.getEpochDaysCount() == 0) {
+      return List.of(toPaymentAggregated(state, command.getAggregateRequestTimestamp()));
     }
 
     var event = PaymentEntity.PaymentRequested
@@ -327,6 +282,48 @@ public class Payment extends AbstractPayment {
   static List<?> eventsFor(PaymentEntity.PaymentState state, PaymentApi.AggregationRequestCommand command) {
     return toPaymentDayAggregationRequestedList(
         state, command.getAggregateRequestTimestamp(), command.getEpochDaysList(), toMerchantKey(command), command.getPaymentId());
+  }
+
+  static PaymentEntity.PaymentAggregated updatePaymentAggregated(PaymentEntity.PaymentAggregated paymentAggregated, PaymentApi.DayAggregationCommand command) {
+    return paymentAggregated.toBuilder()
+        .setTransactionTotalAmount(paymentAggregated.getTransactionTotalAmount() + command.getTransactionTotalAmount())
+        .setTransactionCount(paymentAggregated.getTransactionCount() + command.getTransactionCount())
+        .setLastUpdateTimestamp(TimeTo.max(paymentAggregated.getLastUpdateTimestamp(), command.getLastUpdateTimestamp()))
+        .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
+        .build();
+  }
+
+  static PaymentEntity.PaymentAggregated toPaymentAggregated(PaymentEntity.PaymentState state, Timestamp aggregateRequestTimestamp) {
+    var transactionTotalAmount = state.getAggregationsList().stream()
+        .flatMap(aggregation -> aggregation.getAggregationDaysList().stream())
+        .mapToDouble(aggregationDay -> aggregationDay.getTransactionTotalAmount())
+        .sum();
+    var transactionCount = state.getAggregationsList().stream()
+        .flatMap(aggregation -> aggregation.getAggregationDaysList().stream())
+        .mapToInt(aggregationDay -> aggregationDay.getTransactionCount())
+        .sum();
+    var lastUpdateTimestamp = state.getAggregationsList().stream()
+        .flatMap(aggregation -> aggregation.getAggregationDaysList().stream())
+        .map(aggregationDay -> aggregationDay.getLastUpdateTimestamp())
+        .max(TimeTo.comparator())
+        .get();
+
+    return PaymentEntity.PaymentAggregated
+        .newBuilder()
+        .setMerchantKey(
+            TransactionMerchantKey.MerchantKey
+                .newBuilder()
+                .setMerchantId(state.getMerchantKey().getMerchantId())
+                .setServiceCode(state.getMerchantKey().getServiceCode())
+                .setAccountFrom(state.getMerchantKey().getAccountFrom())
+                .setAccountTo(state.getMerchantKey().getAccountTo())
+                .build())
+        .setPaymentId(state.getPaymentId())
+        .setTransactionTotalAmount(transactionTotalAmount)
+        .setTransactionCount(transactionCount)
+        .setLastUpdateTimestamp(lastUpdateTimestamp)
+        .setAggregateRequestTimestamp(aggregateRequestTimestamp)
+        .build();
   }
 
   static List<PaymentEntity.PaymentDayAggregationRequested> toPaymentDayAggregationRequestedList(
@@ -382,6 +379,26 @@ public class Payment extends AbstractPayment {
         .setServiceCode(command.getServiceCode())
         .setAccountFrom(command.getAccountFrom())
         .setAccountTo(command.getAccountTo())
+        .build();
+  }
+
+  static PaymentEntity.ActiveDayAggregated toActiveDayAggregated(PaymentApi.DayAggregationCommand command) {
+    return PaymentEntity.ActiveDayAggregated
+        .newBuilder()
+        .setMerchantKey(
+            TransactionMerchantKey.MerchantKey
+                .newBuilder()
+                .setMerchantId(command.getMerchantId())
+                .setServiceCode(command.getServiceCode())
+                .setAccountFrom(command.getAccountFrom())
+                .setAccountTo(command.getAccountTo())
+                .build())
+        .setPaymentId(command.getPaymentId())
+        .setEpochDay(command.getEpochDay())
+        .setTransactionTotalAmount(command.getTransactionTotalAmount())
+        .setTransactionCount(command.getTransactionCount())
+        .setLastUpdateTimestamp(command.getLastUpdateTimestamp())
+        .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
         .build();
   }
 }

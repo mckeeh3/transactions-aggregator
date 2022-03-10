@@ -24,7 +24,7 @@ public class DayToPaymentAction extends AbstractDayToPaymentAction {
 
   @Override
   public Effect<Empty> onDayAggregated(DayEntity.DayAggregated event) {
-    log.info("onDayAggregated: {}", event);
+    log.debug("onDayAggregated: {}", event);
 
     return effects().forward(components().payment().dayAggregation(
         PaymentApi.DayAggregationCommand
