@@ -9,7 +9,8 @@ option java_outer_classname = "MerchantEntity";
 
 message MerchantDayActivated {
   MerchantKey merchant_key = 1;
-  int64 epoch_day = 2;
+  string payment_id = 2;
+  int64 epoch_day = 3;
 }
 
 message MerchantPaymentRequested {

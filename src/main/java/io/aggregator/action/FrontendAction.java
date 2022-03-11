@@ -40,7 +40,7 @@ public class FrontendAction extends AbstractFrontendAction {
 
           return TransactionApi.CreateTransactionCommand
               .newBuilder()
-              .setTransactionId(UUID.randomUUID().toString())
+              .setTransactionId(String.format("transaction-%d-%s", i, UUID.randomUUID()))
               .setMerchantId("merchant-" + random.nextInt(request.getMerchantIdRange()))
               .setServiceCode("service-code-" + random.nextInt(3) + 1)
               .setAccountFrom("account-from-" + random.nextInt(3) + 1)
@@ -65,13 +65,13 @@ public class FrontendAction extends AbstractFrontendAction {
     var transactionIntervalMs = request.getTransactionIntervalMs();
     var intervalMs = transactionIntervalMs == 0 ? 10 : transactionIntervalMs;
 
-    var results = IntStream.range(0, request.getTransactionCount())
+    var results = IntStream.rangeClosed(request.getTransactionIdFirst(), request.getTransactionIdLast())
         .mapToObj(i -> {
           var timestamp = TimeTo.fromTimestamp(request.getDay()).plus().milliSeconds(i * intervalMs).toTimestamp();
 
           return TransactionApi.CreateTransactionCommand
               .newBuilder()
-              .setTransactionId(UUID.randomUUID().toString())
+              .setTransactionId(String.format("transaction-%d-%s", i, UUID.randomUUID()))
               .setMerchantId(request.getMerchantId())
               .setServiceCode(request.getServiceCode())
               .setAccountFrom(request.getAccountFrom())

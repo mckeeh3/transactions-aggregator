@@ -1,9 +1,13 @@
 
-@urlPrefix = https://lively-truth-3781.us-east1.akkaserverless.app
+# Curl commands used with VS Code REST Client extension
+
+@urlPrefix = https://old-boat-2936.us-east1.akkaserverless.app
 @merchantIdRange = 1
 @transactionCount = 1000
+@transactionIdFirst = 1
+@transactionIdLast = 2000
 @transactionIntervalMs = 5
-@day = 2022-03-09T01:00:00.000Z
+@day = 2022-03-10T01:05:00.000Z
 @merchantId = merchant-1
 @serviceCode = service-code-1
 @accountFrom = account-from-1
@@ -25,7 +29,8 @@ curl -XPOST -H "Content-Type: application/json" -d '{
   "service_code":"{{serviceCode}}",
   "account_from":"{{accountFrom}}",
   "account_to":"{{accountTo}}",
-  "transaction_count":{{transactionCount}},
+  "transaction_id_first":{{transactionIdFirst}},
+  "transaction_id_last":{{transactionIdLast}},
   "transaction_interval_ms":{{transactionIntervalMs}},
   "day":"{{day}}"}'
   {{urlPrefix}}/generate-transactions-single-merchant

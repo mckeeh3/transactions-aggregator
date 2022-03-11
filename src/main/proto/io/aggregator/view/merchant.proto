@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package io.aggregator.view;
+
+option java_outer_classname = "MerchantModel";
+
+message Merchant {
+  string merchant_id = 1;
+  string service_code = 2;
+  string account_from = 3;
+  string account_to = 4;
+  string payment_id = 5;
+  bool is_paid = 6;
+  string status = 7;
+}

@@ -23,6 +23,10 @@ service TransactionsPaidByPaymentByDate {
              " WHERE transaction_timestamp.seconds >= :`from_date.seconds`"
              "   AND transaction_timestamp.seconds < :`to_date.seconds`"
              "   AND payment_id = :payment_id"
+             "   AND merchant_id = :merchant_id"
+             "   AND service_code = :service_code"
+             "   AND account_from = :account_from"
+             "   AND account_to = :account_to"
     };
     option (google.api.http) = {
       get: "/transactions-paid-by-payment-by-date"
@@ -62,10 +66,14 @@ service TransactionsPaidByPaymentByDate {
 
 message TransactionsPaidByPaymentByDateRequest {
   string payment_id = 1;
-  google.protobuf.Timestamp from_date = 2;
-  google.protobuf.Timestamp to_date = 3;
-  int32 transaction_offset = 4;
-  int32 transaction_limit = 5;
+  string merchant_id = 2;
+  string service_code = 3;
+  string account_from = 4;
+  string account_to = 5;
+  google.protobuf.Timestamp from_date = 6;
+  google.protobuf.Timestamp to_date = 7;
+  int32 transaction_offset = 8;
+  int32 transaction_limit = 9;
 }
 
 message TransactionsPaidByPaymentByDateResponse {

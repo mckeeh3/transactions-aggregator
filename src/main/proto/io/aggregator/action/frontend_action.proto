@@ -41,7 +41,8 @@ message GenerateTransactionsSingleMerchantRequest {
   string service_code = 2;
   string account_from = 3;
   string account_to = 4;
-  int32 transaction_count = 5;
-  int32 transaction_interval_ms = 6;
-  google.protobuf.Timestamp day = 7;
+  int32 transaction_id_first = 5;
+  int32 transaction_id_last = 6;
+  int32 transaction_interval_ms = 7;
+  google.protobuf.Timestamp day = 8;
 }

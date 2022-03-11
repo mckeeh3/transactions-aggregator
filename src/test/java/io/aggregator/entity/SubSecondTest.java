@@ -160,7 +160,12 @@ public class SubSecondTest {
     assertEquals("payment-1", subSecondAggregated.getPaymentId());
 
     // add more transactions after aggregation
-    testKit.addTransaction(addTransactionCommand(epochSubSecond, "transaction-4", 6.54, TimeTo.fromEpochSubSecond(epochSubSecond).plus().nanos(30).toTimestamp()));
+    response = testKit.addTransaction(addTransactionCommand(epochSubSecond, "transaction-4", 6.54, TimeTo.fromEpochSubSecond(epochSubSecond).plus().nanos(30).toTimestamp()));
+
+    assertEquals(2, response.getAllEvents().size());
+    response.getNextEventOfType(SubSecondEntity.SubSecondActivated.class);
+    response.getNextEventOfType(SubSecondEntity.SubSecondTransactionAdded.class);
+
     testKit.addTransaction(addTransactionCommand(epochSubSecond, "transaction-5", 3.21, TimeTo.fromEpochSubSecond(epochSubSecond).plus().nanos(40).toTimestamp()));
 
     response = testKit.aggregateSubSecond(aggregateSubSecondCommand("payment-2", epochSubSecond, TimeTo.fromEpochSubSecond(epochSubSecond).plus().hours(3).toTimestamp()));

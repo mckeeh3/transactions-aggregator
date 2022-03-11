@@ -1,5 +1,6 @@
 package io.aggregator.entity;
 
+import java.util.List;
 import java.util.Optional;
 
 import com.akkaserverless.javasdk.eventsourcedentity.EventSourcedEntityContext;
@@ -94,7 +95,7 @@ public class Merchant extends AbstractMerchant {
     log.info("state: {}\nActivateDayCommand: {}", state, command);
 
     return effects()
-        .emitEvent(eventFor(state, command))
+        .emitEvents(eventsFor(state, command))
         .thenReply(newState -> Empty.getDefaultInstance());
   }
 
@@ -164,19 +165,32 @@ public class Merchant extends AbstractMerchant {
         .build();
   }
 
-  static MerchantEntity.MerchantDayActivated eventFor(MerchantEntity.MerchantState state, MerchantApi.ActivateDayCommand command) {
-    return MerchantEntity.MerchantDayActivated
+  static List<?> eventsFor(MerchantEntity.MerchantState state, MerchantApi.ActivateDayCommand command) {
+    var merchantKey = TransactionMerchantKey.MerchantKey
         .newBuilder()
-        .setMerchantKey(
-            TransactionMerchantKey.MerchantKey
-                .newBuilder()
-                .setMerchantId(command.getMerchantId())
-                .setServiceCode(command.getServiceCode())
-                .setAccountFrom(command.getAccountFrom())
-                .setAccountTo(command.getAccountTo())
-                .build())
-        .setEpochDay(command.getEpochDay())
+        .setMerchantId(command.getMerchantId())
+        .setServiceCode(command.getServiceCode())
+        .setAccountFrom(command.getAccountFrom())
+        .setAccountTo(command.getAccountTo())
         .build();
+
+    var merchantDayActivated = MerchantEntity.MerchantDayActivated
+        .newBuilder()
+        .setMerchantKey(merchantKey)
+        .setEpochDay(command.getEpochDay())
+        .setPaymentId(paymentIdNext(state))
+        .build();
+
+    var merchantAggregationRequested = MerchantEntity.MerchantAggregationRequested
+        .newBuilder()
+        .setMerchantKey(merchantKey)
+        .setPaymentId(paymentIdNext(state))
+        .setAggregateRequestTimestamp(TimeTo.now())
+        .addAllActiveDays(state.getActiveDaysList())
+        .addActiveDays(command.getEpochDay())
+        .build();
+
+    return List.of(merchantDayActivated, merchantAggregationRequested);
   }
 
   static Optional<MerchantEntity.MerchantAggregationRequested> eventFor(MerchantEntity.MerchantState state, MerchantApi.MerchantAggregationRequestCommand command) {

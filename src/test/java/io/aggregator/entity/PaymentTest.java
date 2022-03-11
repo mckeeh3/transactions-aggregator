@@ -141,6 +141,38 @@ public class PaymentTest {
   }
 
   @Test
+  public void paymentRequestWithZeroDays() {
+    PaymentTestKit testKit = PaymentTestKit.of(Payment::new);
+
+    var now = TimeTo.now();
+    var epochDay = TimeTo.fromTimestamp(now).toEpochDay();
+
+    var response = testKit.paymentRequest(paymentRequestCommand(now, epochDay));
+
+    assertEquals(2, response.getAllEvents().size());
+    // var event = response.getNextEventOfType(PaymentEntity.PaymentDayPaymentRequested.class);
+
+    // assertEquals("merchant-1", event.getMerchantKey().getMerchantId());
+    // assertEquals("service-code-1", event.getMerchantKey().getServiceCode());
+    // assertEquals("account-from-1", event.getMerchantKey().getAccountFrom());
+    // assertEquals("account-to-1", event.getMerchantKey().getAccountTo());
+    // assertEquals(epochDay, event.getEpochDay());
+    // assertEquals("payment-1", event.getPaymentId());
+    // assertEquals(now, event.getPaymentRequestTimestamp());
+
+    // assertEquals("merchant-1", testKit.getState().getMerchantKey().getMerchantId());
+    // assertEquals("service-code-1", testKit.getState().getMerchantKey().getServiceCode());
+    // assertEquals("account-from-1", testKit.getState().getMerchantKey().getAccountFrom());
+    // assertEquals("account-to-1", testKit.getState().getMerchantKey().getAccountTo());
+    // assertEquals("payment-1", testKit.getState().getPaymentId());
+
+    // assertEquals(1, testKit.getState().getPaymentsList().size());
+    // assertEquals(now, testKit.getState().getPaymentsList().get(0).getPaymentRequestTimestamp());
+    // assertEquals(1, testKit.getState().getPaymentsList().get(0).getPaymentDaysList().size());
+    // assertEquals(epochDay, testKit.getState().getPaymentsList().get(0).getPaymentDaysList().get(0
+  }
+
+  @Test
   public void paymentRequestTestWithOneDay() {
     PaymentTestKit testKit = PaymentTestKit.of(Payment::new);
 

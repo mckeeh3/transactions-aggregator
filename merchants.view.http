@@ -1,0 +1,15 @@
+
+# Curl commands used with VS Code REST Client extension
+
+@urlPrefix = https://old-boat-2936.us-east1.akkaserverless.app
+@merchantId = merchant-1
+@offset = 1850
+@limit = 10
+
+### io.aggregator.view.MerchantsNotPaid.GetMerchantsNotPaid
+
+curl -XGET -H "Content-Type: application/json" '{{urlPrefix}}/merchants-not-paid?merchant_offset={{offset}}&merchant_limit={{limit}}'
+
+### io.aggregator.view.MerchantsByMerchantId.GetMerchantsByMerchantId
+
+curl -XGET -H "Content-Type: application/json" '{{urlPrefix}}/merchants-by-merchant-id?merchant_id={{merchantId}}&merchant_offset={{offset}}&merchant_limit={{limit}}'
