@@ -63,7 +63,7 @@
     &quot;transaction_amount&quot;: 100.00,&#xd;
     &quot;merchant_id&quot;:&quot;merchant-id-1&quot;,&#xd;
     &quot;shop_id&quot;:&quot;shop-id-1&quot;,&#xd;
-    &quot;transaction_timestamp&quot;:&quot;2022-03-02T00:00:01.000Z&quot;&#xd;
+    &quot;transaction_timestamp&quot;:&quot;${__time(yyyy-MM-dd&apos;T&apos;HH:mm:ss.SSS&apos;Z&apos;)}&quot;&#xd;
 }&#xd;
 </stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
