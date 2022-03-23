@@ -1,10 +1,32 @@
-# transactions-aggregator
+# Merchant Transactions Aggregator Java Demo
 
+TODO
+
+| ![Merchant Payment Transaction Aggregator Design](src/main/resources/images/merchant-payment-transaction-aggregation-demo.png)
+|:--:
+| Figure 1 - Merchant Payment Transaction Aggregator Design
+
+TODO
+
+| ![Micro Stream Event Flows](src/main/resources/images/micro-stream-event-flows.png)
+|:--:
+| Figure 2 - Micro Stream Event Flows
+
+TODO
+
+| ![Micro Stream Overview](src/main/resources/images/micro-stream-overview.png)
+|:--:
+| Figure 3 - Micro Stream Overview
+
+---
+
+## The following sections were generated when this project was created
+
+See [Development Tools/Maven archetype](https://developer.lightbend.com/docs/akka-serverless/java/developer-tools#_maven_archetype)
 
 ## Designing
 
 While designing your service it is useful to read [designing services](https://developer.lightbend.com/docs/akka-serverless/services/development-process.html)
-
 
 ## Developing
 
@@ -12,16 +34,14 @@ This project has a bare-bones skeleton service ready to go, but in order to adap
 extend it it may be useful to read up on [developing services](https://developer.lightbend.com/docs/akka-serverless/developing/index.html)
 and in particular the [Java section](https://developer.lightbend.com/docs/akka-serverless/java-services/index.html)
 
-
 ## Building
 
 You can use Maven to build your project, which will also take care of
 generating code based on the `.proto` definitions:
 
-```
+```shell
 mvn compile
 ```
-
 
 ## Running Locally
 
@@ -29,19 +49,19 @@ In order to run your application locally, you must run the Akka Serverless proxy
 It also contains the configuration to start a local Google Pub/Sub emulator that the Akka Serverless proxy will connect to.
 To start the proxy, run the following command from this directory:
 
-```
+```shell
 docker-compose up
 ```
 
 To start the application locally, the `exec-maven-plugin` is used. Use the following command:
 
-```
+```shell
 mvn compile exec:exec
 ```
 
 With both the proxy and your application running, any defined endpoints should be available at `http://localhost:9000`. In addition to the defined gRPC interface, each method has a corresponding HTTP endpoint. Unless configured otherwise (see [Transcoding HTTP](https://developer.lightbend.com/docs/akka-serverless/java/proto.html#_transcoding_http)), this endpoint accepts POST requests at the path `/[package].[entity name]/[method]`. For example, using `curl`:
 
-```
+```shell
 > curl -XPOST -H "Content-Type: application/json" localhost:9000/io.example.CounterService/GetCurrentCounter -d '{"counterId": "foo"}'
 The command handler for `GetCurrentCounter` is not implemented, yet
 ```
@@ -57,7 +77,6 @@ ERROR:
 
 > Note: The failure is to be expected if you have not yet provided an implementation of `GetCurrentCounter` in
 > your entity.
-
 
 ## Deploying
 
