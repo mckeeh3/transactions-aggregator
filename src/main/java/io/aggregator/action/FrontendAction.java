@@ -38,18 +38,18 @@ public class FrontendAction extends AbstractFrontendAction {
         .mapToObj(i -> {
           var timestamp = TimeTo.fromTimestamp(request.getDay()).plus().milliSeconds(i * intervalMs).toTimestamp();
 
-          return TransactionApi.CreateTransactionCommand
+          return TransactionApi.PaymentPricedCommand
               .newBuilder()
               .setTransactionId(String.format("transaction-%d-%s", i, UUID.randomUUID()))
-              .setMerchantId("merchant-" + random.nextInt(request.getMerchantIdRange()))
-              .setServiceCode("service-code-" + random.nextInt(3) + 1)
-              .setAccountFrom("account-from-" + random.nextInt(3) + 1)
-              .setAccountTo("account-to-" + random.nextInt(3) + 3)
-              .setTransactionAmount(random.nextInt(100) / 10.0)
+//              .setMerchantId("merchant-" + random.nextInt(request.getMerchantIdRange()))
+//              .setServiceCode("service-code-" + random.nextInt(3) + 1)
+//              .setAccountFrom("account-from-" + random.nextInt(3) + 1)
+//              .setAccountTo("account-to-" + random.nextInt(3) + 3)
+//              .setTransactionAmount(random.nextInt(100) / 10.0)
               .setTransactionTimestamp(timestamp)
               .build();
         })
-        .map(command -> components().transaction().createTransaction(command).execute())
+        .map(command -> components().transaction().paymentPriced(command).execute())
         .toList();
 
     var result = CompletableFuture.allOf(results.toArray(new CompletableFuture[results.size()]))
@@ -69,18 +69,18 @@ public class FrontendAction extends AbstractFrontendAction {
         .mapToObj(i -> {
           var timestamp = TimeTo.fromTimestamp(request.getDay()).plus().milliSeconds(i * intervalMs).toTimestamp();
 
-          return TransactionApi.CreateTransactionCommand
+          return TransactionApi.PaymentPricedCommand
               .newBuilder()
               .setTransactionId(String.format("transaction-%d-%s", i, UUID.randomUUID()))
-              .setMerchantId(request.getMerchantId())
-              .setServiceCode(request.getServiceCode())
-              .setAccountFrom(request.getAccountFrom())
-              .setAccountTo(request.getAccountTo())
-              .setTransactionAmount(random.nextInt(100) / 10.0)
+//              .setMerchantId(request.getMerchantId())
+//              .setServiceCode(request.getServiceCode())
+//              .setAccountFrom(request.getAccountFrom())
+//              .setAccountTo(request.getAccountTo())
+//              .setTransactionAmount(random.nextInt(100) / 10.0)
               .setTransactionTimestamp(timestamp)
               .build();
         })
-        .map(command -> components().transaction().createTransaction(command).execute())
+        .map(command -> components().transaction().paymentPriced(command).execute())
         .toList();
 
     var result = CompletableFuture.allOf(results.toArray(new CompletableFuture[results.size()]))

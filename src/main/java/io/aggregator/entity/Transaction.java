@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import io.aggregator.api.TransactionApi;
 
 // This class was initially generated based on the .proto definition by Akka Serverless tooling.
-// This is the implementation for the Event Sourced Entity Service described in your io/aggregator/api/tranaaction_api.proto file.
+// This is the implementation for the Event Sourced Entity Service described in your io/aggregator/api/transaction_api.proto file.
 //
 // As long as this file exists it will not be overwritten: you can maintain it yourself,
 // or delete it so it is regenerated as needed.
@@ -28,7 +28,7 @@ public class Transaction extends AbstractTransaction {
   }
 
   @Override
-  public Effect<Empty> createTransaction(TransactionEntity.TransactionState state, TransactionApi.CreateTransactionCommand command) {
+  public Effect<Empty> paymentPriced(TransactionEntity.TransactionState state, TransactionApi.PaymentPricedCommand command) {
     return handle(state, command);
   }
 
@@ -43,7 +43,7 @@ public class Transaction extends AbstractTransaction {
   }
 
   @Override
-  public TransactionEntity.TransactionState transactionCreated(TransactionEntity.TransactionState state, TransactionEntity.TransactionCreated event) {
+  public TransactionEntity.TransactionState incidentAdded(TransactionEntity.TransactionState state, TransactionEntity.IncidentAdded event) {
     return handle(state, event);
   }
 
@@ -52,12 +52,9 @@ public class Transaction extends AbstractTransaction {
     return handle(state, event);
   }
 
-  private Effect<Empty> handle(TransactionEntity.TransactionState state, TransactionApi.CreateTransactionCommand command) {
-    log.debug("state: {}\nCreateTransactionCommand: {}", state, command);
+  private Effect<Empty> handle(TransactionEntity.TransactionState state, TransactionApi.PaymentPricedCommand command) {
+    log.debug("state: {}\nPaymentPricedCommand: {}", state, command);
 
-    if (state.getTransactionKey().getTransactionId() != null && !state.getTransactionKey().getTransactionId().isEmpty()) {
-      return effects().reply(Empty.getDefaultInstance()); // already created
-    }
     return effects()
         .emitEvent(eventFor(state, command))
         .thenReply(newState -> Empty.getDefaultInstance());
@@ -72,7 +69,7 @@ public class Transaction extends AbstractTransaction {
   }
 
   private Optional<Effect<TransactionApi.GetTransactionResponse>> reject(TransactionEntity.TransactionState state, TransactionApi.GetTransactionRequest request) {
-    if (state.getTransactionKey() == null || state.getTransactionKey().getTransactionId().isEmpty()) {
+    if (state.getTransactionId().isEmpty()) {
       return Optional.of(effects().error(String.format("Transaction %s not found", request)));
     }
     return Optional.empty();
@@ -82,14 +79,7 @@ public class Transaction extends AbstractTransaction {
     return effects().reply(
         TransactionApi.GetTransactionResponse
             .newBuilder()
-            .setTransactionKey(
-                TransactionApi.TransactionKey
-                    .newBuilder()
-                    .setTransactionId(state.getTransactionKey().getTransactionId())
-                    .setServiceCode(state.getTransactionKey().getServiceCode())
-                    .setAccountFrom(state.getTransactionKey().getAccountFrom())
-                    .setAccountTo(state.getTransactionKey().getAccountTo())
-                    .build())
+            .setTransactionId(state.getTransactionId())
             .setMerchantId(state.getMerchantId())
             .setShopId(state.getShopId())
             .setTransactionAmount(state.getTransactionAmount())
@@ -98,21 +88,9 @@ public class Transaction extends AbstractTransaction {
             .build());
   }
 
-  static TransactionEntity.TransactionState handle(TransactionEntity.TransactionState state, TransactionEntity.TransactionCreated event) {
-    return TransactionEntity.TransactionState
-        .newBuilder()
-        .setTransactionKey(
-            TransactionMerchantKey.TransactionKey
-                .newBuilder()
-                .setTransactionId(event.getTransactionKey().getTransactionId())
-                .setServiceCode(event.getTransactionKey().getServiceCode())
-                .setAccountFrom(event.getTransactionKey().getAccountFrom())
-                .setAccountTo(event.getTransactionKey().getAccountTo())
-                .build())
-        .setTransactionAmount(event.getTransactionAmount())
-        .setMerchantId(event.getMerchantId())
-        .setShopId(event.getShopId())
-        .setTransactionTimestamp(event.getTransactionTimestamp())
+  static TransactionEntity.TransactionState handle(TransactionEntity.TransactionState state, TransactionEntity.IncidentAdded event) {
+    return state.toBuilder()
+        // TODO
         .build();
   }
 
@@ -122,22 +100,12 @@ public class Transaction extends AbstractTransaction {
         .build();
   }
 
-  static TransactionEntity.TransactionCreated eventFor(TransactionEntity.TransactionState state, TransactionApi.CreateTransactionCommand command) {
-    return TransactionEntity.TransactionCreated
-        .newBuilder()
-        .setTransactionKey(
-            TransactionMerchantKey.TransactionKey
-                .newBuilder()
-                .setTransactionId(command.getTransactionId())
-                .setServiceCode(command.getServiceCode())
-                .setAccountFrom(command.getAccountFrom())
-                .setAccountTo(command.getAccountTo())
-                .build())
-        .setTransactionAmount(command.getTransactionAmount())
-        .setMerchantId(command.getMerchantId())
-        .setShopId(command.getShopId())
-        .setTransactionTimestamp(command.getTransactionTimestamp())
-        .build();
+  static TransactionEntity.IncidentAdded eventFor(TransactionEntity.TransactionState state, TransactionApi.PaymentPricedCommand command) {
+    return TransactionEntity.IncidentAdded
+            .newBuilder()
+            // TODO
+            .setTransactionId(command.getTransactionId())
+            .build();
   }
 
   static TransactionEntity.PaymentAdded eventFor(TransactionEntity.TransactionState state, TransactionApi.AddPaymentCommand command) {

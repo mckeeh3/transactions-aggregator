@@ -11,7 +11,7 @@
     <properties>
 
     <!-- TODO Update to your own Docker repository or Docker Hub scope -->
-    <dockerImage>mckeeh3/${project.artifactId}</dockerImage>
+    <dockerImage>gkarakis/${project.artifactId}</dockerImage>
     <dockerTag>${project.version}</dockerTag>
     <mainClass>io.aggregator.Main</mainClass>
 
@@ -45,7 +45,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.8.1</version>
+        <version>3.10.0</version>
         <configuration>
           <source>${jdk.target}</source>
           <target>${jdk.target}</target>
@@ -89,7 +89,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>2.1</version>
+        <version>3.2.4</version>
         <executions>
           <execution>
             <phase>package</phase>
@@ -113,7 +113,7 @@
       <plugin>
         <groupId>io.fabric8</groupId>
         <artifactId>docker-maven-plugin</artifactId>
-        <version>0.36.0</version>
+        <version>0.39.1</version>
         <configuration>
           <images>
             <image>
@@ -189,7 +189,7 @@
         <!-- configure src/it/java and src/it/resources -->
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
-        <version>3.2.0</version>
+        <version>3.3.0</version>
         <executions>
           <execution>
             <id>add-integration-test-source</id>

@@ -8,11 +8,20 @@ package io.aggregator.entity;
 option java_outer_classname = "TransactionEntity";
 
 message TransactionCreated {
-  TransactionKey transaction_key = 1;
+  string transaction_id = 1;
   string merchant_id = 2;
   string shop_id = 3;
   double transaction_amount = 4;
   google.protobuf.Timestamp transaction_timestamp = 5;
+}
+
+message IncidentAdded {
+  string transaction_id = 1;
+  string merchant_id = 2;
+  string shop_id = 3;
+  double transaction_amount = 4;
+  google.protobuf.Timestamp transaction_timestamp = 5;
+  repeated TransactionIncident transaction_incident = 7;
 }
 
 message PaymentAdded {
@@ -21,10 +30,18 @@ message PaymentAdded {
 }
 
 message TransactionState {
-  TransactionKey transaction_key = 1;
+  string transaction_id = 1;
   string merchant_id = 2;
   string shop_id = 3;
   double transaction_amount = 4;
   google.protobuf.Timestamp transaction_timestamp = 5;
   string payment_id = 6;
+  repeated TransactionIncident transaction_incident = 7;
+}
+
+message TransactionIncident {
+  string service_code = 1;
+  string account_from = 2;
+  string account_to = 3;
+  string incident_amount = 4;
 }

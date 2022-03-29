@@ -28,11 +28,12 @@ public class TransactionToSubSecondAction extends AbstractTransactionToSubSecond
         SubSecondApi.AddTransactionCommand
             .newBuilder()
             .setMerchantId(event.getMerchantId())
-            .setServiceCode(event.getTransactionKey().getServiceCode())
-            .setAccountFrom(event.getTransactionKey().getAccountFrom())
-            .setAccountTo(event.getTransactionKey().getAccountTo())
+            .setTransactionId(event.getTransactionId())
+//            .setServiceCode(event.getTransactionKey().getServiceCode())
+//            .setAccountFrom(event.getTransactionKey().getAccountFrom())
+//            .setAccountTo(event.getTransactionKey().getAccountTo())
             .setEpochSubSecond(epochSubSecond)
-            .setTransactionId(event.getTransactionKey().getTransactionId())
+//            .setTransactionId(event.getTransactionKey().getTransactionId())
             .setAmount(event.getTransactionAmount())
             .setTimestamp(timestamp)
             .build()));

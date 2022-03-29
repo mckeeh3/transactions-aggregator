@@ -36,14 +36,15 @@ public class TransactionToSubSecondActionTest {
     var result = testKit.onTransactionCreated(
         TransactionEntity.TransactionCreated
             .newBuilder()
-            .setTransactionKey(
-                TransactionMerchantKey.TransactionKey
-                    .newBuilder()
-                    .setTransactionId("transaction-1")
-                    .setServiceCode("service-code-1")
-                    .setAccountFrom("account-from-1")
-                    .setAccountTo("account-to-1")
-                    .build())
+            .setTransactionId("transaction-1")
+//            .setTransactionKey(
+//                TransactionMerchantKey.TransactionKey
+//                    .newBuilder()
+//                    .setTransactionId("transaction-1")
+//                    .setServiceCode("service-code-1")
+//                    .setAccountFrom("account-from-1")
+//                    .setAccountTo("account-to-1")
+//                    .build())
             .setMerchantId("merchant-1")
             .setTransactionAmount(1)
             .setTransactionTimestamp(timestamp)
@@ -54,9 +55,9 @@ public class TransactionToSubSecondActionTest {
     var reply = (SubSecondApi.AddTransactionCommand) result.getForward().getMessage();
 
     assertEquals("merchant-1", reply.getMerchantId());
-    assertEquals("service-code-1", reply.getServiceCode());
-    assertEquals("account-from-1", reply.getAccountFrom());
-    assertEquals("account-to-1", reply.getAccountTo());
+//    assertEquals("service-code-1", reply.getServiceCode());
+//    assertEquals("account-from-1", reply.getAccountFrom());
+//    assertEquals("account-to-1", reply.getAccountTo());
     assertEquals(epochSubSecond, reply.getEpochSubSecond());
     assertEquals(1, reply.getAmount(), 0.0);
     assertEquals("transaction-1", reply.getTransactionId());
