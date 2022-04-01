@@ -34,6 +34,12 @@ public class SubSecond extends AbstractSubSecond {
   }
 
   @Override
+  public Effect<Empty> addLedgerItems(SubSecondEntity.SubSecondState currentState, SubSecondApi.AddLedgerItemsCommand addLedgerItemsCommand) {
+    // TODO
+    return null;
+  }
+
+  @Override
   public Effect<Empty> aggregateSubSecond(SubSecondEntity.SubSecondState state, SubSecondApi.AggregateSubSecondCommand command) {
     return handle(state, command);
   }

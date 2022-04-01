@@ -20,6 +20,12 @@ service TransactionToSubSecond {
     };
   }
 
+  rpc OnIncidentAdded(entity.IncidentAdded) returns (google.protobuf.Empty) {
+    option (akkaserverless.method).eventing.in = {
+      event_sourced_entity: "transaction"
+    };
+  }
+
   rpc IgnoreOtherEvents(google.protobuf.Any) returns (google.protobuf.Empty) {
     option (akkaserverless.method).eventing.in = {
       event_sourced_entity: "transaction"

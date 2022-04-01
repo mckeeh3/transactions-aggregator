@@ -8,6 +8,8 @@ import io.aggregator.TimeTo;
 import io.aggregator.api.SubSecondApi;
 import io.aggregator.entity.TransactionEntity;
 
+import java.util.stream.Collectors;
+
 // This class was initially generated based on the .proto definition by Akka Serverless tooling.
 // This is the implementation for the Action Service described in your io/aggregator/action/transaction_to_sub_second_action.proto.proto file.
 //
@@ -37,6 +39,31 @@ public class TransactionToSubSecondAction extends AbstractTransactionToSubSecond
             .setAmount(event.getTransactionAmount())
             .setTimestamp(timestamp)
             .build()));
+  }
+
+  @Override
+  public Effect<Empty> onIncidentAdded(TransactionEntity.IncidentAdded event) {
+    // TODO apply what is in onTransactionCreated here
+    var timestamp = event.getIncidentTimestamp();
+    var epochSubSecond = TimeTo.fromTimestamp(timestamp).toEpochSubSecond();
+
+    return effects().forward(components().subSecond().addLedgerItems(
+            SubSecondApi.AddLedgerItemsCommand
+                    .newBuilder()
+                    .setMerchantId(event.getMerchantId())
+                    .setEpochSubSecond(epochSubSecond)
+                    .setTransactionId(event.getTransactionId())
+                    .setTimestamp(timestamp)
+                    .addAllLedgerItem(event.getTransactionIncidentList().stream()
+                            .map(TransactionToSubSecondAction::toLedgerItem)
+                            .collect(Collectors.toList()))
+                    .build()));
+  }
+
+  static SubSecondApi.LedgerItem toLedgerItem(TransactionEntity.TransactionIncident transactionIncident) {
+    return SubSecondApi.LedgerItem.newBuilder()
+            // TODO
+            .build();
   }
 
   @Override

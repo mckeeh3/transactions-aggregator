@@ -17,11 +17,11 @@ message TransactionCreated {
 
 message IncidentAdded {
   string transaction_id = 1;
-  string merchant_id = 2;
+  string event_type = 2;
   string shop_id = 3;
-  double transaction_amount = 4;
-  google.protobuf.Timestamp transaction_timestamp = 5;
-  repeated TransactionIncident transaction_incident = 7;
+  string merchant_id = 4;
+  google.protobuf.Timestamp incident_timestamp = 5;
+  repeated TransactionIncident transaction_incident = 6;
 }
 
 message PaymentAdded {

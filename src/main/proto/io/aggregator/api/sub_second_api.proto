@@ -31,6 +31,13 @@ service SubSecond {
     };
   }
 
+  rpc AddLedgerItems(AddLedgerItemsCommand) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/sub_second/add-ledger-items"
+      body: "*"
+    };
+  }
+
   rpc AggregateSubSecond(AggregateSubSecondCommand) returns (google.protobuf.Empty) {
     option (google.api.http) = {
       post: "/sub_second/aggregate"
@@ -48,6 +55,21 @@ message AddTransactionCommand {
   string transaction_id = 6;
   double amount = 7;
   google.protobuf.Timestamp timestamp = 8;
+}
+
+message AddLedgerItemsCommand {
+  string merchant_id = 1 [(akkaserverless.field).entity_key = true];
+  int64 epoch_sub_second = 2 [(akkaserverless.field).entity_key = true];
+  string transaction_id = 3;
+  google.protobuf.Timestamp timestamp = 4;
+  repeated LedgerItem ledger_item = 5;
+}
+
+message LedgerItem {
+  string service_code = 1 [(akkaserverless.field).entity_key = true];
+  string account_from = 2 [(akkaserverless.field).entity_key = true];
+  string account_to = 3 [(akkaserverless.field).entity_key = true];
+  double amount = 4;
 }
 
 message AggregateSubSecondCommand {
