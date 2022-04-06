@@ -2,6 +2,7 @@ package io.aggregator.entity;
 
 import java.util.Collections;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.akkaserverless.javasdk.eventsourcedentity.EventSourcedEntityContext;
 import com.google.protobuf.Empty;
@@ -91,7 +92,6 @@ public class Transaction extends AbstractTransaction {
 
   static TransactionEntity.TransactionState handle(TransactionEntity.TransactionState state, TransactionEntity.IncidentAdded event) {
     return state.toBuilder()
-        // TODO
         .setTransactionId(event.getTransactionId())
         .setMerchantId(event.getMerchantId())
         .setShopId(event.getShopId())
@@ -108,6 +108,7 @@ public class Transaction extends AbstractTransaction {
   static TransactionEntity.IncidentAdded eventFor(TransactionEntity.TransactionState state, TransactionApi.PaymentPricedCommand command) {
     return TransactionEntity.IncidentAdded
             .newBuilder()
+            .setTransactionId(command.getTransactionId())
             .setEventType(command.getEventType())
             .setShopId(command.getShopId())
             .setMerchantId(findMerchant(command.getShopId()))
@@ -137,6 +138,13 @@ public class Transaction extends AbstractTransaction {
 
   static Iterable<TransactionEntity.TransactionIncident> toTransactionIncidents(TransactionEntity.TransactionState state, TransactionApi.PaymentPricedCommand command) {
     // TODO apply business rules and generate list
-    return Collections.emptyList();
+    return command.getPricedItemList().stream()
+            .map(pricedItem -> TransactionEntity.TransactionIncident.newBuilder()
+                    .setServiceCode(pricedItem.getServiceCode())
+                    .setIncidentAmount(pricedItem.getPricedItemAmount())
+                    .setAccountFrom("from")
+                    .setAccountTo("to")
+                    .build())
+            .collect(Collectors.toList());
   }
 }

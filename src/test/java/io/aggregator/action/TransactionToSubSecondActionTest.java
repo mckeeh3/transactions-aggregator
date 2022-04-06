@@ -27,41 +27,39 @@ public class TransactionToSubSecondActionTest {
   }
 
   @Test
-  public void onTransactionCreatedTest() {
+  public void onIncidentAddedTest() {
     TransactionToSubSecondActionTestKit testKit = TransactionToSubSecondActionTestKit.of(TransactionToSubSecondAction::new);
 
     var timestamp = TimeTo.now();
     var epochSubSecond = TimeTo.fromTimestamp(timestamp).toEpochSubSecond();
 
-    var result = testKit.onTransactionCreated(
-        TransactionEntity.TransactionCreated
+    var result = testKit.onIncidentAdded(
+        TransactionEntity.IncidentAdded
             .newBuilder()
             .setTransactionId("transaction-1")
-//            .setTransactionKey(
-//                TransactionMerchantKey.TransactionKey
-//                    .newBuilder()
-//                    .setTransactionId("transaction-1")
-//                    .setServiceCode("service-code-1")
-//                    .setAccountFrom("account-from-1")
-//                    .setAccountTo("account-to-1")
-//                    .build())
-            .setMerchantId("merchant-1")
-            .setTransactionAmount(1)
-            .setTransactionTimestamp(timestamp)
-            .setMerchantId("merchant-1")
-            .setShopId("shop-1")
+            .setEventType("event-type-1")
+            .setShopId("merchant-shop")
+            .setMerchantId("merchant")
+            .setIncidentTimestamp(timestamp)
+            .addTransactionIncident(TransactionEntity.TransactionIncident.newBuilder()
+                    .setServiceCode("service-code-1")
+                    .setIncidentAmount(123.45)
+                    .setAccountFrom("from")
+                    .setAccountTo("to")
+                    .build())
             .build());
 
-    var reply = (SubSecondApi.AddTransactionCommand) result.getForward().getMessage();
+    var reply = (SubSecondApi.AddLedgerItemsCommand) result.getForward().getMessage();
 
-    assertEquals("merchant-1", reply.getMerchantId());
-//    assertEquals("service-code-1", reply.getServiceCode());
-//    assertEquals("account-from-1", reply.getAccountFrom());
-//    assertEquals("account-to-1", reply.getAccountTo());
+    assertEquals("merchant", reply.getMerchantId());
     assertEquals(epochSubSecond, reply.getEpochSubSecond());
-    assertEquals(1, reply.getAmount(), 0.0);
     assertEquals("transaction-1", reply.getTransactionId());
     assertEquals(timestamp, reply.getTimestamp());
+    assertEquals(1, reply.getLedgerItemList().size());
+    assertEquals("service-code-1", reply.getLedgerItemList().get(0).getServiceCode());
+    assertEquals(123.45, reply.getLedgerItemList().get(0).getAmount(), 0);
+    assertEquals("from", reply.getLedgerItemList().get(0).getAccountFrom());
+    assertEquals("to", reply.getLedgerItemList().get(0).getAccountTo());
   }
 
   @Test

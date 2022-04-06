@@ -43,5 +43,5 @@ message TransactionIncident {
   string service_code = 1;
   string account_from = 2;
   string account_to = 3;
-  string incident_amount = 4;
+  double incident_amount = 4;
 }

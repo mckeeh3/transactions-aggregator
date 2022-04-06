@@ -29,14 +29,8 @@ public class SubSecond extends AbstractSubSecond {
   }
 
   @Override
-  public Effect<Empty> addTransaction(SubSecondEntity.SubSecondState state, SubSecondApi.AddTransactionCommand command) {
+  public Effect<Empty> addLedgerItems(SubSecondEntity.SubSecondState state, SubSecondApi.AddLedgerItemsCommand command) {
     return handle(state, command);
-  }
-
-  @Override
-  public Effect<Empty> addLedgerItems(SubSecondEntity.SubSecondState currentState, SubSecondApi.AddLedgerItemsCommand addLedgerItemsCommand) {
-    // TODO
-    return null;
   }
 
   @Override
@@ -64,8 +58,8 @@ public class SubSecond extends AbstractSubSecond {
     return state;
   }
 
-  private Effect<Empty> handle(SubSecondEntity.SubSecondState state, SubSecondApi.AddTransactionCommand command) {
-    log.debug("state: {}\nAddTransactionCommand: {}", state, command);
+  private Effect<Empty> handle(SubSecondEntity.SubSecondState state, SubSecondApi.AddLedgerItemsCommand command) {
+    log.debug("state: {}\nAddLedgerItemsCommand: {}", state, command);
 
     return effects()
         .emitEvents(eventsFor(state, command))
@@ -138,28 +132,29 @@ public class SubSecond extends AbstractSubSecond {
         .build();
   }
 
-  static List<?> eventsFor(SubSecondEntity.SubSecondState state, SubSecondApi.AddTransactionCommand command) {
+  static List<?> eventsFor(SubSecondEntity.SubSecondState state, SubSecondApi.AddLedgerItemsCommand command) {
     var transactionAdded = SubSecondEntity.SubSecondTransactionAdded
         .newBuilder()
-        .setMerchantKey(
-            TransactionMerchantKey.MerchantKey
-                .newBuilder()
-                .setMerchantId(command.getMerchantId())
-                .setServiceCode(command.getServiceCode())
-                .setAccountFrom(command.getAccountFrom())
-                .setAccountTo(command.getAccountTo())
-                .build())
-        .setEpochSubSecond(command.getEpochSubSecond())
-        .setTransactionKey(
-            TransactionMerchantKey.TransactionKey
-                .newBuilder()
-                .setTransactionId(command.getTransactionId())
-                .setServiceCode(command.getServiceCode())
-                .setAccountFrom(command.getAccountFrom())
-                .setAccountTo(command.getAccountTo())
-                .build())
-        .setAmount(command.getAmount())
-        .setTimestamp(command.getTimestamp())
+            // TODO
+//        .setMerchantKey(
+//            TransactionMerchantKey.MerchantKey
+//                .newBuilder()
+//                .setMerchantId(command.getMerchantId())
+//                .setServiceCode(command.getServiceCode())
+//                .setAccountFrom(command.getAccountFrom())
+//                .setAccountTo(command.getAccountTo())
+//                .build())
+//        .setEpochSubSecond(command.getEpochSubSecond())
+//        .setTransactionKey(
+//            TransactionMerchantKey.TransactionKey
+//                .newBuilder()
+//                .setTransactionId(command.getTransactionId())
+//                .setServiceCode(command.getServiceCode())
+//                .setAccountFrom(command.getAccountFrom())
+//                .setAccountTo(command.getAccountTo())
+//                .build())
+//        .setAmount(command.getAmount())
+//        .setTimestamp(command.getTimestamp())
         .build();
 
     var isInactive = state.getTransactionsCount() == 0 || state.getTransactionsList().stream()

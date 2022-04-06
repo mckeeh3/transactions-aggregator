@@ -22,28 +22,7 @@ public class TransactionToSubSecondAction extends AbstractTransactionToSubSecond
   }
 
   @Override
-  public Effect<Empty> onTransactionCreated(TransactionEntity.TransactionCreated event) {
-    var timestamp = event.getTransactionTimestamp();
-    var epochSubSecond = TimeTo.fromTimestamp(timestamp).toEpochSubSecond();
-
-    return effects().forward(components().subSecond().addTransaction(
-        SubSecondApi.AddTransactionCommand
-            .newBuilder()
-            .setMerchantId(event.getMerchantId())
-            .setTransactionId(event.getTransactionId())
-//            .setServiceCode(event.getTransactionKey().getServiceCode())
-//            .setAccountFrom(event.getTransactionKey().getAccountFrom())
-//            .setAccountTo(event.getTransactionKey().getAccountTo())
-            .setEpochSubSecond(epochSubSecond)
-//            .setTransactionId(event.getTransactionKey().getTransactionId())
-            .setAmount(event.getTransactionAmount())
-            .setTimestamp(timestamp)
-            .build()));
-  }
-
-  @Override
   public Effect<Empty> onIncidentAdded(TransactionEntity.IncidentAdded event) {
-    // TODO apply what is in onTransactionCreated here
     var timestamp = event.getIncidentTimestamp();
     var epochSubSecond = TimeTo.fromTimestamp(timestamp).toEpochSubSecond();
 
@@ -62,7 +41,10 @@ public class TransactionToSubSecondAction extends AbstractTransactionToSubSecond
 
   static SubSecondApi.LedgerItem toLedgerItem(TransactionEntity.TransactionIncident transactionIncident) {
     return SubSecondApi.LedgerItem.newBuilder()
-            // TODO
+            .setServiceCode(transactionIncident.getServiceCode())
+            .setAmount(transactionIncident.getIncidentAmount())
+            .setAccountFrom(transactionIncident.getAccountFrom())
+            .setAccountTo(transactionIncident.getAccountTo())
             .build();
   }
 
