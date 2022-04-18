@@ -26,9 +26,6 @@ public class MinuteToSecondAction extends AbstractMinuteToSecondAction {
         .map(epochSecond -> SecondApi.AggregateSecondCommand
             .newBuilder()
             .setMerchantId(event.getMerchantKey().getMerchantId())
-            .setServiceCode(event.getMerchantKey().getServiceCode())
-            .setAccountFrom(event.getMerchantKey().getAccountFrom())
-            .setAccountTo(event.getMerchantKey().getAccountTo())
             .setEpochSecond(epochSecond)
             .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
             .setPaymentId(event.getPaymentId())

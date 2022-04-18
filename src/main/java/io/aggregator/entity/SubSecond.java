@@ -1,6 +1,7 @@
 package io.aggregator.entity;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.akkaserverless.javasdk.eventsourcedentity.EventSourcedEntityContext;
@@ -44,7 +45,7 @@ public class SubSecond extends AbstractSubSecond {
   }
 
   @Override
-  public SubSecondEntity.SubSecondState subSecondTransactionAdded(SubSecondEntity.SubSecondState state, SubSecondEntity.SubSecondTransactionAdded event) {
+  public SubSecondEntity.SubSecondState subSecondLedgerItemsAdded(SubSecondEntity.SubSecondState state, SubSecondEntity.SubSecondLedgerItemsAdded event) {
     return handle(state, event);
   }
 
@@ -59,7 +60,8 @@ public class SubSecond extends AbstractSubSecond {
   }
 
   private Effect<Empty> handle(SubSecondEntity.SubSecondState state, SubSecondApi.AddLedgerItemsCommand command) {
-    log.debug("state: {}\nAddLedgerItemsCommand: {}", state, command);
+    log.debug(Thread.currentThread().getName() + " - state: {}\nAddLedgerItemsCommand: {}", state, command);
+    log.info(Thread.currentThread().getName() + " - RECEIVED COMMAND: AddLedgerItemsCommand");
 
     return effects()
         .emitEvents(eventsFor(state, command))
@@ -68,6 +70,7 @@ public class SubSecond extends AbstractSubSecond {
 
   private Effect<Empty> handle(SubSecondEntity.SubSecondState state, SubSecondApi.AggregateSubSecondCommand command) {
     log.debug("state: {}\nAggregateCommand: {}", state, command);
+    log.info(Thread.currentThread().getName() + " - RECEIVED COMMAND: AggregateSubSecondCommand");
 
     return effects()
         .emitEvents(eventsFor(state, command))
@@ -75,14 +78,14 @@ public class SubSecond extends AbstractSubSecond {
   }
 
   static SubSecondEntity.SubSecondState handle(SubSecondEntity.SubSecondState state, SubSecondEntity.SubSecondActivated event) {
+    log.debug(Thread.currentThread().getName() + " - SubSecondActivated: {}", event);
+    log.info(Thread.currentThread().getName() + " - RECEIVED EVENT: SubSecondActivated");
+
     return state.toBuilder()
         .setMerchantKey(
             TransactionMerchantKey.MerchantKey
                 .newBuilder()
                 .setMerchantId(event.getMerchantKey().getMerchantId())
-                .setServiceCode(event.getMerchantKey().getServiceCode())
-                .setAccountFrom(event.getMerchantKey().getAccountFrom())
-                .setAccountTo(event.getMerchantKey().getAccountTo())
                 .build())
         .setEpochSubSecond(event.getEpochSubSecond())
         .setEpochSecond(TimeTo.fromEpochSubSecond(event.getEpochSubSecond()).toEpochSecond())
@@ -92,102 +95,91 @@ public class SubSecond extends AbstractSubSecond {
         .build();
   }
 
-  static SubSecondEntity.SubSecondState handle(SubSecondEntity.SubSecondState state, SubSecondEntity.SubSecondTransactionAdded event) {
-    var transactionAlreadyAdded = state.getTransactionsList().stream()
-        .anyMatch(transaction -> transaction.getTransactionKey().equals(event.getTransactionKey()));
+  static SubSecondEntity.SubSecondState handle(SubSecondEntity.SubSecondState state, SubSecondEntity.SubSecondLedgerItemsAdded event) {
+    log.debug(Thread.currentThread().getName() + " - SubSecondLedgerItemsAdded: {}", event);
+    log.info(Thread.currentThread().getName() + " - RECEIVED EVENT: SubSecondLedgerItemsAdded");
 
-    if (transactionAlreadyAdded) {
-      return state; // idempotent - no need to re-add the same transaction
-    } else {
-      return state.toBuilder()
-          .addTransactions(
-              SubSecondEntity.Transaction
-                  .newBuilder()
-                  .setMerchantId(event.getMerchantKey().getMerchantId())
-                  .setEpochSubSecond(event.getEpochSubSecond())
-                  .setTransactionKey(event.getTransactionKey())
-                  .setAmount(event.getAmount())
-                  .setTimestamp(event.getTimestamp())
-                  .build())
-          .build();
-    }
+    var newState = state.toBuilder();
+    event.getLedgerEntriesList().stream()
+        .filter(ledgerEntry -> state.getLedgerEntriesList().stream()
+            .noneMatch(existingLedgerEntry -> existingLedgerEntry.getTransactionKey().equals(ledgerEntry.getTransactionKey())))
+        .forEach(newState::addLedgerEntries);
+    return newState.build();
   }
 
   static SubSecondEntity.SubSecondState handle(SubSecondEntity.SubSecondState state, SubSecondEntity.SubSecondAggregated event) {
-    var transactions = state.getTransactionsList().stream()
-        .map(transaction -> {
-          if (transaction.getAggregateRequestTimestamp().getSeconds() == 0) {
-            return transaction.toBuilder()
+    log.info(Thread.currentThread().getName() + " - RECEIVED EVENT: SubSecondAggregated");
+
+    var ledgerEntries = state.getLedgerEntriesList().stream()
+        .map(ledgerEntry -> {
+          if (ledgerEntry.getAggregateRequestTimestamp().getSeconds() == 0) {
+            return ledgerEntry.toBuilder()
                 .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
                 .build();
           } else {
-            return transaction;
+            return ledgerEntry;
           }
         })
         .toList();
 
     return state.toBuilder()
-        .clearTransactions()
-        .addAllTransactions(transactions)
+        .clearLedgerEntries()
+        .addAllLedgerEntries(ledgerEntries)
         .build();
   }
 
   static List<?> eventsFor(SubSecondEntity.SubSecondState state, SubSecondApi.AddLedgerItemsCommand command) {
-    var transactionAdded = SubSecondEntity.SubSecondTransactionAdded
+    var subSecondLedgerItemsAdded = SubSecondEntity.SubSecondLedgerItemsAdded
         .newBuilder()
-            // TODO
-//        .setMerchantKey(
-//            TransactionMerchantKey.MerchantKey
-//                .newBuilder()
-//                .setMerchantId(command.getMerchantId())
-//                .setServiceCode(command.getServiceCode())
-//                .setAccountFrom(command.getAccountFrom())
-//                .setAccountTo(command.getAccountTo())
-//                .build())
-//        .setEpochSubSecond(command.getEpochSubSecond())
-//        .setTransactionKey(
-//            TransactionMerchantKey.TransactionKey
-//                .newBuilder()
-//                .setTransactionId(command.getTransactionId())
-//                .setServiceCode(command.getServiceCode())
-//                .setAccountFrom(command.getAccountFrom())
-//                .setAccountTo(command.getAccountTo())
-//                .build())
-//        .setAmount(command.getAmount())
-//        .setTimestamp(command.getTimestamp())
+        .setMerchantKey(
+            TransactionMerchantKey.MerchantKey
+                .newBuilder()
+                .setMerchantId(command.getMerchantId())
+                .build())
+        .setEpochSubSecond(command.getEpochSubSecond())
+        .setTimestamp(command.getTimestamp())
+        .addAllLedgerEntries(
+            command.getLedgerItemList().stream()
+                .map(ledgerItem -> SubSecondEntity.LedgerEntry.newBuilder()
+                    .setTransactionKey(TransactionMerchantKey.TransactionKey.newBuilder()
+                        .setTransactionId(command.getTransactionId())
+                        .setServiceCode(ledgerItem.getServiceCode())
+                        .setAccountFrom(ledgerItem.getAccountFrom())
+                        .setAccountTo(ledgerItem.getAccountTo())
+                        .build())
+                    .setAmount(ledgerItem.getAmount())
+                    .setEpochSubSecond(command.getEpochSubSecond())
+                    .setTimestamp(command.getTimestamp())
+                    .build())
+                .collect(Collectors.toList())
+        )
         .build();
 
-    var isInactive = state.getTransactionsCount() == 0 || state.getTransactionsList().stream()
+    var isInactive = state.getLedgerEntriesCount() == 0 || state.getLedgerEntriesList().stream()
         .allMatch(transaction -> transaction.getAggregateRequestTimestamp().getSeconds() > 0);
 
     if (isInactive) {
-      var secondCreated = SubSecondEntity.SubSecondActivated
-          .newBuilder()
+      var subSecondActivated = SubSecondEntity.SubSecondActivated.newBuilder()
           .setMerchantKey(
-              TransactionMerchantKey.MerchantKey
-                  .newBuilder()
+              TransactionMerchantKey.MerchantKey.newBuilder()
                   .setMerchantId(command.getMerchantId())
-                  .setServiceCode(command.getServiceCode())
-                  .setAccountFrom(command.getAccountFrom())
-                  .setAccountTo(command.getAccountTo())
                   .build())
           .setEpochSubSecond(command.getEpochSubSecond())
           .build();
 
-      return List.of(secondCreated, transactionAdded);
+      return List.of(subSecondActivated, subSecondLedgerItemsAdded);
     } else {
-      return List.of(transactionAdded);
+      return List.of(subSecondLedgerItemsAdded);
     }
   }
 
   static List<?> eventsFor(SubSecondEntity.SubSecondState state, SubSecondApi.AggregateSubSecondCommand command) {
-    var transactions = state.getTransactionsList().stream()
-        .filter(transaction -> transaction.getAggregateRequestTimestamp().getSeconds() == 0)
+    var ledgerEntries = state.getLedgerEntriesList().stream()
+        .filter(ledgerEntry -> ledgerEntry.getAggregateRequestTimestamp().getSeconds() == 0)
         .toList();
 
-    if (transactions.size() == 0) {
-      return List.of(SubSecondEntity.SubSecondAggregated
-          .newBuilder()
+    if (ledgerEntries.size() == 0) {
+      return List.of(SubSecondEntity.SubSecondAggregated.newBuilder()
           .setMerchantKey(state.getMerchantKey())
           .setEpochSubSecond(state.getEpochSubSecond())
           .setTransactionTotalAmount(0.0)
@@ -196,14 +188,14 @@ public class SubSecond extends AbstractSubSecond {
           .setPaymentId(command.getPaymentId())
           .build());
     } else {
-      var total = transactions.stream()
-          .reduce(0.0, (a, b) -> a + b.getAmount(), (a, b) -> a + b);
-      var lastUpdate = transactions.stream()
-          .map(transaction -> transaction.getTimestamp())
+      var total = ledgerEntries.stream()
+          .reduce(0.0, (a, b) -> a + b.getAmount(), Double::sum);
+      var lastUpdate = ledgerEntries.stream()
+          .map(SubSecondEntity.LedgerEntry::getTimestamp)
           .max(TimeTo.comparator())
           .get();
 
-      var transactionsPaid = transactions.stream()
+      var transactionsPaid = ledgerEntries.stream()
           .map(transaction -> SubSecondEntity.TransactionPaid
               .newBuilder()
               .setTransactionKey(
@@ -224,7 +216,7 @@ public class SubSecond extends AbstractSubSecond {
           .setMerchantKey(state.getMerchantKey())
           .setEpochSubSecond(state.getEpochSubSecond())
           .setTransactionTotalAmount(total)
-          .setTransactionCount(transactions.size())
+          .setTransactionCount(ledgerEntries.size())
           .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
           .setLastUpdateTimestamp(lastUpdate)
           .setPaymentId(command.getPaymentId())

@@ -57,17 +57,11 @@ public class PaymentTest {
     var event = response.getNextEventOfType(PaymentEntity.PaymentDayAggregationRequested.class);
 
     assertEquals("merchant-1", event.getMerchantKey().getMerchantId());
-    assertEquals("service-code-1", event.getMerchantKey().getServiceCode());
-    assertEquals("account-from-1", event.getMerchantKey().getAccountFrom());
-    assertEquals("account-to-1", event.getMerchantKey().getAccountTo());
     assertEquals(epochDay, event.getEpochDay());
     assertEquals("payment-1", event.getPaymentId());
     assertEquals(now, event.getAggregateRequestTimestamp());
 
     assertEquals("merchant-1", testKit.getState().getMerchantKey().getMerchantId());
-    assertEquals("service-code-1", testKit.getState().getMerchantKey().getServiceCode());
-    assertEquals("account-from-1", testKit.getState().getMerchantKey().getAccountFrom());
-    assertEquals("account-to-1", testKit.getState().getMerchantKey().getAccountTo());
     assertEquals("payment-1", testKit.getState().getPaymentId());
 
     assertEquals(1, testKit.getState().getAggregationsList().size());
@@ -188,9 +182,6 @@ public class PaymentTest {
     response.getNextEventOfType(PaymentEntity.PaymentDayAggregationRequested.class);
 
     assertEquals("merchant-1", event.getMerchantKey().getMerchantId());
-    assertEquals("service-code-1", event.getMerchantKey().getServiceCode());
-    assertEquals("account-from-1", event.getMerchantKey().getAccountFrom());
-    assertEquals("account-to-1", event.getMerchantKey().getAccountTo());
     assertEquals("payment-1", event.getPaymentId());
   }
 
@@ -234,9 +225,6 @@ public class PaymentTest {
     var event = response.getNextEventOfType(PaymentEntity.ActiveDayAggregated.class);
 
     assertEquals("merchant-1", event.getMerchantKey().getMerchantId());
-    assertEquals("service-code-1", event.getMerchantKey().getServiceCode());
-    assertEquals("account-from-1", event.getMerchantKey().getAccountFrom());
-    assertEquals("account-to-1", event.getMerchantKey().getAccountTo());
     assertEquals("payment-1", event.getPaymentId());
     assertEquals(epochDay, event.getEpochDay());
     assertEquals(123.45, event.getTransactionTotalAmount(), 0.0);
@@ -275,9 +263,6 @@ public class PaymentTest {
     var activeDayAggregated = response.getNextEventOfType(PaymentEntity.ActiveDayAggregated.class);
 
     assertEquals("merchant-1", paymentAggregated.getMerchantKey().getMerchantId());
-    assertEquals("service-code-1", paymentAggregated.getMerchantKey().getServiceCode());
-    assertEquals("account-from-1", paymentAggregated.getMerchantKey().getAccountFrom());
-    assertEquals("account-to-1", paymentAggregated.getMerchantKey().getAccountTo());
     assertEquals("payment-1", paymentAggregated.getPaymentId());
     assertEquals(123.45, paymentAggregated.getTransactionTotalAmount(), 0.0);
     assertEquals(123, paymentAggregated.getTransactionCount());
@@ -285,9 +270,6 @@ public class PaymentTest {
     assertEquals(now, paymentAggregated.getAggregateRequestTimestamp());
 
     assertEquals("merchant-1", activeDayAggregated.getMerchantKey().getMerchantId());
-    assertEquals("service-code-1", activeDayAggregated.getMerchantKey().getServiceCode());
-    assertEquals("account-from-1", activeDayAggregated.getMerchantKey().getAccountFrom());
-    assertEquals("account-to-1", activeDayAggregated.getMerchantKey().getAccountTo());
     assertEquals("payment-1", activeDayAggregated.getPaymentId());
     assertEquals(epochDay, activeDayAggregated.getEpochDay());
     assertEquals(123.45, activeDayAggregated.getTransactionTotalAmount(), 0.0);
@@ -340,9 +322,6 @@ public class PaymentTest {
     response.getNextEventOfType(PaymentEntity.ActiveDayAggregated.class);
 
     assertEquals("merchant-1", paymentAggregated.getMerchantKey().getMerchantId());
-    assertEquals("service-code-1", paymentAggregated.getMerchantKey().getServiceCode());
-    assertEquals("account-from-1", paymentAggregated.getMerchantKey().getAccountFrom());
-    assertEquals("account-to-1", paymentAggregated.getMerchantKey().getAccountTo());
     assertEquals("payment-1", paymentAggregated.getPaymentId());
     assertEquals(12.34 + 23.45 + 34.56 + 45.67 + 56.78 + 67.89, paymentAggregated.getTransactionTotalAmount(), 0.0);
     assertEquals(12 + 23 + 34 + 45 + 56 + 67, paymentAggregated.getTransactionCount());
@@ -373,9 +352,6 @@ public class PaymentTest {
     var paymentAggregated = response.getNextEventOfType(PaymentEntity.PaymentAggregated.class);
 
     assertEquals("merchant-1", paymentAggregated.getMerchantKey().getMerchantId());
-    assertEquals("service-code-1", paymentAggregated.getMerchantKey().getServiceCode());
-    assertEquals("account-from-1", paymentAggregated.getMerchantKey().getAccountFrom());
-    assertEquals("account-to-1", paymentAggregated.getMerchantKey().getAccountTo());
     assertEquals("payment-1", paymentAggregated.getPaymentId());
     assertEquals(12.34, paymentAggregated.getTransactionTotalAmount(), 0.0);
     assertEquals(12, paymentAggregated.getTransactionCount());

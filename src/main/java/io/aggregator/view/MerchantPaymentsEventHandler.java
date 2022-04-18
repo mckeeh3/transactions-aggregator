@@ -11,9 +11,6 @@ class MerchantPaymentsEventHandler {
 
     return state.toBuilder()
         .setMerchantId(event.getMerchantKey().getMerchantId())
-        .setServiceCode(event.getMerchantKey().getServiceCode())
-        .setAccountFrom(event.getMerchantKey().getAccountFrom())
-        .setAccountTo(event.getMerchantKey().getAccountTo())
         .setPaymentId(event.getPaymentId())
         .setTransactionTotalAmount(amount)
         .setTransactionCount(count)

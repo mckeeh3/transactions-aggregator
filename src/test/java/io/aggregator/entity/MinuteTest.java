@@ -46,23 +46,14 @@ public class MinuteTest {
     var secondAdded = response.getNextEventOfType(MinuteEntity.SecondAdded.class);
 
     assertEquals("merchant-1", minuteActivated.getMerchantKey().getMerchantId());
-    assertEquals("service-code-1", minuteActivated.getMerchantKey().getServiceCode());
-    assertEquals("account-from-1", minuteActivated.getMerchantKey().getAccountFrom());
-    assertEquals("account-to-1", minuteActivated.getMerchantKey().getAccountTo());
     assertEquals(epochMinute, minuteActivated.getEpochMinute());
 
     assertEquals("merchant-1", secondAdded.getMerchantKey().getMerchantId());
-    assertEquals("service-code-1", secondAdded.getMerchantKey().getServiceCode());
-    assertEquals("account-from-1", secondAdded.getMerchantKey().getAccountFrom());
-    assertEquals("account-to-1", secondAdded.getMerchantKey().getAccountTo());
     assertEquals(epochSecond, secondAdded.getEpochSecond());
 
     var state = testKit.getState();
 
     assertEquals("merchant-1", state.getMerchantKey().getMerchantId());
-    assertEquals("service-code-1", state.getMerchantKey().getServiceCode());
-    assertEquals("account-from-1", state.getMerchantKey().getAccountFrom());
-    assertEquals("account-to-1", state.getMerchantKey().getAccountTo());
     assertEquals(epochMinute, state.getEpochMinute());
     assertEquals(1, state.getActiveSecondsCount());
 
@@ -75,17 +66,11 @@ public class MinuteTest {
     secondAdded = response.getNextEventOfType(MinuteEntity.SecondAdded.class);
 
     assertEquals("merchant-1", secondAdded.getMerchantKey().getMerchantId());
-    assertEquals("service-code-1", secondAdded.getMerchantKey().getServiceCode());
-    assertEquals("account-from-1", secondAdded.getMerchantKey().getAccountFrom());
-    assertEquals("account-to-1", secondAdded.getMerchantKey().getAccountTo());
     assertEquals(nextEpochSecond, secondAdded.getEpochSecond());
 
     state = testKit.getState();
 
     assertEquals("merchant-1", state.getMerchantKey().getMerchantId());
-    assertEquals("service-code-1", state.getMerchantKey().getServiceCode());
-    assertEquals("account-from-1", state.getMerchantKey().getAccountFrom());
-    assertEquals("account-to-1", state.getMerchantKey().getAccountTo());
     assertEquals(epochMinute, state.getEpochMinute());
     assertEquals(2, state.getActiveSecondsCount());
 
@@ -111,9 +96,6 @@ public class MinuteTest {
     var minuteAggregationRequested = response.getNextEventOfType(MinuteEntity.MinuteAggregationRequested.class);
 
     assertEquals("merchant-1", minuteAggregationRequested.getMerchantKey().getMerchantId());
-    assertEquals("service-code-1", minuteAggregationRequested.getMerchantKey().getServiceCode());
-    assertEquals("account-from-1", minuteAggregationRequested.getMerchantKey().getAccountFrom());
-    assertEquals("account-to-1", minuteAggregationRequested.getMerchantKey().getAccountTo());
     assertEquals(epochMinute, minuteAggregationRequested.getEpochMinute());
     assertEquals(now, minuteAggregationRequested.getAggregateRequestTimestamp());
     assertEquals(2, minuteAggregationRequested.getEpochSecondsCount());
@@ -143,9 +125,6 @@ public class MinuteTest {
     var minuteAggregated = response.getNextEventOfType(MinuteEntity.MinuteAggregated.class);
 
     assertEquals("merchant-1", minuteAggregated.getMerchantKey().getMerchantId());
-    assertEquals("service-code-1", minuteAggregated.getMerchantKey().getServiceCode());
-    assertEquals("account-from-1", minuteAggregated.getMerchantKey().getAccountFrom());
-    assertEquals("account-to-1", minuteAggregated.getMerchantKey().getAccountTo());
     assertEquals(epochMinute, minuteAggregated.getEpochMinute());
     assertEquals(now, minuteAggregated.getAggregateRequestTimestamp());
     assertEquals(0, minuteAggregated.getTransactionCount());
@@ -171,9 +150,6 @@ public class MinuteTest {
     var activeSecondAggregated = response.getNextEventOfType(MinuteEntity.ActiveSecondAggregated.class);
 
     assertEquals("merchant-1", activeSecondAggregated.getMerchantKey().getMerchantId());
-    assertEquals("service-code-1", activeSecondAggregated.getMerchantKey().getServiceCode());
-    assertEquals("account-from-1", activeSecondAggregated.getMerchantKey().getAccountFrom());
-    assertEquals("account-to-1", activeSecondAggregated.getMerchantKey().getAccountTo());
     assertEquals(epochSecond, activeSecondAggregated.getEpochSecond());
     assertEquals(123.45, activeSecondAggregated.getTransactionTotalAmount(), 0.0);
     assertEquals(10, activeSecondAggregated.getTransactionCount());
@@ -187,9 +163,6 @@ public class MinuteTest {
     activeSecondAggregated = response.getNextEventOfType(MinuteEntity.ActiveSecondAggregated.class);
 
     assertEquals("merchant-1", activeSecondAggregated.getMerchantKey().getMerchantId());
-    assertEquals("service-code-1", activeSecondAggregated.getMerchantKey().getServiceCode());
-    assertEquals("account-from-1", activeSecondAggregated.getMerchantKey().getAccountFrom());
-    assertEquals("account-to-1", activeSecondAggregated.getMerchantKey().getAccountTo());
     assertEquals(nextEpochSecond, activeSecondAggregated.getEpochSecond());
     assertEquals(678.90, activeSecondAggregated.getTransactionTotalAmount(), 0.0);
     assertEquals(20, activeSecondAggregated.getTransactionCount());
@@ -198,9 +171,6 @@ public class MinuteTest {
     assertEquals("payment-1", activeSecondAggregated.getPaymentId());
 
     assertEquals("merchant-1", minuteAggregated.getMerchantKey().getMerchantId());
-    assertEquals("service-code-1", minuteAggregated.getMerchantKey().getServiceCode());
-    assertEquals("account-from-1", minuteAggregated.getMerchantKey().getAccountFrom());
-    assertEquals("account-to-1", minuteAggregated.getMerchantKey().getAccountTo());
     assertEquals(epochMinute, minuteAggregated.getEpochMinute());
     assertEquals(123.45 + 678.90, minuteAggregated.getTransactionTotalAmount(), 0.0);
     assertEquals(10 + 20, minuteAggregated.getTransactionCount());
@@ -224,9 +194,6 @@ public class MinuteTest {
     activeSecondAggregated = response.getNextEventOfType(MinuteEntity.ActiveSecondAggregated.class);
 
     assertEquals("merchant-1", activeSecondAggregated.getMerchantKey().getMerchantId());
-    assertEquals("service-code-1", activeSecondAggregated.getMerchantKey().getServiceCode());
-    assertEquals("account-from-1", activeSecondAggregated.getMerchantKey().getAccountFrom());
-    assertEquals("account-to-1", activeSecondAggregated.getMerchantKey().getAccountTo());
     assertEquals(epochSecond, activeSecondAggregated.getEpochSecond());
     assertEquals(543.21, activeSecondAggregated.getTransactionTotalAmount(), 0.0);
     assertEquals(321, activeSecondAggregated.getTransactionCount());
@@ -235,9 +202,6 @@ public class MinuteTest {
     assertEquals("payment-1", activeSecondAggregated.getPaymentId());
 
     assertEquals("merchant-1", minuteAggregated.getMerchantKey().getMerchantId());
-    assertEquals("service-code-1", minuteAggregated.getMerchantKey().getServiceCode());
-    assertEquals("account-from-1", minuteAggregated.getMerchantKey().getAccountFrom());
-    assertEquals("account-to-1", minuteAggregated.getMerchantKey().getAccountTo());
     assertEquals(epochMinute, minuteAggregated.getEpochMinute());
     assertEquals(543.21, minuteAggregated.getTransactionTotalAmount(), 0.0);
     assertEquals(321, minuteAggregated.getTransactionCount());
@@ -250,9 +214,6 @@ public class MinuteTest {
     return MinuteApi.AddSecondCommand
         .newBuilder()
         .setMerchantId("merchant-1")
-        .setServiceCode("service-code-1")
-        .setAccountFrom("account-from-1")
-        .setAccountTo("account-to-1")
         .setEpochMinute(TimeTo.fromEpochSecond(epochSecond).toEpochMinute())
         .setEpochSecond(epochSecond)
         .build();

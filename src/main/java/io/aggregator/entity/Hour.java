@@ -72,6 +72,7 @@ public class Hour extends AbstractHour {
 
   private Effect<Empty> handle(HourEntity.HourState state, HourApi.AddMinuteCommand command) {
     log.debug("state: {}\nAddMinuteCommand: {}", state, command);
+    log.info(Thread.currentThread().getName() + " - RECEIVED COMMAND: AddMinuteCommand");
 
     return effects()
         .emitEvents(eventsFor(state, command))
@@ -80,6 +81,7 @@ public class Hour extends AbstractHour {
 
   private Effect<Empty> handle(HourEntity.HourState state, HourApi.AggregateHourCommand command) {
     log.debug("state: {}\nAggregateHourCommand: {}", state, command);
+    log.info(Thread.currentThread().getName() + " - RECEIVED COMMAND: AggregateHourCommand");
 
     return effects()
         .emitEvents(eventsFor(state, command))
@@ -88,6 +90,7 @@ public class Hour extends AbstractHour {
 
   private Effect<Empty> handle(HourEntity.HourState state, HourApi.MinuteAggregationCommand command) {
     log.debug("state: {}\nMinuteAggregationCommand: {}", state, command);
+    log.info(Thread.currentThread().getName() + " - RECEIVED COMMAND: MinuteAggregationCommand");
 
     return effects()
         .emitEvents(eventsFor(state, command))
@@ -95,14 +98,13 @@ public class Hour extends AbstractHour {
   }
 
   static HourEntity.HourState handle(HourEntity.HourState state, HourEntity.HourActivated event) {
+    log.info(Thread.currentThread().getName() + " - RECEIVED EVENT: HourActivated");
+
     return state.toBuilder()
         .setMerchantKey(
             TransactionMerchantKey.MerchantKey
                 .newBuilder()
                 .setMerchantId(event.getMerchantKey().getMerchantId())
-                .setServiceCode(event.getMerchantKey().getServiceCode())
-                .setAccountFrom(event.getMerchantKey().getAccountFrom())
-                .setAccountTo(event.getMerchantKey().getAccountTo())
                 .build())
         .setEpochHour(event.getEpochHour())
         .setEpochDay(TimeTo.fromEpochHour(event.getEpochHour()).toEpochDay())
@@ -110,6 +112,8 @@ public class Hour extends AbstractHour {
   }
 
   static HourEntity.HourState handle(HourEntity.HourState state, HourEntity.MinuteAdded event) {
+    log.info(Thread.currentThread().getName() + " - RECEIVED EVENT: MinuteAdded");
+
     var alreadyAdded = state.getActiveMinutesList().stream()
         .anyMatch(activeMinute -> activeMinute.getEpochMinute() == event.getEpochMinute());
 
@@ -127,6 +131,8 @@ public class Hour extends AbstractHour {
   }
 
   static HourEntity.HourState handle(HourEntity.HourState state, HourEntity.HourAggregationRequested event) {
+    log.info(Thread.currentThread().getName() + " - RECEIVED EVENT: HourAggregationRequested");
+
     var activeAlreadyMoved = state.getAggregateHoursList().stream()
         .anyMatch(aggregateHour -> aggregateHour.getAggregateRequestTimestamp() == event.getAggregateRequestTimestamp());
 
@@ -201,9 +207,6 @@ public class Hour extends AbstractHour {
             TransactionMerchantKey.MerchantKey
                 .newBuilder()
                 .setMerchantId(command.getMerchantId())
-                .setServiceCode(command.getServiceCode())
-                .setAccountFrom(command.getAccountFrom())
-                .setAccountTo(command.getAccountTo())
                 .build())
         .setEpochMinute(command.getEpochMinute())
         .build();
@@ -215,9 +218,6 @@ public class Hour extends AbstractHour {
               TransactionMerchantKey.MerchantKey
                   .newBuilder()
                   .setMerchantId(command.getMerchantId())
-                  .setServiceCode(command.getServiceCode())
-                  .setAccountFrom(command.getAccountFrom())
-                  .setAccountTo(command.getAccountTo())
                   .build())
           .setEpochHour(command.getEpochHour())
           .build();
@@ -238,9 +238,6 @@ public class Hour extends AbstractHour {
                   TransactionMerchantKey.MerchantKey
                       .newBuilder()
                       .setMerchantId(command.getMerchantId())
-                      .setServiceCode(command.getServiceCode())
-                      .setAccountFrom(command.getAccountFrom())
-                      .setAccountTo(command.getAccountTo())
                       .build())
               .setEpochHour(command.getEpochHour())
               .setTransactionTotalAmount(0.0)
@@ -257,16 +254,13 @@ public class Hour extends AbstractHour {
                   TransactionMerchantKey.MerchantKey
                       .newBuilder()
                       .setMerchantId(command.getMerchantId())
-                      .setServiceCode(command.getServiceCode())
-                      .setAccountFrom(command.getAccountFrom())
-                      .setAccountTo(command.getAccountTo())
                       .build())
               .setEpochHour(command.getEpochHour())
               .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
               .setPaymentId(command.getPaymentId())
               .addAllEpochMinutes(
                   state.getActiveMinutesList().stream()
-                      .map(activeMinute -> activeMinute.getEpochMinute())
+                      .map(HourEntity.ActiveMinute::getEpochMinute)
                       .toList())
               .build());
     }
@@ -334,9 +328,6 @@ public class Hour extends AbstractHour {
             TransactionMerchantKey.MerchantKey
                 .newBuilder()
                 .setMerchantId(command.getMerchantId())
-                .setServiceCode(command.getServiceCode())
-                .setAccountFrom(command.getAccountFrom())
-                .setAccountTo(command.getAccountTo())
                 .build())
         .setEpochMinute(command.getEpochMinute())
         .setTransactionTotalAmount(command.getTransactionTotalAmount())
@@ -366,9 +357,6 @@ public class Hour extends AbstractHour {
             TransactionMerchantKey.MerchantKey
                 .newBuilder()
                 .setMerchantId(command.getMerchantId())
-                .setServiceCode(command.getServiceCode())
-                .setAccountFrom(command.getAccountFrom())
-                .setAccountTo(command.getAccountTo())
                 .build())
         .setEpochHour(command.getEpochHour())
         .setTransactionTotalAmount(transactionTotalAmount)

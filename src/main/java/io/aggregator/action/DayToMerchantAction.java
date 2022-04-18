@@ -6,6 +6,8 @@ import com.google.protobuf.Empty;
 
 import io.aggregator.api.MerchantApi;
 import io.aggregator.entity.DayEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // This class was initially generated based on the .proto definition by Akka Serverless tooling.
 // This is the implementation for the Action Service described in your io/aggregator/action/day_to_merchant_action.proto file.
@@ -14,19 +16,19 @@ import io.aggregator.entity.DayEntity;
 // or delete it so it is regenerated as needed.
 
 public class DayToMerchantAction extends AbstractDayToMerchantAction {
+  static final Logger log = LoggerFactory.getLogger(DayToMerchantAction.class);
 
   public DayToMerchantAction(ActionCreationContext creationContext) {
   }
 
   @Override
   public Effect<Empty> onDayActivated(DayEntity.DayActivated event) {
+    log.info(Thread.currentThread().getName() + " - ON EVENT: DayActivated");
+
     return effects().forward(components().merchant().activateDay(
         MerchantApi.ActivateDayCommand
             .newBuilder()
             .setMerchantId(event.getMerchantKey().getMerchantId())
-            .setServiceCode(event.getMerchantKey().getServiceCode())
-            .setAccountFrom(event.getMerchantKey().getAccountFrom())
-            .setAccountTo(event.getMerchantKey().getAccountTo())
             .setEpochDay(event.getEpochDay())
             .build()));
   }

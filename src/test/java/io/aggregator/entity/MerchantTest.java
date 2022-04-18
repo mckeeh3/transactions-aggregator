@@ -46,9 +46,6 @@ public class MerchantTest {
     var merchantAggregationRequested = response.getNextEventOfType(MerchantEntity.MerchantAggregationRequested.class);
 
     assertEquals("merchant-1", dayActivated.getMerchantKey().getMerchantId());
-    assertEquals("service-code-1", dayActivated.getMerchantKey().getServiceCode());
-    assertEquals("account-from-1", dayActivated.getMerchantKey().getAccountFrom());
-    assertEquals("account-to-1", dayActivated.getMerchantKey().getAccountTo());
     assertEquals(epochDay, dayActivated.getEpochDay());
 
     assertEquals(1, merchantAggregationRequested.getActiveDaysCount());
@@ -57,9 +54,6 @@ public class MerchantTest {
     var state = testKit.getState();
 
     assertEquals("merchant-1", state.getMerchantKey().getMerchantId());
-    assertEquals("service-code-1", state.getMerchantKey().getServiceCode());
-    assertEquals("account-from-1", state.getMerchantKey().getAccountFrom());
-    assertEquals("account-to-1", state.getMerchantKey().getAccountTo());
     assertEquals(0, state.getPaymentIdSequenceNumber());
     assertEquals(0, state.getActiveDaysCount());
   }
@@ -112,9 +106,6 @@ public class MerchantTest {
     var merchantAggregationRequested = response.getNextEventOfType(MerchantEntity.MerchantAggregationRequested.class);
 
     assertEquals("merchant-1", merchantAggregationRequested.getMerchantKey().getMerchantId());
-    assertEquals("service-code-1", merchantAggregationRequested.getMerchantKey().getServiceCode());
-    assertEquals("account-from-1", merchantAggregationRequested.getMerchantKey().getAccountFrom());
-    assertEquals("account-to-1", merchantAggregationRequested.getMerchantKey().getAccountTo());
     assertEquals("payment-1", merchantAggregationRequested.getPaymentId());
     // assertEquals(epochDay, merchantAggregationRequested.getEpochDay());
     assertTrue(merchantAggregationRequested.getAggregateRequestTimestamp().getSeconds() > 0);
@@ -197,9 +188,6 @@ public class MerchantTest {
     var merchantPaymentRequested = response.getNextEventOfType(MerchantEntity.MerchantPaymentRequested.class);
 
     assertEquals("merchant-1", merchantPaymentRequested.getMerchantKey().getMerchantId());
-    assertEquals("service-code-1", merchantPaymentRequested.getMerchantKey().getServiceCode());
-    assertEquals("account-from-1", merchantPaymentRequested.getMerchantKey().getAccountFrom());
-    assertEquals("account-to-1", merchantPaymentRequested.getMerchantKey().getAccountTo());
     assertEquals("payment-1", merchantPaymentRequested.getPaymentId());
   }
 
@@ -222,9 +210,6 @@ public class MerchantTest {
     var event = response.getNextEventOfType(MerchantEntity.MerchantPaymentRequested.class);
 
     assertEquals("merchant-1", event.getMerchantKey().getMerchantId());
-    assertEquals("service-code-1", event.getMerchantKey().getServiceCode());
-    assertEquals("account-from-1", event.getMerchantKey().getAccountFrom());
-    assertEquals("account-to-1", event.getMerchantKey().getAccountTo());
     assertEquals("payment-1", event.getPaymentId());
     // assertEquals(1, event.getActiveDaysCount());
     // assertEquals(epochDay, event.getActiveDays(0));
@@ -299,9 +284,6 @@ public class MerchantTest {
     return MerchantApi.ActivateDayCommand
         .newBuilder()
         .setMerchantId("merchant-1")
-        .setServiceCode("service-code-1")
-        .setAccountFrom("account-from-1")
-        .setAccountTo("account-to-1")
         .setEpochDay(epochDay)
         .build();
   }
@@ -310,9 +292,6 @@ public class MerchantTest {
     return MerchantApi.MerchantAggregationRequestCommand
         .newBuilder()
         .setMerchantId("merchant-1")
-        .setServiceCode("service-code-1")
-        .setAccountFrom("account-from-1")
-        .setAccountTo("account-to-1")
         .build();
   }
 
@@ -320,9 +299,6 @@ public class MerchantTest {
     return MerchantApi.MerchantPaymentRequestCommand
         .newBuilder()
         .setMerchantId("merchant-1")
-        .setServiceCode("service-code-1")
-        .setAccountFrom("account-from-1")
-        .setAccountTo("account-to-1")
         .build();
   }
 }

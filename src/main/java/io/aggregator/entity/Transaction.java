@@ -1,6 +1,5 @@
 package io.aggregator.entity;
 
-import java.util.Collections;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -55,7 +54,8 @@ public class Transaction extends AbstractTransaction {
   }
 
   private Effect<Empty> handle(TransactionEntity.TransactionState state, TransactionApi.PaymentPricedCommand command) {
-    log.debug("state: {}\nPaymentPricedCommand: {}", state, command);
+    log.debug(Thread.currentThread().getName() + " - state: {}\nPaymentPricedCommand: {}", state, command);
+    log.info(Thread.currentThread().getName() + " - RECEIVED COMMAND: PaymentPricedCommand");
 
     return effects()
         .emitEvent(eventFor(state, command))
@@ -64,6 +64,7 @@ public class Transaction extends AbstractTransaction {
 
   private Effect<Empty> handle(TransactionEntity.TransactionState state, TransactionApi.AddPaymentCommand command) {
     log.debug("state: {}\nAddPaymentCommand: {}", state, command);
+    log.info(Thread.currentThread().getName() + " - RECEIVED COMMAND: AddPaymentCommand");
 
     return effects()
         .emitEvent(eventFor(state, command))
@@ -91,6 +92,7 @@ public class Transaction extends AbstractTransaction {
   }
 
   static TransactionEntity.TransactionState handle(TransactionEntity.TransactionState state, TransactionEntity.IncidentAdded event) {
+    log.info(Thread.currentThread().getName() + " - RECEIVED EVENT: IncidentAdded");
     return state.toBuilder()
         .setTransactionId(event.getTransactionId())
         .setMerchantId(event.getMerchantId())
@@ -100,6 +102,7 @@ public class Transaction extends AbstractTransaction {
   }
 
   static TransactionEntity.TransactionState handle(TransactionEntity.TransactionState state, TransactionEntity.PaymentAdded event) {
+    log.info(Thread.currentThread().getName() + " - RECEIVED EVENT: PaymentAdded");
     return state.toBuilder()
         .setPaymentId(event.getPaymentId())
         .build();

@@ -7,6 +7,8 @@ import com.google.protobuf.Empty;
 import io.aggregator.TimeTo;
 import io.aggregator.api.MinuteApi;
 import io.aggregator.entity.SecondEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // This class was initially generated based on the .proto definition by Akka Serverless tooling.
 //
@@ -14,19 +16,19 @@ import io.aggregator.entity.SecondEntity;
 // or delete it so it is regenerated as needed.
 
 public class SecondToMinuteAction extends AbstractSecondToMinuteAction {
+  static final Logger log = LoggerFactory.getLogger(SecondToMinuteAction.class);
 
   public SecondToMinuteAction(ActionCreationContext creationContext) {
   }
 
   @Override
   public Effect<Empty> onSecondActivated(SecondEntity.SecondActivated event) {
+    log.info(Thread.currentThread().getName() + " - ON EVENT: SecondActivated");
+
     return effects().forward(components().minute().addSecond(
         MinuteApi.AddSecondCommand
             .newBuilder()
             .setMerchantId(event.getMerchantKey().getMerchantId())
-            .setServiceCode(event.getMerchantKey().getServiceCode())
-            .setAccountFrom(event.getMerchantKey().getAccountFrom())
-            .setAccountTo(event.getMerchantKey().getAccountTo())
             .setEpochMinute(TimeTo.fromEpochSecond(event.getEpochSecond()).toEpochMinute())
             .setEpochSecond(event.getEpochSecond())
             .build()));
@@ -34,13 +36,12 @@ public class SecondToMinuteAction extends AbstractSecondToMinuteAction {
 
   @Override
   public Effect<Empty> onSecondAggregated(SecondEntity.SecondAggregated event) {
+    log.info(Thread.currentThread().getName() + " - ON EVENT: SecondAggregated");
+
     return effects().forward(components().minute().secondAggregation(
         MinuteApi.SecondAggregationCommand
             .newBuilder()
             .setMerchantId(event.getMerchantKey().getMerchantId())
-            .setServiceCode(event.getMerchantKey().getServiceCode())
-            .setAccountFrom(event.getMerchantKey().getAccountFrom())
-            .setAccountTo(event.getMerchantKey().getAccountTo())
             .setEpochMinute(TimeTo.fromEpochSecond(event.getEpochSecond()).toEpochMinute())
             .setEpochSecond(event.getEpochSecond())
             .setTransactionTotalAmount(event.getTransactionTotalAmount())

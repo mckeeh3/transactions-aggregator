@@ -72,6 +72,7 @@ public class Minute extends AbstractMinute {
 
   private Effect<Empty> handle(MinuteEntity.MinuteState state, MinuteApi.AddSecondCommand command) {
     log.debug("state: {}\nAddSecondCommand: {}", state, command);
+    log.info(Thread.currentThread().getName() + " - RECEIVED COMMAND: AddSecondCommand");
 
     return effects()
         .emitEvents(eventsFor(state, command))
@@ -80,6 +81,7 @@ public class Minute extends AbstractMinute {
 
   private Effect<Empty> handle(MinuteEntity.MinuteState state, MinuteApi.AggregateMinuteCommand command) {
     log.debug("state: {}\nAggregateMinuteCommand: {}", state, command);
+    log.info(Thread.currentThread().getName() + " - RECEIVED COMMAND: AggregateMinuteCommand");
 
     return effects()
         .emitEvents(eventsFor(state, command))
@@ -88,6 +90,7 @@ public class Minute extends AbstractMinute {
 
   private Effect<Empty> handle(MinuteEntity.MinuteState state, MinuteApi.SecondAggregationCommand command) {
     log.debug("state: {}\nSecondAggregationCommand: {}", state, command);
+    log.info(Thread.currentThread().getName() + " - RECEIVED COMMAND: SecondAggregationCommand");
 
     return effects()
         .emitEvents(eventsFor(state, command))
@@ -95,14 +98,13 @@ public class Minute extends AbstractMinute {
   }
 
   static MinuteEntity.MinuteState handle(MinuteEntity.MinuteState state, MinuteEntity.MinuteActivated event) {
+    log.info(Thread.currentThread().getName() + " - RECEIVED EVENT: MinuteActivated");
+
     return state.toBuilder()
         .setMerchantKey(
             TransactionMerchantKey.MerchantKey
                 .newBuilder()
                 .setMerchantId(event.getMerchantKey().getMerchantId())
-                .setServiceCode(event.getMerchantKey().getServiceCode())
-                .setAccountFrom(event.getMerchantKey().getAccountFrom())
-                .setAccountTo(event.getMerchantKey().getAccountTo())
                 .build())
         .setEpochMinute(event.getEpochMinute())
         .setEpochHour(TimeTo.fromEpochMinute(event.getEpochMinute()).toEpochHour())
@@ -111,6 +113,8 @@ public class Minute extends AbstractMinute {
   }
 
   static MinuteEntity.MinuteState handle(MinuteEntity.MinuteState state, MinuteEntity.SecondAdded event) {
+    log.info(Thread.currentThread().getName() + " - RECEIVED EVENT: SecondAdded");
+
     var alreadyAdded = state.getActiveSecondsList().stream()
         .anyMatch(activeSecond -> activeSecond.getEpochSecond() == event.getEpochSecond());
 
@@ -128,6 +132,8 @@ public class Minute extends AbstractMinute {
   }
 
   static MinuteEntity.MinuteState handle(MinuteEntity.MinuteState state, MinuteEntity.MinuteAggregationRequested event) {
+    log.info(Thread.currentThread().getName() + " - RECEIVED EVENT: MinuteAggregationRequested");
+
     var activeAlreadyMoved = state.getAggregateMinutesList().stream()
         .anyMatch(activeMinute -> activeMinute.getAggregateRequestTimestamp().equals(event.getAggregateRequestTimestamp()));
 
@@ -202,9 +208,6 @@ public class Minute extends AbstractMinute {
             TransactionMerchantKey.MerchantKey
                 .newBuilder()
                 .setMerchantId(command.getMerchantId())
-                .setServiceCode(command.getServiceCode())
-                .setAccountFrom(command.getAccountFrom())
-                .setAccountTo(command.getAccountTo())
                 .build())
         .setEpochSecond(command.getEpochSecond())
         .build();
@@ -216,9 +219,6 @@ public class Minute extends AbstractMinute {
               TransactionMerchantKey.MerchantKey
                   .newBuilder()
                   .setMerchantId(command.getMerchantId())
-                  .setServiceCode(command.getServiceCode())
-                  .setAccountFrom(command.getAccountFrom())
-                  .setAccountTo(command.getAccountTo())
                   .build())
           .setEpochMinute(command.getEpochMinute())
           .build();
@@ -239,9 +239,6 @@ public class Minute extends AbstractMinute {
                   TransactionMerchantKey.MerchantKey
                       .newBuilder()
                       .setMerchantId(command.getMerchantId())
-                      .setServiceCode(command.getServiceCode())
-                      .setAccountFrom(command.getAccountFrom())
-                      .setAccountTo(command.getAccountTo())
                       .build())
               .setEpochMinute(command.getEpochMinute())
               .setTransactionTotalAmount(0.0)
@@ -258,9 +255,6 @@ public class Minute extends AbstractMinute {
                   TransactionMerchantKey.MerchantKey
                       .newBuilder()
                       .setMerchantId(command.getMerchantId())
-                      .setServiceCode(command.getServiceCode())
-                      .setAccountFrom(command.getAccountFrom())
-                      .setAccountTo(command.getAccountTo())
                       .build())
               .setEpochMinute(command.getEpochMinute())
               .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
@@ -336,9 +330,6 @@ public class Minute extends AbstractMinute {
             TransactionMerchantKey.MerchantKey
                 .newBuilder()
                 .setMerchantId(command.getMerchantId())
-                .setServiceCode(command.getServiceCode())
-                .setAccountFrom(command.getAccountFrom())
-                .setAccountTo(command.getAccountTo())
                 .build())
         .setEpochSecond(command.getEpochSecond())
         .setTransactionTotalAmount(command.getTransactionTotalAmount())
@@ -368,9 +359,6 @@ public class Minute extends AbstractMinute {
             TransactionMerchantKey.MerchantKey
                 .newBuilder()
                 .setMerchantId(command.getMerchantId())
-                .setServiceCode(command.getServiceCode())
-                .setAccountFrom(command.getAccountFrom())
-                .setAccountTo(command.getAccountTo())
                 .build())
         .setEpochMinute(command.getEpochMinute())
         .setTransactionTotalAmount(transactionTotalAmount)

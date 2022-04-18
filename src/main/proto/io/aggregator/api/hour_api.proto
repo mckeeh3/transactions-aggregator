@@ -49,11 +49,8 @@ service Hour {
 
 message AddMinuteCommand {
   string merchant_id = 1 [(akkaserverless.field).entity_key = true];
-  string service_code = 2 [(akkaserverless.field).entity_key = true];
-  string account_from = 3 [(akkaserverless.field).entity_key = true];
-  string account_to = 4 [(akkaserverless.field).entity_key = true];
-  int64 epoch_hour = 5 [(akkaserverless.field).entity_key = true];
-  int64 epoch_minute = 6;
+  int64 epoch_hour = 2 [(akkaserverless.field).entity_key = true];
+  int64 epoch_minute = 3;
 }
 
 message AggregateHourCommand {

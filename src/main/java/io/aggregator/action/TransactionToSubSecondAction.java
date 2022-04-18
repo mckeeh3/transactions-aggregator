@@ -7,6 +7,8 @@ import com.google.protobuf.Empty;
 import io.aggregator.TimeTo;
 import io.aggregator.api.SubSecondApi;
 import io.aggregator.entity.TransactionEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.stream.Collectors;
 
@@ -17,6 +19,7 @@ import java.util.stream.Collectors;
 // or delete it so it is regenerated as needed.
 
 public class TransactionToSubSecondAction extends AbstractTransactionToSubSecondAction {
+  static final Logger log = LoggerFactory.getLogger(TransactionToSubSecondAction.class);
 
   public TransactionToSubSecondAction(ActionCreationContext creationContext) {
   }
@@ -26,6 +29,8 @@ public class TransactionToSubSecondAction extends AbstractTransactionToSubSecond
     var timestamp = event.getIncidentTimestamp();
     var epochSubSecond = TimeTo.fromTimestamp(timestamp).toEpochSubSecond();
 
+    log.debug(Thread.currentThread().getName() + " - IncidentAdded: {}", event);
+    log.info(Thread.currentThread().getName() + " - ON EVENT: IncidentAdded");
     return effects().forward(components().subSecond().addLedgerItems(
             SubSecondApi.AddLedgerItemsCommand
                     .newBuilder()

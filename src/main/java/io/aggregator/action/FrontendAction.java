@@ -41,11 +41,11 @@ public class FrontendAction extends AbstractFrontendAction {
           return TransactionApi.PaymentPricedCommand
               .newBuilder()
               .setTransactionId(String.format("transaction-%d-%s", i, UUID.randomUUID()))
-//              .setMerchantId("merchant-" + random.nextInt(request.getMerchantIdRange()))
-//              .setServiceCode("service-code-" + random.nextInt(3) + 1)
-//              .setAccountFrom("account-from-" + random.nextInt(3) + 1)
-//              .setAccountTo("account-to-" + random.nextInt(3) + 3)
-//              .setTransactionAmount(random.nextInt(100) / 10.0)
+              .setShopId("tesco-chelsea")
+              .addPricedItem(TransactionApi.PricedItem.newBuilder()
+                  .setServiceCode("service-code-" + random.nextInt(3) + 1)
+                  .setPricedItemAmount(random.nextInt(90) + 5)
+                  .build())
               .setTimestamp(timestamp)
               .build();
         })

@@ -7,6 +7,8 @@ import com.google.protobuf.Empty;
 import io.aggregator.TimeTo;
 import io.aggregator.api.DayApi;
 import io.aggregator.entity.HourEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // This class was initially generated based on the .proto definition by Akka Serverless tooling.
 //
@@ -14,19 +16,19 @@ import io.aggregator.entity.HourEntity;
 // or delete it so it is regenerated as needed.
 
 public class HourToDayAction extends AbstractHourToDayAction {
+  static final Logger log = LoggerFactory.getLogger(HourToDayAction.class);
 
   public HourToDayAction(ActionCreationContext creationContext) {
   }
 
   @Override
   public Effect<Empty> onHourActivated(HourEntity.HourActivated event) {
-    return effects().forward(components().day().activateHour(
-        DayApi.ActivateHourCommand
+    log.info(Thread.currentThread().getName() + " - ON EVENT: HourActivated");
+
+    return effects().forward(components().day().addHour(
+        DayApi.AddHourCommand
             .newBuilder()
             .setMerchantId(event.getMerchantKey().getMerchantId())
-            .setServiceCode(event.getMerchantKey().getServiceCode())
-            .setAccountFrom(event.getMerchantKey().getAccountFrom())
-            .setAccountTo(event.getMerchantKey().getAccountTo())
             .setEpochDay(TimeTo.fromEpochHour(event.getEpochHour()).toEpochDay())
             .setEpochHour(event.getEpochHour())
             .build()));
@@ -34,13 +36,12 @@ public class HourToDayAction extends AbstractHourToDayAction {
 
   @Override
   public Effect<Empty> onHourAggregated(HourEntity.HourAggregated event) {
+    log.info(Thread.currentThread().getName() + " - ON EVENT: HourAggregated");
+
     return effects().forward(components().day().hourAggregation(
         DayApi.HourAggregationCommand
             .newBuilder()
             .setMerchantId(event.getMerchantKey().getMerchantId())
-            .setServiceCode(event.getMerchantKey().getServiceCode())
-            .setAccountFrom(event.getMerchantKey().getAccountFrom())
-            .setAccountTo(event.getMerchantKey().getAccountTo())
             .setEpochDay(TimeTo.fromEpochHour(event.getEpochHour()).toEpochDay())
             .setEpochHour(event.getEpochHour())
             .setTransactionTotalAmount(event.getTransactionTotalAmount())

@@ -30,9 +30,6 @@ public class DayToPaymentAction extends AbstractDayToPaymentAction {
         PaymentApi.DayAggregationCommand
             .newBuilder()
             .setMerchantId(event.getMerchantKey().getMerchantId())
-            .setServiceCode(event.getMerchantKey().getServiceCode())
-            .setAccountFrom(event.getMerchantKey().getAccountFrom())
-            .setAccountTo(event.getMerchantKey().getAccountTo())
             .setPaymentId(event.getPaymentId())
             .setEpochDay(event.getEpochDay())
             .setTransactionTotalAmount(event.getTransactionTotalAmount())

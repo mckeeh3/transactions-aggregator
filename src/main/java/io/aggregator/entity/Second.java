@@ -31,7 +31,7 @@ public class Second extends AbstractSecond {
   }
 
   @Override
-  public Effect<Empty> activateSubSecond(SecondEntity.SecondState state, SecondApi.ActivateSubSecondCommand command) {
+  public Effect<Empty> addSubSecond(SecondEntity.SecondState state, SecondApi.AddSubSecondCommand command) {
     return handle(state, command);
   }
 
@@ -70,8 +70,9 @@ public class Second extends AbstractSecond {
     return handle(state, event);
   }
 
-  private Effect<Empty> handle(SecondEntity.SecondState state, SecondApi.ActivateSubSecondCommand command) {
-    log.debug("state: {}\nActivateSubSecondCommand: {}", state, command);
+  private Effect<Empty> handle(SecondEntity.SecondState state, SecondApi.AddSubSecondCommand command) {
+    log.debug(Thread.currentThread().getName() + " - state: {}\nAddSubSecondCommand: {}", state, command);
+    log.info(Thread.currentThread().getName() + " - RECEIVED COMMAND: AddSubSecondCommand");
 
     return effects()
         .emitEvents(eventsFor(state, command))
@@ -80,6 +81,7 @@ public class Second extends AbstractSecond {
 
   private Effect<Empty> handle(SecondEntity.SecondState state, SecondApi.AggregateSecondCommand command) {
     log.debug("state: {}\nAggregateSecondCommand: {}", state, command);
+    log.info(Thread.currentThread().getName() + " - RECEIVED COMMAND: AggregateSecondCommand");
 
     return effects()
         .emitEvents(eventsFor(state, command))
@@ -88,6 +90,7 @@ public class Second extends AbstractSecond {
 
   private Effect<Empty> handle(SecondEntity.SecondState state, SecondApi.SubSecondAggregationCommand command) {
     log.debug("state: {}\nSubSecondAggregationCommand: {}", state, command);
+    log.info(Thread.currentThread().getName() + " - RECEIVED COMMAND: SubSecondAggregationCommand");
 
     return effects()
         .emitEvents(eventsFor(state, command))
@@ -95,14 +98,13 @@ public class Second extends AbstractSecond {
   }
 
   static SecondEntity.SecondState handle(SecondEntity.SecondState state, SecondEntity.SecondActivated event) {
+    log.info(Thread.currentThread().getName() + " - RECEIVED EVENT: SecondActivated");
+
     return state.toBuilder()
         .setMerchantKey(
             TransactionMerchantKey.MerchantKey
                 .newBuilder()
                 .setMerchantId(event.getMerchantKey().getMerchantId())
-                .setServiceCode(event.getMerchantKey().getServiceCode())
-                .setAccountFrom(event.getMerchantKey().getAccountFrom())
-                .setAccountTo(event.getMerchantKey().getAccountTo())
                 .build())
         .setEpochSecond(event.getEpochSecond())
         .setEpochHour(TimeTo.fromEpochSecond(event.getEpochSecond()).toEpochHour())
@@ -111,6 +113,8 @@ public class Second extends AbstractSecond {
   }
 
   static SecondEntity.SecondState handle(SecondEntity.SecondState state, SecondEntity.SubSecondAdded event) {
+    log.info(Thread.currentThread().getName() + " - RECEIVED EVENT: SubSecondAdded");
+
     var alreadyActivated = state.getActiveSubSecondsList().stream()
         .anyMatch(activeSecond -> activeSecond.getEpochSubSecond() == event.getEpochSubSecond());
 
@@ -128,6 +132,8 @@ public class Second extends AbstractSecond {
   }
 
   static SecondEntity.SecondState handle(SecondEntity.SecondState state, SecondEntity.SecondAggregationRequested event) {
+    log.info(Thread.currentThread().getName() + " - RECEIVED EVENT: SecondAggregationRequested");
+
     var activeAlreadyMoved = state.getAggregateSecondsList().stream()
         .anyMatch(aggregatedSecond -> aggregatedSecond.getAggregateRequestTimestamp().equals(event.getAggregateRequestTimestamp()));
 
@@ -195,16 +201,13 @@ public class Second extends AbstractSecond {
         .toList();
   }
 
-  static List<?> eventsFor(SecondEntity.SecondState state, SecondApi.ActivateSubSecondCommand command) {
+  static List<?> eventsFor(SecondEntity.SecondState state, SecondApi.AddSubSecondCommand command) {
     var subSecondAdded = SecondEntity.SubSecondAdded
         .newBuilder()
         .setMerchantKey(
             TransactionMerchantKey.MerchantKey
                 .newBuilder()
                 .setMerchantId(command.getMerchantId())
-                .setServiceCode(command.getServiceCode())
-                .setAccountFrom(command.getAccountFrom())
-                .setAccountTo(command.getAccountTo())
                 .build())
         .setEpochSubSecond(command.getEpochSubSecond())
         .build();
@@ -216,9 +219,6 @@ public class Second extends AbstractSecond {
               TransactionMerchantKey.MerchantKey
                   .newBuilder()
                   .setMerchantId(command.getMerchantId())
-                  .setServiceCode(command.getServiceCode())
-                  .setAccountFrom(command.getAccountFrom())
-                  .setAccountTo(command.getAccountTo())
                   .build())
           .setEpochSecond(command.getEpochSecond())
           .build();
@@ -239,9 +239,6 @@ public class Second extends AbstractSecond {
                   TransactionMerchantKey.MerchantKey
                       .newBuilder()
                       .setMerchantId(command.getMerchantId())
-                      .setServiceCode(command.getServiceCode())
-                      .setAccountFrom(command.getAccountFrom())
-                      .setAccountTo(command.getAccountTo())
                       .build())
               .setEpochSecond(command.getEpochSecond())
               .setTransactionTotalAmount(0.0)
@@ -258,16 +255,13 @@ public class Second extends AbstractSecond {
                   TransactionMerchantKey.MerchantKey
                       .newBuilder()
                       .setMerchantId(command.getMerchantId())
-                      .setServiceCode(command.getServiceCode())
-                      .setAccountFrom(command.getAccountFrom())
-                      .setAccountTo(command.getAccountTo())
                       .build())
               .setEpochSecond(command.getEpochSecond())
               .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
               .setPaymentId(command.getPaymentId())
               .addAllEpochSubSeconds(
                   state.getActiveSubSecondsList().stream()
-                      .map(activeSubSecond -> activeSubSecond.getEpochSubSecond())
+                      .map(SecondEntity.ActiveSubSecond::getEpochSubSecond)
                       .toList())
               .build());
     }
@@ -336,9 +330,6 @@ public class Second extends AbstractSecond {
             TransactionMerchantKey.MerchantKey
                 .newBuilder()
                 .setMerchantId(command.getMerchantId())
-                .setServiceCode(command.getServiceCode())
-                .setAccountFrom(command.getAccountFrom())
-                .setAccountTo(command.getAccountTo())
                 .build())
         .setEpochSubSecond(command.getEpochSubSecond())
         .setTransactionTotalAmount(command.getTransactionTotalAmount())
@@ -367,9 +358,6 @@ public class Second extends AbstractSecond {
             TransactionMerchantKey.MerchantKey
                 .newBuilder()
                 .setMerchantId(command.getMerchantId())
-                .setServiceCode(command.getServiceCode())
-                .setAccountFrom(command.getAccountFrom())
-                .setAccountTo(command.getAccountTo())
                 .build())
         .setEpochSecond(command.getEpochSecond())
         .setTransactionTotalAmount(transactionTotalAmount)

@@ -12,22 +12,21 @@ message SubSecondActivated {
   int64 epoch_sub_second = 2;
 }
 
-message SubSecondTransactionAdded {
+message SubSecondLedgerItemsAdded {
   MerchantKey merchant_key = 1;
   int64 epoch_sub_second = 2;
-  TransactionKey transaction_key = 3;
-  double amount = 4;
-  google.protobuf.Timestamp timestamp = 5;
+  repeated LedgerEntry ledger_entries = 3;
+  google.protobuf.Timestamp timestamp = 4;
 }
 
 message SubSecondAggregated {
   MerchantKey merchant_key = 1;
   int64 epoch_sub_second = 2;
-  double transaction_total_amount = 4;
-  int32 transaction_count = 5;
-  google.protobuf.Timestamp last_update_timestamp = 6;
-  google.protobuf.Timestamp aggregate_request_timestamp = 7;
-  string payment_id = 8;
+  double transaction_total_amount = 3;
+  int32 transaction_count = 4;
+  google.protobuf.Timestamp last_update_timestamp = 5;
+  google.protobuf.Timestamp aggregate_request_timestamp = 6;
+  string payment_id = 7;
 }
 
 message TransactionPaid {
@@ -44,16 +43,15 @@ message SubSecondState {
   int64 epoch_minute = 4;
   int64 epoch_hour = 5;
   int64 epoch_day = 6;
-  repeated Transaction transactions = 7;
+  repeated LedgerEntry ledger_entries = 7;
   google.protobuf.Timestamp last_update_timestamp = 8;
 }
 
-message Transaction {
+message LedgerEntry {
   TransactionKey transaction_key = 1;
-  string merchant_id = 2;
-  int64 epoch_sub_second = 3;
-  double amount = 4;
-  google.protobuf.Timestamp timestamp = 5;
-  google.protobuf.Timestamp aggregate_request_timestamp = 6;
-  string payment_id = 7;
+  int64 epoch_sub_second = 2;
+  double amount = 3;
+  google.protobuf.Timestamp timestamp = 4;
+  google.protobuf.Timestamp aggregate_request_timestamp = 5;
+  string payment_id = 6;
 }

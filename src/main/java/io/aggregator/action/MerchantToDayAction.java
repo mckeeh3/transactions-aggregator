@@ -26,9 +26,6 @@ public class MerchantToDayAction extends AbstractMerchantToDayAction {
         .map(epochDay -> DayApi.AggregateDayCommand
             .newBuilder()
             .setMerchantId(event.getMerchantKey().getMerchantId())
-            .setServiceCode(event.getMerchantKey().getServiceCode())
-            .setAccountFrom(event.getMerchantKey().getAccountFrom())
-            .setAccountTo(event.getMerchantKey().getAccountTo())
             .setPaymentId(event.getPaymentId())
             .setEpochDay(epochDay)
             .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
@@ -49,9 +46,6 @@ public class MerchantToDayAction extends AbstractMerchantToDayAction {
         .map(epochDay -> DayApi.AggregateDayCommand
             .newBuilder()
             .setMerchantId(event.getMerchantKey().getMerchantId())
-            .setServiceCode(event.getMerchantKey().getServiceCode())
-            .setAccountFrom(event.getMerchantKey().getAccountFrom())
-            .setAccountTo(event.getMerchantKey().getAccountTo())
             .setPaymentId(event.getPaymentId())
             .setEpochDay(epochDay)
             .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())

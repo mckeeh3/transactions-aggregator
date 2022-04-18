@@ -63,15 +63,6 @@ public class Merchant extends AbstractMerchant {
     if (command.getMerchantId().isEmpty()) {
       return Optional.of(effects().error("MerchantId is required"));
     }
-    if (command.getServiceCode().isEmpty()) {
-      return Optional.of(effects().error("ServiceCode is required"));
-    }
-    if (command.getAccountFrom().isEmpty()) {
-      return Optional.of(effects().error("AccountFrom is required"));
-    }
-    if (command.getAccountTo().isEmpty()) {
-      return Optional.of(effects().error("AccountTo is required"));
-    }
     return Optional.empty();
   }
 
@@ -79,20 +70,12 @@ public class Merchant extends AbstractMerchant {
     if (command.getMerchantId().isEmpty()) {
       return Optional.of(effects().error("MerchantId is required"));
     }
-    if (command.getServiceCode().isEmpty()) {
-      return Optional.of(effects().error("ServiceCode is required"));
-    }
-    if (command.getAccountFrom().isEmpty()) {
-      return Optional.of(effects().error("AccountFrom is required"));
-    }
-    if (command.getAccountTo().isEmpty()) {
-      return Optional.of(effects().error("AccountTo is required"));
-    }
     return Optional.empty();
   }
 
   private Effect<Empty> handle(MerchantEntity.MerchantState state, MerchantApi.ActivateDayCommand command) {
-    log.info("state: {}\nActivateDayCommand: {}", state, command);
+    log.debug("state: {}\nActivateDayCommand: {}", state, command);
+    log.info(Thread.currentThread().getName() + " - RECEIVED COMMAND: ActivateDayCommand");
 
     return effects()
         .emitEvents(eventsFor(state, command))
@@ -101,6 +84,7 @@ public class Merchant extends AbstractMerchant {
 
   private Effect<Empty> handle(MerchantEntity.MerchantState state, MerchantApi.MerchantAggregationRequestCommand command) {
     log.info("state: {}\nMerchantAggregationRequestCommand: {}", state, command);
+    log.info(Thread.currentThread().getName() + " - RECEIVED COMMAND: MerchantAggregationRequestCommand");
 
     var event = eventFor(state, command);
 
@@ -115,6 +99,7 @@ public class Merchant extends AbstractMerchant {
 
   private Effect<Empty> handle(MerchantEntity.MerchantState state, MerchantApi.MerchantPaymentRequestCommand command) {
     log.info("state: {}\nMerchantPaymentRequestCommand: {}", state, command);
+    log.info(Thread.currentThread().getName() + " - RECEIVED COMMAND: MerchantPaymentRequestCommand");
 
     var event = eventFor(state, command);
 
@@ -128,6 +113,8 @@ public class Merchant extends AbstractMerchant {
   }
 
   static MerchantEntity.MerchantState handle(MerchantEntity.MerchantState state, MerchantEntity.MerchantDayActivated event) {
+    log.info(Thread.currentThread().getName() + " - RECEIVED EVENT: MerchantDayActivated");
+
     var alreadyActivatedDay = state.getActiveDaysList().stream().anyMatch(epochDay -> epochDay == event.getEpochDay());
 
     if (!alreadyActivatedDay) {
@@ -142,9 +129,6 @@ public class Merchant extends AbstractMerchant {
               TransactionMerchantKey.MerchantKey
                   .newBuilder()
                   .setMerchantId(event.getMerchantKey().getMerchantId())
-                  .setServiceCode(event.getMerchantKey().getServiceCode())
-                  .setAccountFrom(event.getMerchantKey().getAccountFrom())
-                  .setAccountTo(event.getMerchantKey().getAccountTo())
                   .build())
           .build();
     } else {
@@ -153,6 +137,8 @@ public class Merchant extends AbstractMerchant {
   }
 
   static MerchantEntity.MerchantState handle(MerchantEntity.MerchantState state, MerchantEntity.MerchantPaymentRequested event) {
+    log.info(Thread.currentThread().getName() + " - RECEIVED EVENT: MerchantPaymentRequested");
+
     return state.toBuilder()
         .clearActiveDays()
         .setPaymentIdSequenceNumber(state.getPaymentIdSequenceNumber() + 1)
@@ -160,6 +146,8 @@ public class Merchant extends AbstractMerchant {
   }
 
   static MerchantEntity.MerchantState handle(MerchantEntity.MerchantState state, MerchantEntity.MerchantAggregationRequested event) {
+    log.info(Thread.currentThread().getName() + " - RECEIVED EVENT: MerchantAggregationRequested");
+
     return state.toBuilder()
         .clearActiveDays()
         .build();
@@ -169,9 +157,6 @@ public class Merchant extends AbstractMerchant {
     var merchantKey = TransactionMerchantKey.MerchantKey
         .newBuilder()
         .setMerchantId(command.getMerchantId())
-        .setServiceCode(command.getServiceCode())
-        .setAccountFrom(command.getAccountFrom())
-        .setAccountTo(command.getAccountTo())
         .build();
 
     var merchantDayActivated = MerchantEntity.MerchantDayActivated
@@ -181,16 +166,17 @@ public class Merchant extends AbstractMerchant {
         .setPaymentId(paymentIdNext(state))
         .build();
 
-    var merchantAggregationRequested = MerchantEntity.MerchantAggregationRequested
-        .newBuilder()
-        .setMerchantKey(merchantKey)
-        .setPaymentId(paymentIdNext(state))
-        .setAggregateRequestTimestamp(TimeTo.now())
-        .addAllActiveDays(state.getActiveDaysList())
-        .addActiveDays(command.getEpochDay())
-        .build();
+//    var merchantAggregationRequested = MerchantEntity.MerchantAggregationRequested
+//        .newBuilder()
+//        .setMerchantKey(merchantKey)
+//        .setPaymentId(paymentIdNext(state))
+//        .setAggregateRequestTimestamp(TimeTo.now())
+//        .addAllActiveDays(state.getActiveDaysList())
+//        .addActiveDays(command.getEpochDay())
+//        .build();
 
-    return List.of(merchantDayActivated, merchantAggregationRequested);
+//    return List.of(merchantDayActivated, merchantAggregationRequested);
+    return List.of(merchantDayActivated);
   }
 
   static Optional<MerchantEntity.MerchantAggregationRequested> eventFor(MerchantEntity.MerchantState state, MerchantApi.MerchantAggregationRequestCommand command) {
@@ -229,9 +215,6 @@ public class Merchant extends AbstractMerchant {
     return TransactionMerchantKey.MerchantKey
         .newBuilder()
         .setMerchantId(command.getMerchantId())
-        .setServiceCode(command.getServiceCode())
-        .setAccountFrom(command.getAccountFrom())
-        .setAccountTo(command.getAccountTo())
         .build();
   }
 
@@ -239,9 +222,6 @@ public class Merchant extends AbstractMerchant {
     return TransactionMerchantKey.MerchantKey
         .newBuilder()
         .setMerchantId(command.getMerchantId())
-        .setServiceCode(command.getServiceCode())
-        .setAccountFrom(command.getAccountFrom())
-        .setAccountTo(command.getAccountTo())
         .build();
   }
 

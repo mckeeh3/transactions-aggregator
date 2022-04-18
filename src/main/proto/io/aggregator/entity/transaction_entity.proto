@@ -7,6 +7,7 @@ package io.aggregator.entity;
 
 option java_outer_classname = "TransactionEntity";
 
+//Deprecated
 message TransactionCreated {
   string transaction_id = 1;
   string merchant_id = 2;

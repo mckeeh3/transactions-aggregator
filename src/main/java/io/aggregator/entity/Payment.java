@@ -260,7 +260,7 @@ public class Payment extends AbstractPayment {
 
     var allAggregated = state.getAggregationsList().stream()
         .flatMap(aggregation -> aggregation.getAggregationDaysList().stream())
-        .allMatch(aggregationDay -> aggregationDay.getAggregated());
+        .allMatch(PaymentEntity.AggregationDay::getAggregated);
 
     if (allAggregated && command.getEpochDaysCount() == 0) {
       return List.of(toPaymentAggregated(state, command.getAggregateRequestTimestamp()));
@@ -314,9 +314,6 @@ public class Payment extends AbstractPayment {
             TransactionMerchantKey.MerchantKey
                 .newBuilder()
                 .setMerchantId(state.getMerchantKey().getMerchantId())
-                .setServiceCode(state.getMerchantKey().getServiceCode())
-                .setAccountFrom(state.getMerchantKey().getAccountFrom())
-                .setAccountTo(state.getMerchantKey().getAccountTo())
                 .build())
         .setPaymentId(state.getPaymentId())
         .setTransactionTotalAmount(transactionTotalAmount)
@@ -366,9 +363,6 @@ public class Payment extends AbstractPayment {
     return TransactionMerchantKey.MerchantKey
         .newBuilder()
         .setMerchantId(command.getMerchantId())
-        .setServiceCode(command.getServiceCode())
-        .setAccountFrom(command.getAccountFrom())
-        .setAccountTo(command.getAccountTo())
         .build();
   }
 
@@ -376,9 +370,6 @@ public class Payment extends AbstractPayment {
     return TransactionMerchantKey.MerchantKey
         .newBuilder()
         .setMerchantId(command.getMerchantId())
-        .setServiceCode(command.getServiceCode())
-        .setAccountFrom(command.getAccountFrom())
-        .setAccountTo(command.getAccountTo())
         .build();
   }
 
@@ -389,9 +380,6 @@ public class Payment extends AbstractPayment {
             TransactionMerchantKey.MerchantKey
                 .newBuilder()
                 .setMerchantId(command.getMerchantId())
-                .setServiceCode(command.getServiceCode())
-                .setAccountFrom(command.getAccountFrom())
-                .setAccountTo(command.getAccountTo())
                 .build())
         .setPaymentId(command.getPaymentId())
         .setEpochDay(command.getEpochDay())

@@ -22,21 +22,16 @@ public class DayToHourAction extends AbstractDayToHourAction {
 
   @Override
   public Effect<Empty> onDayAggregationRequested(DayEntity.DayAggregationRequested event) {
-    var results = event.getEpochHoursList().stream()
-        .map(epochHour -> HourApi.AggregateHourCommand
-            .newBuilder()
-            .setMerchantId(event.getMerchantKey().getMerchantId())
-            .setServiceCode(event.getMerchantKey().getServiceCode())
-            .setAccountFrom(event.getMerchantKey().getAccountFrom())
-            .setAccountTo(event.getMerchantKey().getAccountTo())
-            .setEpochHour(epochHour)
-            .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
-            .setPaymentId(event.getPaymentId())
-            .build())
-        .map(command -> components().hour().aggregateHour(command).execute())
-        .collect(Collectors.toList());
 
-    var result = CompletableFuture.allOf(results.toArray(new CompletableFuture[results.size()]))
+    var result = CompletableFuture.allOf(event.getEpochHoursList().stream()
+            .map(epochHour -> HourApi.AggregateHourCommand
+                    .newBuilder()
+                    .setMerchantId(event.getMerchantKey().getMerchantId())
+                    .setEpochHour(epochHour)
+                    .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
+                    .setPaymentId(event.getPaymentId())
+                    .build())
+            .map(command -> components().hour().aggregateHour(command).execute()).toArray(CompletableFuture[]::new))
         .thenApply(reply -> effects().reply(Empty.getDefaultInstance()));
 
     return effects().asyncEffect(result);

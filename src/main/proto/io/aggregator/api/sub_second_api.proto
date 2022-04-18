@@ -17,7 +17,7 @@ service SubSecond {
       state: "io.aggregator.entity.SubSecondState"
       events: [
         "io.aggregator.entity.SubSecondActivated",
-        "io.aggregator.entity.SubSecondTransactionAdded",
+        "io.aggregator.entity.SubSecondLedgerItemsAdded",
         "io.aggregator.entity.SubSecondAggregated",
         "io.aggregator.entity.TransactionPaid"  //
       ]

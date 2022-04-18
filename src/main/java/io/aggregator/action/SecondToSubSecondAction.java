@@ -26,9 +26,6 @@ public class SecondToSubSecondAction extends AbstractSecondToSubSecondAction {
         .map(epochSubSecond -> SubSecondApi.AggregateSubSecondCommand
             .newBuilder()
             .setMerchantId(event.getMerchantKey().getMerchantId())
-            .setServiceCode(event.getMerchantKey().getServiceCode())
-            .setAccountFrom(event.getMerchantKey().getAccountFrom())
-            .setAccountTo(event.getMerchantKey().getAccountTo())
             .setEpochSubSecond(epochSubSecond)
             .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
             .setPaymentId(event.getPaymentId())

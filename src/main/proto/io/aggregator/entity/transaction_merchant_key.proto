@@ -13,7 +13,4 @@ message TransactionKey {
 
 message MerchantKey {
   string merchant_id = 1;
-  string service_code = 2;
-  string account_from = 3;
-  string account_to = 4;
 }

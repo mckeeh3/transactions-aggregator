@@ -24,9 +24,6 @@ public class MerchantToPaymentAction extends AbstractMerchantToPaymentAction {
         PaymentApi.AggregationRequestCommand
             .newBuilder()
             .setMerchantId(event.getMerchantKey().getMerchantId())
-            .setServiceCode(event.getMerchantKey().getServiceCode())
-            .setAccountFrom(event.getMerchantKey().getAccountFrom())
-            .setAccountTo(event.getMerchantKey().getAccountTo())
             .setPaymentId(event.getPaymentId())
             .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
             .addAllEpochDays(event.getActiveDaysList())
@@ -39,9 +36,6 @@ public class MerchantToPaymentAction extends AbstractMerchantToPaymentAction {
         PaymentApi.PaymentRequestCommand
             .newBuilder()
             .setMerchantId(event.getMerchantKey().getMerchantId())
-            .setServiceCode(event.getMerchantKey().getServiceCode())
-            .setAccountFrom(event.getMerchantKey().getAccountFrom())
-            .setAccountTo(event.getMerchantKey().getAccountTo())
             .setPaymentId(event.getPaymentId())
             .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
             .addAllEpochDays(event.getActiveDaysList())
