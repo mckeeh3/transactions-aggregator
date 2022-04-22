@@ -34,11 +34,6 @@ public class Transaction extends AbstractTransaction {
   }
 
   @Override
-  public Effect<Empty> addPayment(TransactionEntity.TransactionState state, TransactionApi.AddPaymentCommand command) {
-    return handle(state, command);
-  }
-
-  @Override
   public Effect<TransactionApi.GetTransactionResponse> getTransaction(TransactionEntity.TransactionState state, TransactionApi.GetTransactionRequest request) {
     return reject(state, request).orElseGet((() -> handle(state, request)));
   }
@@ -48,23 +43,9 @@ public class Transaction extends AbstractTransaction {
     return handle(state, event);
   }
 
-  @Override
-  public TransactionEntity.TransactionState paymentAdded(TransactionEntity.TransactionState state, TransactionEntity.PaymentAdded event) {
-    return handle(state, event);
-  }
-
   private Effect<Empty> handle(TransactionEntity.TransactionState state, TransactionApi.PaymentPricedCommand command) {
     log.debug(Thread.currentThread().getName() + " - state: {}\nPaymentPricedCommand: {}", state, command);
     log.info(Thread.currentThread().getName() + " - RECEIVED COMMAND: PaymentPricedCommand");
-
-    return effects()
-        .emitEvent(eventFor(state, command))
-        .thenReply(newState -> Empty.getDefaultInstance());
-  }
-
-  private Effect<Empty> handle(TransactionEntity.TransactionState state, TransactionApi.AddPaymentCommand command) {
-    log.debug("state: {}\nAddPaymentCommand: {}", state, command);
-    log.info(Thread.currentThread().getName() + " - RECEIVED COMMAND: AddPaymentCommand");
 
     return effects()
         .emitEvent(eventFor(state, command))
@@ -87,7 +68,6 @@ public class Transaction extends AbstractTransaction {
             .setShopId(state.getShopId())
             .setTransactionAmount(state.getTransactionAmount())
             .setTransactionTimestamp(state.getTransactionTimestamp())
-            .setPaymentId(state.getPaymentId())
             .build());
   }
 
@@ -101,13 +81,6 @@ public class Transaction extends AbstractTransaction {
         .build();
   }
 
-  static TransactionEntity.TransactionState handle(TransactionEntity.TransactionState state, TransactionEntity.PaymentAdded event) {
-    log.info(Thread.currentThread().getName() + " - RECEIVED EVENT: PaymentAdded");
-    return state.toBuilder()
-        .setPaymentId(event.getPaymentId())
-        .build();
-  }
-
   static TransactionEntity.IncidentAdded eventFor(TransactionEntity.TransactionState state, TransactionApi.PaymentPricedCommand command) {
     return TransactionEntity.IncidentAdded
             .newBuilder()
@@ -118,21 +91,6 @@ public class Transaction extends AbstractTransaction {
             .setIncidentTimestamp(command.getTimestamp())
             .addAllTransactionIncident(toTransactionIncidents(state, command))
             .build();
-  }
-
-  static TransactionEntity.PaymentAdded eventFor(TransactionEntity.TransactionState state, TransactionApi.AddPaymentCommand command) {
-    return TransactionEntity.PaymentAdded
-        .newBuilder()
-        .setTransactionKey(
-            TransactionMerchantKey.TransactionKey
-                .newBuilder()
-                .setTransactionId(command.getTransactionId())
-                .setServiceCode(command.getServiceCode())
-                .setAccountFrom(command.getAccountFrom())
-                .setAccountTo(command.getAccountTo())
-                .build())
-        .setPaymentId(command.getPaymentId())
-        .build();
   }
 
   static String findMerchant(String shopId) {

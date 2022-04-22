@@ -52,12 +52,14 @@ public class SystemIntegrationTest {
             .build())
         .build()).toCompletableFuture().get(10, SECONDS);
 
-    Thread.sleep(15000);
+    Thread.sleep(10000);
 
-//    merchantClient.merchantAggregationRequest(MerchantApi.MerchantAggregationRequestCommand.newBuilder()
-//        .setMerchantId("tesco")
-//        .build()).toCompletableFuture().get(10, SECONDS);
-//
+    merchantClient.merchantAggregationRequest(MerchantApi.MerchantAggregationRequestCommand.newBuilder()
+        .setMerchantId("tesco")
+        .build()).toCompletableFuture().get(10, SECONDS);
+
+    Thread.sleep(10000);
+
 //    merchantClient.merchantPaymentRequest(MerchantApi.MerchantPaymentRequestCommand.newBuilder()
 //        .setMerchantId("tesco")
 //        .build()).toCompletableFuture().get(10, SECONDS);
@@ -66,6 +68,10 @@ public class SystemIntegrationTest {
   @Test
   public void merchantToTransaction() throws Exception {
     System.out.println(Thread.currentThread().getName() + " - CALL TIME: " + Instant.now().toString());
+
+    merchantClient.merchantAggregationRequest(MerchantApi.MerchantAggregationRequestCommand.newBuilder()
+        .setMerchantId("tesco")
+        .build()).toCompletableFuture().get(10, SECONDS);
 
     merchantClient.merchantPaymentRequest(MerchantApi.MerchantPaymentRequestCommand.newBuilder()
         .setMerchantId("tesco")

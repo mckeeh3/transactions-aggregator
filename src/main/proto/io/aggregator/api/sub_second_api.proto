@@ -18,8 +18,7 @@ service SubSecond {
       events: [
         "io.aggregator.entity.SubSecondActivated",
         "io.aggregator.entity.SubSecondLedgerItemsAdded",
-        "io.aggregator.entity.SubSecondAggregated",
-        "io.aggregator.entity.TransactionPaid"  //
+        "io.aggregator.entity.SubSecondAggregated"
       ]
     }
   };
@@ -56,10 +55,7 @@ message LedgerItem {
 
 message AggregateSubSecondCommand {
   string merchant_id = 1 [(akkaserverless.field).entity_key = true];
-  string service_code = 2 [(akkaserverless.field).entity_key = true];
-  string account_from = 3 [(akkaserverless.field).entity_key = true];
-  string account_to = 4 [(akkaserverless.field).entity_key = true];
-  int64 epoch_sub_second = 5 [(akkaserverless.field).entity_key = true];
-  google.protobuf.Timestamp aggregate_request_timestamp = 6;
-  string payment_id = 7;
+  int64 epoch_sub_second = 2 [(akkaserverless.field).entity_key = true];
+  google.protobuf.Timestamp aggregate_request_timestamp = 3;
+  string payment_id = 4;
 }

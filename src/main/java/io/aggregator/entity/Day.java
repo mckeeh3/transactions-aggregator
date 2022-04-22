@@ -233,6 +233,7 @@ public class Day extends AbstractDay {
   static List<?> eventsFor(DayEntity.DayState state, DayApi.AggregateDayCommand command) {
     if (state.getActiveHoursCount() == 0) {
       var timestamp = command.getAggregateRequestTimestamp();
+//    TODO edit DayAggregated and add map of aggregations
       return List.of(
           DayEntity.DayAggregated
               .newBuilder()

@@ -16,8 +16,7 @@ service Transaction {
       entity_type: "transaction"
       state: "io.aggregator.entity.TransactionState"
       events: [
-        "io.aggregator.entity.IncidentAdded",
-        "io.aggregator.entity.PaymentAdded" // TODO change name
+        "io.aggregator.entity.IncidentAdded"
       ]
     }
   };
@@ -29,29 +28,11 @@ service Transaction {
     };
   }
 
-  rpc AddPayment(AddPaymentCommand) returns (google.protobuf.Empty) {
-    option (google.api.http) = {
-      post: "/transaction/add-payment"
-      body: "*"
-    };
-  }
-
   rpc GetTransaction(GetTransactionRequest) returns (GetTransactionResponse) {
     option (google.api.http) = {
-      get: "/transaction/{transaction_id}/{service_code}/{account_from}/{account_to}"
+      get: "/transaction/{transaction_id}"
     };
   }
-}
-
-message CreateTransactionCommand {
-  string transaction_id = 1 [(akkaserverless.field).entity_key = true];
-  string service_code = 2 [(akkaserverless.field).entity_key = true];
-  string account_from = 3 [(akkaserverless.field).entity_key = true];
-  string account_to = 4 [(akkaserverless.field).entity_key = true];
-  double transaction_amount = 5;
-  string merchant_id = 6;
-  string shop_id = 7;
-  google.protobuf.Timestamp transaction_timestamp = 8;
 }
 
 message PaymentPricedCommand {
@@ -67,19 +48,8 @@ message PricedItem {
   double priced_item_amount = 2;
 }
 
-message AddPaymentCommand {
-  string transaction_id = 1 [(akkaserverless.field).entity_key = true];
-  string service_code = 2 [(akkaserverless.field).entity_key = true];
-  string account_from = 3 [(akkaserverless.field).entity_key = true];
-  string account_to = 4 [(akkaserverless.field).entity_key = true];
-  string payment_id = 5;
-}
-
 message GetTransactionRequest {
   string transaction_id = 1 [(akkaserverless.field).entity_key = true];
-  string service_code = 2 [(akkaserverless.field).entity_key = true];
-  string account_from = 3 [(akkaserverless.field).entity_key = true];
-  string account_to = 4 [(akkaserverless.field).entity_key = true];
 }
 
 message GetTransactionResponse {
@@ -88,12 +58,4 @@ message GetTransactionResponse {
   string shop_id = 3;
   double transaction_amount = 4;
   google.protobuf.Timestamp transaction_timestamp = 5;
-  string payment_id = 6;
-}
-
-message TransactionKey {
-  string transaction_id = 1;
-  string service_code = 2;
-  string account_from = 3;
-  string account_to = 4;
 }

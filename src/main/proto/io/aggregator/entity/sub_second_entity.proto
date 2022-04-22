@@ -27,13 +27,7 @@ message SubSecondAggregated {
   google.protobuf.Timestamp last_update_timestamp = 5;
   google.protobuf.Timestamp aggregate_request_timestamp = 6;
   string payment_id = 7;
-}
-
-message TransactionPaid {
-  TransactionKey transaction_key = 1;
-  string merchant_id = 2;
-  int64 epoch_sub_second = 3;
-  string payment_id = 4;
+  map<string, double> amount_by_svc_code = 8;
 }
 
 message SubSecondState {

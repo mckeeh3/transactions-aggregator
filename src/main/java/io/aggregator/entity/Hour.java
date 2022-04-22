@@ -231,6 +231,7 @@ public class Hour extends AbstractHour {
   static List<?> eventsFor(HourEntity.HourState state, HourApi.AggregateHourCommand command) {
     if (state.getActiveMinutesCount() == 0) {
       var timestamp = command.getAggregateRequestTimestamp();
+//    TODO edit HourAggregated and add map of aggregations
       return List.of(
           HourEntity.HourAggregated
               .newBuilder()

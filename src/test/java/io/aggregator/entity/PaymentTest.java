@@ -376,9 +376,6 @@ public class PaymentTest {
     return PaymentApi.DayAggregationCommand
         .newBuilder()
         .setMerchantId("merchant-1")
-        .setServiceCode("service-code-1")
-        .setAccountFrom("account-from-1")
-        .setAccountTo("account-to-1")
         .setPaymentId("payment-1")
         .setEpochDay(epochDay)
         .setTransactionTotalAmount(amount)
@@ -392,9 +389,6 @@ public class PaymentTest {
     return PaymentApi.AggregationRequestCommand
         .newBuilder()
         .setMerchantId("merchant-1")
-        .setServiceCode("service-code-1")
-        .setAccountFrom("account-from-1")
-        .setAccountTo("account-to-1")
         .setPaymentId("payment-1")
         .setAggregateRequestTimestamp(timestamp)
         .addAllEpochDays(Arrays.asList(epochDays))
@@ -405,9 +399,6 @@ public class PaymentTest {
     return PaymentApi.PaymentRequestCommand
         .newBuilder()
         .setMerchantId("merchant-1")
-        .setServiceCode("service-code-1")
-        .setAccountFrom("account-from-1")
-        .setAccountTo("account-to-1")
         .setPaymentId("payment-1")
         .setAggregateRequestTimestamp(timestamp)
         .addAllEpochDays(Arrays.asList(epochDays))

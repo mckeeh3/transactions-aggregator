@@ -41,21 +41,17 @@ public class MerchantTest {
 
     var response = testKit.activateDay(activateDayCommand(epochDay));
 
-    assertEquals(2, response.getAllEvents().size());
+    assertEquals(1, response.getAllEvents().size());
     var dayActivated = response.getNextEventOfType(MerchantEntity.MerchantDayActivated.class);
-    var merchantAggregationRequested = response.getNextEventOfType(MerchantEntity.MerchantAggregationRequested.class);
 
     assertEquals("merchant-1", dayActivated.getMerchantKey().getMerchantId());
     assertEquals(epochDay, dayActivated.getEpochDay());
-
-    assertEquals(1, merchantAggregationRequested.getActiveDaysCount());
-    assertEquals(epochDay, merchantAggregationRequested.getActiveDays(0));
 
     var state = testKit.getState();
 
     assertEquals("merchant-1", state.getMerchantKey().getMerchantId());
     assertEquals(0, state.getPaymentIdSequenceNumber());
-    assertEquals(0, state.getActiveDaysCount());
+    assertEquals(1, state.getActiveDaysCount());
   }
 
   @Test

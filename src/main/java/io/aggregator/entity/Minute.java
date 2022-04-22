@@ -232,6 +232,7 @@ public class Minute extends AbstractMinute {
   static List<?> eventsFor(MinuteEntity.MinuteState state, MinuteApi.AggregateMinuteCommand command) {
     if (state.getActiveSecondsCount() == 0) {
       var timestamp = command.getAggregateRequestTimestamp();
+//    TODO edit MinuteAggregated and add map of aggregations
       return List.of(
           MinuteEntity.MinuteAggregated
               .newBuilder()

@@ -223,9 +223,6 @@ public class MinuteTest {
     return MinuteApi.AggregateMinuteCommand
         .newBuilder()
         .setMerchantId("merchant-1")
-        .setServiceCode("service-code-1")
-        .setAccountFrom("account-from-1")
-        .setAccountTo("account-to-1")
         .setEpochMinute(epochMinute)
         .setAggregateRequestTimestamp(timestamp)
         .setPaymentId("payment-1")
@@ -236,9 +233,6 @@ public class MinuteTest {
     return MinuteApi.SecondAggregationCommand
         .newBuilder()
         .setMerchantId("merchant-1")
-        .setServiceCode("service-code-1")
-        .setAccountFrom("account-from-1")
-        .setAccountTo("account-to-1")
         .setEpochMinute(TimeTo.fromEpochSecond(epochSecond).toEpochMinute())
         .setEpochSecond(epochSecond)
         .setTransactionTotalAmount(amount)

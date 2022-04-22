@@ -14,7 +14,6 @@ import io.aggregator.action.MinuteToSecondAction;
 import io.aggregator.action.SecondToMinuteAction;
 import io.aggregator.action.SecondToSubSecondAction;
 import io.aggregator.action.SubSecondToSecondAction;
-import io.aggregator.action.SubSecondToTransactionAction;
 import io.aggregator.action.TransactionToSubSecondAction;
 import io.aggregator.entity.Day;
 import io.aggregator.entity.Hour;
@@ -73,7 +72,6 @@ public final class Main {
       SecondToMinuteAction::new,
       SecondToSubSecondAction::new,
       SubSecondToSecondAction::new,
-      SubSecondToTransactionAction::new,
       TransactionToSubSecondAction::new,
       TransactionsNotPaidByDateView::new,
       TransactionsPaidByPaymentByDateView::new);

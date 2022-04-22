@@ -222,9 +222,6 @@ public class HourTest {
     return HourApi.AggregateHourCommand
         .newBuilder()
         .setMerchantId("merchant-1")
-        .setServiceCode("service-code-1")
-        .setAccountFrom("account-from-1")
-        .setAccountTo("account-to-1")
         .setEpochHour(epochHour)
         .setAggregateRequestTimestamp(timestamp)
         .setPaymentId("payment-1")
@@ -235,9 +232,6 @@ public class HourTest {
     return HourApi.MinuteAggregationCommand
         .newBuilder()
         .setMerchantId("merchant-1")
-        .setServiceCode("service-code-1")
-        .setAccountFrom("account-from-1")
-        .setAccountTo("account-to-1")
         .setEpochHour(TimeTo.fromEpochMinute(epochMinute).toEpochHour())
         .setEpochMinute(epochMinute)
         .setTransactionTotalAmount(amount)

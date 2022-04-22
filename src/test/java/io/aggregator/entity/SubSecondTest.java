@@ -104,19 +104,8 @@ public class SubSecondTest {
 
     var response = testKit.aggregateSubSecond(aggregateSubSecondCommand("payment-1", epochSubSecond, TimeTo.fromEpochSubSecond(epochSubSecond).plus().hours(2).toTimestamp()));
 
-    assertEquals(4, response.getAllEvents().size());
+    assertEquals(1, response.getAllEvents().size());
     var subSecondAggregated = response.getNextEventOfType(SubSecondEntity.SubSecondAggregated.class);
-    response.getNextEventOfType(SubSecondEntity.TransactionPaid.class);
-    response.getNextEventOfType(SubSecondEntity.TransactionPaid.class);
-    var transactionPaid = response.getNextEventOfType(SubSecondEntity.TransactionPaid.class);
-
-    assertEquals("transaction-3", transactionPaid.getTransactionKey().getTransactionId());
-    assertEquals("service-code-1", transactionPaid.getTransactionKey().getServiceCode());
-    assertEquals("account-from-1", transactionPaid.getTransactionKey().getAccountFrom());
-    assertEquals("account-to-1", transactionPaid.getTransactionKey().getAccountTo());
-    assertEquals("merchant-1", transactionPaid.getMerchantId());
-    assertEquals("payment-1", transactionPaid.getPaymentId());
-    assertEquals(epochSubSecond, transactionPaid.getEpochSubSecond());
 
     assertNotNull(subSecondAggregated);
     assertEquals("merchant-1", subSecondAggregated.getMerchantKey().getMerchantId());
@@ -153,10 +142,8 @@ public class SubSecondTest {
 
     response = testKit.aggregateSubSecond(aggregateSubSecondCommand("payment-2", epochSubSecond, TimeTo.fromEpochSubSecond(epochSubSecond).plus().hours(3).toTimestamp()));
 
-    assertEquals(3, response.getAllEvents().size());
+    assertEquals(1, response.getAllEvents().size());
     subSecondAggregated = response.getNextEventOfType(SubSecondEntity.SubSecondAggregated.class);
-    response.getNextEventOfType(SubSecondEntity.TransactionPaid.class);
-    response.getNextEventOfType(SubSecondEntity.TransactionPaid.class);
 
     assertNotNull(subSecondAggregated);
     assertEquals("merchant-1", subSecondAggregated.getMerchantKey().getMerchantId());
@@ -209,9 +196,6 @@ public class SubSecondTest {
     return SubSecondApi.AggregateSubSecondCommand
         .newBuilder()
         .setMerchantId("merchant-1")
-        .setServiceCode("service-code-1")
-        .setAccountFrom("account-from-1")
-        .setAccountTo("account-to-1")
         .setEpochSubSecond(epochSubSecond)
         .setAggregateRequestTimestamp(timestamp)
         .setPaymentId(paymentId)

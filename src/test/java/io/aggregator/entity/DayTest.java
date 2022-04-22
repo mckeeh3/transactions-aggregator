@@ -251,9 +251,6 @@ public class DayTest {
     return DayApi.AggregateDayCommand
         .newBuilder()
         .setMerchantId("merchant-1")
-        .setServiceCode("service-code-1")
-        .setAccountFrom("account-from-1")
-        .setAccountTo("account-to-1")
         .setEpochDay(epochDay)
         .setAggregateRequestTimestamp(timestamp)
         .setPaymentId("payment-1")
@@ -264,9 +261,6 @@ public class DayTest {
     return DayApi.HourAggregationCommand
         .newBuilder()
         .setMerchantId("merchant-1")
-        .setServiceCode("service-code-1")
-        .setAccountFrom("account-from-1")
-        .setAccountTo("account-to-1")
         .setEpochDay(TimeTo.fromEpochHour(epochHour).toEpochDay())
         .setEpochHour(epochHour)
         .setTransactionTotalAmount(amount)

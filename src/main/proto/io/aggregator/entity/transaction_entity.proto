@@ -36,8 +36,7 @@ message TransactionState {
   string shop_id = 3;
   double transaction_amount = 4;
   google.protobuf.Timestamp transaction_timestamp = 5;
-  string payment_id = 6;
-  repeated TransactionIncident transaction_incident = 7;
+  repeated TransactionIncident transaction_incident = 6;
 }
 
 message TransactionIncident {

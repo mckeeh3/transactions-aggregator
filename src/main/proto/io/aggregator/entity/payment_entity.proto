@@ -52,8 +52,8 @@ message PaymentState {
 }
 
 message Aggregation {
-  google.protobuf.Timestamp aggregate_request_timestamp = 5;
-  repeated AggregationDay aggregation_days = 6;
+  google.protobuf.Timestamp aggregate_request_timestamp = 1;
+  repeated AggregationDay aggregation_days = 2;
 }
 
 message AggregationDay {
