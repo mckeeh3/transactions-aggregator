@@ -1,11 +1,12 @@
 package io.aggregator.entity;
 
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import com.akkaserverless.javasdk.eventsourcedentity.EventSourcedEntityContext;
 import com.google.protobuf.Empty;
 
+import io.aggregator.service.MerchantService;
+import io.aggregator.service.RuleService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,30 +83,19 @@ public class Transaction extends AbstractTransaction {
   }
 
   static TransactionEntity.IncidentAdded eventFor(TransactionEntity.TransactionState state, TransactionApi.PaymentPricedCommand command) {
+    String merchant = MerchantService.findMerchant(command.getShopId());
     return TransactionEntity.IncidentAdded
             .newBuilder()
             .setTransactionId(command.getTransactionId())
             .setEventType(command.getEventType())
             .setShopId(command.getShopId())
-            .setMerchantId(findMerchant(command.getShopId()))
+            .setMerchantId(merchant)
             .setIncidentTimestamp(command.getTimestamp())
-            .addAllTransactionIncident(toTransactionIncidents(state, command))
+            .addAllTransactionIncident(toTransactionIncidents(state, merchant, command))
             .build();
   }
 
-  static String findMerchant(String shopId) {
-    return shopId.split("-")[0];
-  }
-
-  static Iterable<TransactionEntity.TransactionIncident> toTransactionIncidents(TransactionEntity.TransactionState state, TransactionApi.PaymentPricedCommand command) {
-    // TODO apply business rules and generate list
-    return command.getPricedItemList().stream()
-            .map(pricedItem -> TransactionEntity.TransactionIncident.newBuilder()
-                    .setServiceCode(pricedItem.getServiceCode())
-                    .setIncidentAmount(pricedItem.getPricedItemAmount())
-                    .setAccountFrom("from")
-                    .setAccountTo("to")
-                    .build())
-            .collect(Collectors.toList());
+  static Iterable<TransactionEntity.TransactionIncident> toTransactionIncidents(TransactionEntity.TransactionState state, String merchant, TransactionApi.PaymentPricedCommand command) {
+    return RuleService.applyRules(state, merchant, command);
   }
 }

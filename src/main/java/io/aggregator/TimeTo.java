@@ -41,7 +41,7 @@ public class TimeTo {
   }
 
   public static Comparator<Timestamp> comparator() {
-    return (timestamp1, timestamp2) -> compare(timestamp1, timestamp2);
+    return TimeTo::compare;
   }
 
   public static Timestamp max(Timestamp... timestamps) {

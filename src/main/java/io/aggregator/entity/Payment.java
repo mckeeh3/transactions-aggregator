@@ -90,6 +90,8 @@ public class Payment extends AbstractPayment {
   }
 
   static PaymentEntity.PaymentState handle(PaymentEntity.PaymentState state, PaymentEntity.ActiveDayAggregated event) {
+    log.info(Thread.currentThread().getName() + " - RECEIVED EVENT: ActiveDayAggregated");
+
     var aggregation = state.getAggregationsList().stream()
         .filter(agg -> agg.getAggregateRequestTimestamp().equals(event.getAggregateRequestTimestamp()))
         .findFirst();
@@ -140,6 +142,8 @@ public class Payment extends AbstractPayment {
   }
 
   static PaymentEntity.PaymentState handle(PaymentEntity.PaymentState state, PaymentEntity.PaymentDayAggregationRequested event) {
+    log.info(Thread.currentThread().getName() + " - RECEIVED EVENT: PaymentDayAggregationRequested");
+
     if (state.getMerchantKey().getMerchantId().isEmpty()) {
       state = state.toBuilder()
           .setMerchantKey(event.getMerchantKey())
@@ -207,13 +211,16 @@ public class Payment extends AbstractPayment {
   }
 
   static PaymentEntity.PaymentState handle(PaymentEntity.PaymentState state, PaymentEntity.PaymentRequested event) {
+    log.info(Thread.currentThread().getName() + " - RECEIVED EVENT: PaymentRequested");
+
     return state.toBuilder()
         .setPaymentRequested(true)
         .build();
   }
 
   static PaymentEntity.PaymentState handle(PaymentEntity.PaymentState state, PaymentEntity.PaymentAggregated event) {
-    log.info("state: {}\nPaymentAggregated: {}", state, event);
+    log.info(Thread.currentThread().getName() + " - RECEIVED EVENT: PaymentRequested");
+    log.debug("state: {}\nPaymentAggregated: {}", state, event);
 
     return state.toBuilder()
         .setTransactionTotalAmount(event.getTransactionTotalAmount())
@@ -229,7 +236,7 @@ public class Payment extends AbstractPayment {
         .toList();
 
     var currentlyAggregatedDays = allAggregationDays.stream()
-        .filter(aggregationDay -> aggregationDay.getAggregated())
+        .filter(PaymentEntity.AggregationDay::getAggregated)
         .toList();
 
     if (state.getPaymentRequested() && allAggregationDays.size() == currentlyAggregatedDays.size()) {

@@ -39,7 +39,7 @@ public class SystemIntegrationTest {
 
   @Test
   public void transactionToMerchant() throws Exception {
-    System.out.println(Thread.currentThread().getName() + " - CALL TIME: " + Instant.now().toString());
+    System.out.println("TEST START TIME: " + Instant.now().toString());
 
     transactionClient.paymentPriced(TransactionApi.PaymentPricedCommand.newBuilder()
         .setTransactionId("txn-1")
@@ -51,14 +51,14 @@ public class SystemIntegrationTest {
             .setServiceCode("ABC")
             .build())
         .build()).toCompletableFuture().get(10, SECONDS);
-
     Thread.sleep(10000);
+    System.out.println("PAYMENT_PRICED END TIME: " + Instant.now().toString());
 
     merchantClient.merchantAggregationRequest(MerchantApi.MerchantAggregationRequestCommand.newBuilder()
         .setMerchantId("tesco")
         .build()).toCompletableFuture().get(10, SECONDS);
-
     Thread.sleep(10000);
+    System.out.println("MERCHANT_AGGREGATION END TIME: " + Instant.now().toString());
 
 //    merchantClient.merchantPaymentRequest(MerchantApi.MerchantPaymentRequestCommand.newBuilder()
 //        .setMerchantId("tesco")

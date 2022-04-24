@@ -43,7 +43,7 @@ public class TransactionTest {
             .setShopId("shop-1")
             .setEventType("event-type-1")
                 .addPricedItem(TransactionApi.PricedItem.newBuilder()
-                        .setServiceCode("service-code-1")
+                        .setServiceCode("SVC1")
                         .setPricedItemAmount(123.45)
                         .build())
             .setTimestamp(now)
@@ -55,20 +55,20 @@ public class TransactionTest {
     assertEquals("event-type-1", incidentAdded.getEventType());
     assertEquals(now, incidentAdded.getIncidentTimestamp());
     assertEquals(1, incidentAdded.getTransactionIncidentList().size());
-    assertEquals("service-code-1", incidentAdded.getTransactionIncidentList().get(0).getServiceCode());
+    assertEquals("SVC1", incidentAdded.getTransactionIncidentList().get(0).getServiceCode());
     assertEquals(123.45, incidentAdded.getTransactionIncidentList().get(0).getIncidentAmount(), 0);
-    assertEquals("from", incidentAdded.getTransactionIncidentList().get(0).getAccountFrom());
-    assertEquals("to", incidentAdded.getTransactionIncidentList().get(0).getAccountTo());
+    assertEquals("JPMC", incidentAdded.getTransactionIncidentList().get(0).getAccountFrom());
+    assertEquals("MERCHANT-SHOP", incidentAdded.getTransactionIncidentList().get(0).getAccountTo());
 
     var state = testKit.getState();
     assertEquals("transaction-1", state.getTransactionId());
     assertEquals("shop", state.getMerchantId());
     assertEquals("shop-1", state.getShopId());
     assertEquals(1, state.getTransactionIncidentList().size());
-    assertEquals("service-code-1", state.getTransactionIncidentList().get(0).getServiceCode());
+    assertEquals("SVC1", state.getTransactionIncidentList().get(0).getServiceCode());
     assertEquals(123.45, state.getTransactionIncidentList().get(0).getIncidentAmount(), 0);
-    assertEquals("from", state.getTransactionIncidentList().get(0).getAccountFrom());
-    assertEquals("to", state.getTransactionIncidentList().get(0).getAccountTo());
+    assertEquals("JPMC", state.getTransactionIncidentList().get(0).getAccountFrom());
+    assertEquals("MERCHANT-SHOP", state.getTransactionIncidentList().get(0).getAccountTo());
   }
 
   @Ignore
