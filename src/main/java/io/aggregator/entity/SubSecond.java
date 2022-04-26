@@ -1,11 +1,15 @@
 package io.aggregator.entity;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.akkaserverless.javasdk.eventsourcedentity.EventSourcedEntityContext;
 import com.google.protobuf.Empty;
 
+import lombok.Builder;
+import lombok.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -177,14 +181,28 @@ public class SubSecond extends AbstractSubSecond {
       return List.of(SubSecondEntity.SubSecondAggregated.newBuilder()
           .setMerchantKey(state.getMerchantKey())
           .setEpochSubSecond(state.getEpochSubSecond())
-          .setTransactionTotalAmount(0.0)
-          .setTransactionCount(0)
           .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
           .setPaymentId(command.getPaymentId())
           .build());
     } else {
-      var total = ledgerEntries.stream()
-          .reduce(0.0, (a, b) -> a + b.getAmount(), Double::sum);
+      Map<MoneyTransferKey, TransactionMerchantKey.Transfer> summarisedTransfersMap = new HashMap<>();
+      ledgerEntries.stream()
+          .map(ledgerEntry -> TransactionMerchantKey.Transfer.newBuilder()
+              .setAccountFrom(ledgerEntry.getTransactionKey().getAccountFrom())
+              .setAccountTo(ledgerEntry.getTransactionKey().getAccountTo())
+              .setAmount(ledgerEntry.getAmount())
+              .build())
+          .forEach(transfer -> {
+            MoneyTransferKey key = MoneyTransferKey.builder()
+                .from(transfer.getAccountFrom())
+                .to(transfer.getAccountTo())
+                .build();
+            summarisedTransfersMap.merge(key, transfer, (transfer1, transfer2) -> TransactionMerchantKey.Transfer.newBuilder()
+                .setAccountFrom(transfer1.getAccountFrom())
+                .setAccountTo(transfer1.getAccountTo())
+                .setAmount(transfer1.getAmount() + transfer2.getAmount())
+                .build());
+          });
       var lastUpdate = ledgerEntries.stream()
           .map(SubSecondEntity.LedgerEntry::getTimestamp)
           .max(TimeTo.comparator())
@@ -193,12 +211,18 @@ public class SubSecond extends AbstractSubSecond {
       return List.of(SubSecondEntity.SubSecondAggregated.newBuilder()
           .setMerchantKey(state.getMerchantKey())
           .setEpochSubSecond(state.getEpochSubSecond())
-          .setTransactionTotalAmount(total)
-          .setTransactionCount(ledgerEntries.size())
           .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
           .setLastUpdateTimestamp(lastUpdate)
           .setPaymentId(command.getPaymentId())
+          .addAllMoneyTransfers(summarisedTransfersMap.values())
           .build());
     }
+  }
+
+  @Value
+  @Builder
+  static class MoneyTransferKey {
+    String from;
+    String to;
   }
 }
