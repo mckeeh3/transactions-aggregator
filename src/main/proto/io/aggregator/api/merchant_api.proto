@@ -3,7 +3,6 @@ syntax = "proto3";
 import "akkaserverless/annotations.proto";
 import "google/protobuf/empty.proto";
 import "google/api/annotations.proto";
-import "google/protobuf/timestamp.proto";
 
 package io.aggregator.api;
 

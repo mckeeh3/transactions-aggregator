@@ -1,12 +1,12 @@
 package io.aggregator.entity;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import com.akkaserverless.javasdk.eventsourcedentity.EventSourcedEntityContext;
 import com.google.protobuf.Empty;
 
+import io.aggregator.service.RuleService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -189,8 +189,7 @@ public class Second extends AbstractSecond {
           if (activeSubSecond.getEpochSubSecond() == event.getEpochSubSecond()) {
             return activeSubSecond
                 .toBuilder()
-                .setTransactionTotalAmount(event.getTransactionTotalAmount())
-                .setTransactionCount(event.getTransactionCount())
+                .addAllMoneyMovements(event.getMoneyMovementsList())
                 .setLastUpdateTimestamp(event.getLastUpdateTimestamp())
                 .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
                 .build();
@@ -242,8 +241,6 @@ public class Second extends AbstractSecond {
                       .setMerchantId(command.getMerchantId())
                       .build())
               .setEpochSecond(command.getEpochSecond())
-              .setTransactionTotalAmount(0.0)
-              .setTransactionCount(0)
               .setLastUpdateTimestamp(timestamp)
               .setAggregateRequestTimestamp(timestamp)
               .setPaymentId(command.getPaymentId())
@@ -312,8 +309,7 @@ public class Second extends AbstractSecond {
           if (activeSecond.getEpochSubSecond() == command.getEpochSubSecond()) {
             return activeSecond
                 .toBuilder()
-                .setTransactionTotalAmount(command.getTransactionTotalAmount())
-                .setTransactionCount(command.getTransactionCount())
+                .addAllMoneyMovements(command.getMoneyMovementsList())
                 .setLastUpdateTimestamp(command.getLastUpdateTimestamp())
                 .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
                 .build();
@@ -333,25 +329,22 @@ public class Second extends AbstractSecond {
                 .setMerchantId(command.getMerchantId())
                 .build())
         .setEpochSubSecond(command.getEpochSubSecond())
-        .setTransactionTotalAmount(command.getTransactionTotalAmount())
-        .setTransactionCount(command.getTransactionCount())
+        .addAllMoneyMovements(command.getMoneyMovementsList())
         .setLastUpdateTimestamp(command.getLastUpdateTimestamp())
         .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
         .setPaymentId(command.getPaymentId())
         .build();
   }
 
-  static SecondEntity.SecondAggregated toSecondAggregated(SecondApi.SubSecondAggregationCommand command, List<SecondEntity.ActiveSubSecond> activeSeconds) {
-    var transactionTotalAmount = activeSeconds.stream()
-        .reduce(0.0, (amount, activeSecond) -> amount + activeSecond.getTransactionTotalAmount(), Double::sum);
-
-    var transactionCount = activeSeconds.stream()
-        .reduce(0, (count, activeSecond) -> count + activeSecond.getTransactionCount(), Integer::sum);
-
-    var lastUpdateTimestamp = activeSeconds.stream()
-        .map(activeSecond -> activeSecond.getLastUpdateTimestamp())
+  static SecondEntity.SecondAggregated toSecondAggregated(SecondApi.SubSecondAggregationCommand command, List<SecondEntity.ActiveSubSecond> activeSubSeconds) {
+    var lastUpdateTimestamp = activeSubSeconds.stream()
+        .map(SecondEntity.ActiveSubSecond::getLastUpdateTimestamp)
         .max(TimeTo.comparator())
         .get();
+
+    List<TransactionMerchantKey.MoneyMovement> summarisedMoneyMovements = activeSubSeconds.stream()
+        .flatMap(activeSubSecond -> activeSubSecond.getMoneyMovementsList().stream())
+        .collect(Collectors.toList());
 
     return SecondEntity.SecondAggregated
         .newBuilder()
@@ -361,8 +354,7 @@ public class Second extends AbstractSecond {
                 .setMerchantId(command.getMerchantId())
                 .build())
         .setEpochSecond(command.getEpochSecond())
-        .setTransactionTotalAmount(transactionTotalAmount)
-        .setTransactionCount(transactionCount)
+        .addAllMoneyMovements(RuleService.mergeMoneyMovements(summarisedMoneyMovements))
         .setLastUpdateTimestamp(lastUpdateTimestamp)
         .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
         .setPaymentId(command.getPaymentId())

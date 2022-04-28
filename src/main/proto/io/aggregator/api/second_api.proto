@@ -4,6 +4,7 @@ import "akkaserverless/annotations.proto";
 import "google/protobuf/empty.proto";
 import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
+import "io/aggregator/entity/transaction_merchant_key.proto";
 
 package io.aggregator.api;
 
@@ -20,7 +21,7 @@ service Second {
         "io.aggregator.entity.SubSecondAdded",
         "io.aggregator.entity.SecondAggregationRequested",
         "io.aggregator.entity.SecondAggregated",
-        "io.aggregator.entity.ActiveSubSecondAggregated"  //
+        "io.aggregator.entity.ActiveSubSecondAggregated"
       ]
     }
   };
@@ -64,9 +65,8 @@ message SubSecondAggregationCommand {
   string merchant_id = 1 [(akkaserverless.field).entity_key = true];
   int64 epoch_second = 2 [(akkaserverless.field).entity_key = true];
   int64 epoch_sub_second = 3;
-  double transaction_total_amount = 4;
-  int32 transaction_count = 5;
-  google.protobuf.Timestamp last_update_timestamp = 6;
-  google.protobuf.Timestamp aggregate_request_timestamp = 7;
-  string payment_id = 8;
+  repeated entity.MoneyMovement money_movements = 4;
+  google.protobuf.Timestamp last_update_timestamp = 5;
+  google.protobuf.Timestamp aggregate_request_timestamp = 6;
+  string payment_id = 7;
 }

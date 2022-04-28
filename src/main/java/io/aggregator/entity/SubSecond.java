@@ -8,8 +8,7 @@ import java.util.stream.Collectors;
 import com.akkaserverless.javasdk.eventsourcedentity.EventSourcedEntityContext;
 import com.google.protobuf.Empty;
 
-import lombok.Builder;
-import lombok.Value;
+import io.aggregator.service.MoneyMovementKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -184,7 +183,7 @@ public class SubSecond extends AbstractSubSecond {
           .setPaymentId(command.getPaymentId())
           .build());
     } else {
-      Map<MoneyTransferKey, TransactionMerchantKey.MoneyMovement> summarisedMoneyMovementsMap = new HashMap<>();
+      Map<MoneyMovementKey, TransactionMerchantKey.MoneyMovement> summarisedMoneyMovementsMap = new HashMap<>();
       ledgerEntries.stream()
           .map(ledgerEntry -> TransactionMerchantKey.MoneyMovement.newBuilder()
               .setAccountFrom(ledgerEntry.getTransactionKey().getAccountFrom())
@@ -192,7 +191,7 @@ public class SubSecond extends AbstractSubSecond {
               .setAmount(ledgerEntry.getAmount())
               .build())
           .forEach(transfer -> {
-            MoneyTransferKey key = MoneyTransferKey.builder()
+            MoneyMovementKey key = MoneyMovementKey.builder()
                 .from(transfer.getAccountFrom())
                 .to(transfer.getAccountTo())
                 .build();
@@ -216,12 +215,5 @@ public class SubSecond extends AbstractSubSecond {
           .addAllMoneyMovements(summarisedMoneyMovementsMap.values())
           .build());
     }
-  }
-
-  @Value
-  @Builder
-  static class MoneyTransferKey {
-    String from;
-    String to;
   }
 }

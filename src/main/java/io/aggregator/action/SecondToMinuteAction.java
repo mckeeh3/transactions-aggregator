@@ -44,8 +44,7 @@ public class SecondToMinuteAction extends AbstractSecondToMinuteAction {
             .setMerchantId(event.getMerchantKey().getMerchantId())
             .setEpochMinute(TimeTo.fromEpochSecond(event.getEpochSecond()).toEpochMinute())
             .setEpochSecond(event.getEpochSecond())
-            .setTransactionTotalAmount(event.getTransactionTotalAmount())
-            .setTransactionCount(event.getTransactionCount())
+            // TODO
             .setLastUpdateTimestamp(event.getLastUpdateTimestamp())
             .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
             .setPaymentId(event.getPaymentId())

@@ -2,7 +2,13 @@ package io.aggregator.service;
 
 import io.aggregator.api.TransactionApi;
 import io.aggregator.entity.TransactionEntity;
+import io.aggregator.entity.TransactionMerchantKey;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -61,6 +67,29 @@ public class RuleService {
   private static String findMerchantAccount(String merchantId) {
     return "MERCHANT-" + merchantId.toUpperCase();
   }
+
+  public static Collection<TransactionMerchantKey.MoneyMovement> mergeMoneyMovements(List<TransactionMerchantKey.MoneyMovement> moneyMovements) {
+    Map<MoneyMovementKey, TransactionMerchantKey.MoneyMovement> summarisedMoneyMovementsMap = new HashMap<>();
+    moneyMovements.forEach(moneyMovement -> summarisedMoneyMovementsMap.merge(
+        toMoneyMovementKey(moneyMovement),
+        moneyMovement,
+        mergeFunction
+    ));
+    return summarisedMoneyMovementsMap.values();
+  }
+
+  private static MoneyMovementKey toMoneyMovementKey(TransactionMerchantKey.MoneyMovement moneyMovement) {
+    return MoneyMovementKey.builder()
+        .from(moneyMovement.getAccountFrom())
+        .to(moneyMovement.getAccountTo())
+        .build();
+  }
+
+  private static BiFunction<TransactionMerchantKey.MoneyMovement, TransactionMerchantKey.MoneyMovement, TransactionMerchantKey.MoneyMovement> mergeFunction = (moneyMovement1, moneyMovement2) -> TransactionMerchantKey.MoneyMovement.newBuilder()
+      .setAccountFrom(moneyMovement1.getAccountFrom())
+      .setAccountTo(moneyMovement1.getAccountTo())
+      .setAmount(moneyMovement1.getAmount() + moneyMovement2.getAmount())
+      .build();
 }
 
 //RULES BY SERVICE:
