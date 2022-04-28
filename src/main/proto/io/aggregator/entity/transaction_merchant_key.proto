@@ -15,7 +15,7 @@ message MerchantKey {
   string merchant_id = 1;
 }
 
-message Transfer {
+message MoneyMovement {
   string account_from = 1;
   string account_to = 2;
   double amount = 3;

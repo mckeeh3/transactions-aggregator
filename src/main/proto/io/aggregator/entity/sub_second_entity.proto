@@ -25,7 +25,7 @@ message SubSecondAggregated {
   google.protobuf.Timestamp last_update_timestamp = 3;
   google.protobuf.Timestamp aggregate_request_timestamp = 4;
   string payment_id = 5;
-  repeated Transfer money_transfers = 6;
+  repeated MoneyMovement money_movements = 6;
 }
 
 message SubSecondState {

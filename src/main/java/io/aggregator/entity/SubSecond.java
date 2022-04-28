@@ -176,7 +176,6 @@ public class SubSecond extends AbstractSubSecond {
         .filter(ledgerEntry -> ledgerEntry.getAggregateRequestTimestamp().getSeconds() == 0)
         .toList();
 
-//    TODO edit SubSecondAggregated and add map of aggregations
     if (ledgerEntries.size() == 0) {
       return List.of(SubSecondEntity.SubSecondAggregated.newBuilder()
           .setMerchantKey(state.getMerchantKey())
@@ -185,9 +184,9 @@ public class SubSecond extends AbstractSubSecond {
           .setPaymentId(command.getPaymentId())
           .build());
     } else {
-      Map<MoneyTransferKey, TransactionMerchantKey.Transfer> summarisedTransfersMap = new HashMap<>();
+      Map<MoneyTransferKey, TransactionMerchantKey.MoneyMovement> summarisedMoneyMovementsMap = new HashMap<>();
       ledgerEntries.stream()
-          .map(ledgerEntry -> TransactionMerchantKey.Transfer.newBuilder()
+          .map(ledgerEntry -> TransactionMerchantKey.MoneyMovement.newBuilder()
               .setAccountFrom(ledgerEntry.getTransactionKey().getAccountFrom())
               .setAccountTo(ledgerEntry.getTransactionKey().getAccountTo())
               .setAmount(ledgerEntry.getAmount())
@@ -197,7 +196,7 @@ public class SubSecond extends AbstractSubSecond {
                 .from(transfer.getAccountFrom())
                 .to(transfer.getAccountTo())
                 .build();
-            summarisedTransfersMap.merge(key, transfer, (transfer1, transfer2) -> TransactionMerchantKey.Transfer.newBuilder()
+            summarisedMoneyMovementsMap.merge(key, transfer, (transfer1, transfer2) -> TransactionMerchantKey.MoneyMovement.newBuilder()
                 .setAccountFrom(transfer1.getAccountFrom())
                 .setAccountTo(transfer1.getAccountTo())
                 .setAmount(transfer1.getAmount() + transfer2.getAmount())
@@ -214,7 +213,7 @@ public class SubSecond extends AbstractSubSecond {
           .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
           .setLastUpdateTimestamp(lastUpdate)
           .setPaymentId(command.getPaymentId())
-          .addAllMoneyTransfers(summarisedTransfersMap.values())
+          .addAllMoneyMovements(summarisedMoneyMovementsMap.values())
           .build());
     }
   }
