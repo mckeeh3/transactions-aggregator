@@ -3,10 +3,12 @@ package io.aggregator.entity;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.akkaserverless.javasdk.eventsourcedentity.EventSourcedEntityContext;
 import com.google.protobuf.Empty;
 
+import io.aggregator.service.RuleService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -189,8 +191,7 @@ public class Minute extends AbstractMinute {
           if (activeSecond.getEpochSecond() == event.getEpochSecond()) {
             return activeSecond
                 .toBuilder()
-                .setTransactionTotalAmount(event.getTransactionTotalAmount())
-                .setTransactionCount(event.getTransactionCount())
+                .addAllMoneyMovements(event.getMoneyMovementsList())
                 .setLastUpdateTimestamp(event.getLastUpdateTimestamp())
                 .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
                 .build();
@@ -232,7 +233,6 @@ public class Minute extends AbstractMinute {
   static List<?> eventsFor(MinuteEntity.MinuteState state, MinuteApi.AggregateMinuteCommand command) {
     if (state.getActiveSecondsCount() == 0) {
       var timestamp = command.getAggregateRequestTimestamp();
-//    TODO edit MinuteAggregated and add map of aggregations
       return List.of(
           MinuteEntity.MinuteAggregated
               .newBuilder()
@@ -242,8 +242,6 @@ public class Minute extends AbstractMinute {
                       .setMerchantId(command.getMerchantId())
                       .build())
               .setEpochMinute(command.getEpochMinute())
-              .setTransactionTotalAmount(0.0)
-              .setTransactionCount(0)
               .setLastUpdateTimestamp(timestamp)
               .setAggregateRequestTimestamp(timestamp)
               .setPaymentId(command.getPaymentId())
@@ -262,7 +260,7 @@ public class Minute extends AbstractMinute {
               .setPaymentId(command.getPaymentId())
               .addAllEpochSeconds(
                   state.getActiveSecondsList().stream()
-                      .map(activeSecond -> activeSecond.getEpochSecond())
+                      .map(MinuteEntity.ActiveSecond::getEpochSecond)
                       .toList())
               .build());
     }
@@ -312,8 +310,7 @@ public class Minute extends AbstractMinute {
           if (activeSecond.getEpochSecond() == command.getEpochSecond()) {
             return activeSecond
                 .toBuilder()
-                .setTransactionTotalAmount(command.getTransactionTotalAmount())
-                .setTransactionCount(command.getTransactionCount())
+                .addAllMoneyMovements(command.getMoneyMovementsList())
                 .setLastUpdateTimestamp(command.getLastUpdateTimestamp())
                 .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
                 .build();
@@ -333,8 +330,7 @@ public class Minute extends AbstractMinute {
                 .setMerchantId(command.getMerchantId())
                 .build())
         .setEpochSecond(command.getEpochSecond())
-        .setTransactionTotalAmount(command.getTransactionTotalAmount())
-        .setTransactionCount(command.getTransactionCount())
+        .addAllMoneyMovements(command.getMoneyMovementsList())
         .setLastUpdateTimestamp(command.getLastUpdateTimestamp())
         .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
         .setPaymentId(command.getPaymentId())
@@ -343,16 +339,14 @@ public class Minute extends AbstractMinute {
   }
 
   static MinuteEntity.MinuteAggregated toMinuteAggregated(MinuteApi.SecondAggregationCommand command, List<MinuteEntity.ActiveSecond> activeSeconds) {
-    var transactionTotalAmount = activeSeconds.stream()
-        .reduce(0.0, (amount, activeSecond) -> amount + activeSecond.getTransactionTotalAmount(), Double::sum);
-
-    var transactionCount = activeSeconds.stream()
-        .reduce(0, (count, activeSecond) -> count + activeSecond.getTransactionCount(), Integer::sum);
-
     var lastUpdateTimestamp = activeSeconds.stream()
-        .map(activeSecond -> activeSecond.getLastUpdateTimestamp())
+        .map(MinuteEntity.ActiveSecond::getLastUpdateTimestamp)
         .max(TimeTo.comparator())
         .get();
+
+    List<TransactionMerchantKey.MoneyMovement> summarisedMoneyMovements = activeSeconds.stream()
+        .flatMap(activeSecond -> activeSecond.getMoneyMovementsList().stream())
+        .collect(Collectors.toList());
 
     return MinuteEntity.MinuteAggregated
         .newBuilder()
@@ -362,8 +356,7 @@ public class Minute extends AbstractMinute {
                 .setMerchantId(command.getMerchantId())
                 .build())
         .setEpochMinute(command.getEpochMinute())
-        .setTransactionTotalAmount(transactionTotalAmount)
-        .setTransactionCount(transactionCount)
+        .addAllMoneyMovements(RuleService.mergeMoneyMovements(summarisedMoneyMovements))
         .setLastUpdateTimestamp(lastUpdateTimestamp)
         .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
         .setPaymentId(command.getPaymentId())

@@ -20,21 +20,19 @@ message SecondAdded {
 message MinuteAggregated {
   MerchantKey merchant_key = 1;
   int64 epoch_minute = 2;
-  double transaction_total_amount = 3;
-  int32 transaction_count = 4;
-  google.protobuf.Timestamp last_update_timestamp = 5;
-  google.protobuf.Timestamp aggregate_request_timestamp = 6;
-  string payment_id = 7;
+  repeated MoneyMovement money_movements = 3;
+  google.protobuf.Timestamp last_update_timestamp = 4;
+  google.protobuf.Timestamp aggregate_request_timestamp = 5;
+  string payment_id = 6;
 }
 
 message ActiveSecondAggregated {
   MerchantKey merchant_key = 1;
   int64 epoch_second = 2;
-  double transaction_total_amount = 3;
-  int32 transaction_count = 4;
-  google.protobuf.Timestamp last_update_timestamp = 5;
-  google.protobuf.Timestamp aggregate_request_timestamp = 6;
-  string payment_id = 7;
+  repeated MoneyMovement money_movements = 3;
+  google.protobuf.Timestamp last_update_timestamp = 4;
+  google.protobuf.Timestamp aggregate_request_timestamp = 5;
+  string payment_id = 6;
 }
 
 message MinuteAggregationRequested {
@@ -63,9 +61,8 @@ message AggregateMinute {
 
 message ActiveSecond {
   int64 epoch_second = 1;
-  double transaction_total_amount = 2;
-  int32 transaction_count = 3;
-  google.protobuf.Timestamp last_update_timestamp = 4;
-  google.protobuf.Timestamp aggregate_request_timestamp = 5;
-  string payment_id = 6;
+  repeated MoneyMovement money_movements = 2;
+  google.protobuf.Timestamp last_update_timestamp = 3;
+  google.protobuf.Timestamp aggregate_request_timestamp = 4;
+  string payment_id = 5;
 }

@@ -125,13 +125,13 @@ public class SecondTest {
 
     var response = testKit.aggregateSecond(aggregateSecondCommand(epochSecond, now));
 
-    var secondAggregationRequested = response.getNextEventOfType(SecondEntity.SecondAggregated.class);
+    var secondAggregated = response.getNextEventOfType(SecondEntity.SecondAggregated.class);
 
-    assertEquals("merchant-1", secondAggregationRequested.getMerchantKey().getMerchantId());
-    assertEquals(epochSecond, secondAggregationRequested.getEpochSecond());
-    assertEquals(now, secondAggregationRequested.getAggregateRequestTimestamp());
-    assertEquals(0, secondAggregationRequested.getMoneyMovementsCount());
-    assertEquals("payment-1", secondAggregationRequested.getPaymentId());
+    assertEquals("merchant-1", secondAggregated.getMerchantKey().getMerchantId());
+    assertEquals(epochSecond, secondAggregated.getEpochSecond());
+    assertEquals(now, secondAggregated.getAggregateRequestTimestamp());
+    assertEquals(0, secondAggregated.getMoneyMovementsCount());
+    assertEquals("payment-1", secondAggregated.getPaymentId());
   }
 
   @Test
@@ -234,8 +234,8 @@ public class SecondTest {
 
     assertEquals("merchant-1", secondAggregated.getMerchantKey().getMerchantId());
     assertEquals(epochSecond, secondAggregated.getEpochSecond());
-    assertEquals(moneyMovements.size(), activeSubSecondAggregated.getMoneyMovementsCount());
-    assertTrue(activeSubSecondAggregated.getMoneyMovementsList().containsAll(moneyMovements));
+    assertEquals(moneyMovements.size(), secondAggregated.getMoneyMovementsCount());
+    assertTrue(secondAggregated.getMoneyMovementsList().containsAll(moneyMovements));
     assertEquals(aggregateRequestTimestamp, secondAggregated.getLastUpdateTimestamp());
     assertEquals(aggregateRequestTimestamp, secondAggregated.getAggregateRequestTimestamp());
     assertEquals("payment-1", secondAggregated.getPaymentId());

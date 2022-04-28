@@ -44,8 +44,7 @@ public class MinuteToHourAction extends AbstractMinuteToHourAction {
             .setMerchantId(event.getMerchantKey().getMerchantId())
             .setEpochHour(TimeTo.fromEpochMinute(event.getEpochMinute()).toEpochHour())
             .setEpochMinute(event.getEpochMinute())
-            .setTransactionTotalAmount(event.getTransactionTotalAmount())
-            .setTransactionCount(event.getTransactionCount())
+            // TODO
             .setLastUpdateTimestamp(event.getLastUpdateTimestamp())
             .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
             .setPaymentId(event.getPaymentId())

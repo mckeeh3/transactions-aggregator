@@ -9,6 +9,9 @@ import static org.junit.Assert.*;
 
 import com.google.protobuf.Timestamp;
 
+import java.util.Collection;
+import java.util.List;
+
 // This class was initially generated based on the .proto definition by Akka Serverless tooling.
 //
 // As long as this file exists it will not be overwritten: you can maintain it yourself,
@@ -127,8 +130,8 @@ public class MinuteTest {
     assertEquals("merchant-1", minuteAggregated.getMerchantKey().getMerchantId());
     assertEquals(epochMinute, minuteAggregated.getEpochMinute());
     assertEquals(now, minuteAggregated.getAggregateRequestTimestamp());
-    assertEquals(0, minuteAggregated.getTransactionCount());
-    assertEquals(0.0, minuteAggregated.getTransactionTotalAmount(), 0.0);
+    assertEquals(0, minuteAggregated.getMoneyMovementsCount());
+    assertEquals("payment-1", minuteAggregated.getPaymentId());
   }
 
   @Test
@@ -145,35 +148,55 @@ public class MinuteTest {
 
     testKit.aggregateMinute(aggregateMinuteCommand(epochMinute, aggregateRequestTimestamp));
 
-    var response = testKit.secondAggregation(secondAggregationCommand(epochSecond, 123.45, 10, aggregateRequestTimestamp));
+    Collection<TransactionMerchantKey.MoneyMovement> moneyMovements = List.of(
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("AAA").setAccountTo("BBB").setAmount(1.22).build(),
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("CCC").setAccountTo("BBB").setAmount(2.20).build(),
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("BBB").setAccountTo("AAA").setAmount(1.22).build()
+    );
+    var response = testKit.secondAggregation(secondAggregationCommand(epochSecond, moneyMovements, aggregateRequestTimestamp));
 
     var activeSecondAggregated = response.getNextEventOfType(MinuteEntity.ActiveSecondAggregated.class);
 
     assertEquals("merchant-1", activeSecondAggregated.getMerchantKey().getMerchantId());
     assertEquals(epochSecond, activeSecondAggregated.getEpochSecond());
-    assertEquals(123.45, activeSecondAggregated.getTransactionTotalAmount(), 0.0);
-    assertEquals(10, activeSecondAggregated.getTransactionCount());
+    assertEquals(moneyMovements.size(), activeSecondAggregated.getMoneyMovementsCount());
+    assertTrue(activeSecondAggregated.getMoneyMovementsList().containsAll(moneyMovements));
     assertEquals(aggregateRequestTimestamp, activeSecondAggregated.getLastUpdateTimestamp());
     assertEquals(aggregateRequestTimestamp, activeSecondAggregated.getAggregateRequestTimestamp());
     assertEquals("payment-1", activeSecondAggregated.getPaymentId());
 
-    response = testKit.secondAggregation(secondAggregationCommand(nextEpochSecond, 678.90, 20, aggregateRequestTimestamp));
+    moneyMovements = List.of(
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("CCC").setAccountTo("AAA").setAmount(3.33).build(),
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("AAA").setAccountTo("DDD").setAmount(4.44).build(),
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("CCC").setAccountTo("BBB").setAmount(1.55).build(),
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("BBB").setAccountTo("CCC").setAmount(2.55).build()
+    );
+    response = testKit.secondAggregation(secondAggregationCommand(nextEpochSecond, moneyMovements, aggregateRequestTimestamp));
 
     var minuteAggregated = response.getNextEventOfType(MinuteEntity.MinuteAggregated.class);
     activeSecondAggregated = response.getNextEventOfType(MinuteEntity.ActiveSecondAggregated.class);
 
     assertEquals("merchant-1", activeSecondAggregated.getMerchantKey().getMerchantId());
     assertEquals(nextEpochSecond, activeSecondAggregated.getEpochSecond());
-    assertEquals(678.90, activeSecondAggregated.getTransactionTotalAmount(), 0.0);
-    assertEquals(20, activeSecondAggregated.getTransactionCount());
+    assertEquals(moneyMovements.size(), activeSecondAggregated.getMoneyMovementsCount());
+    assertTrue(activeSecondAggregated.getMoneyMovementsList().containsAll(moneyMovements));
     assertEquals(aggregateRequestTimestamp, activeSecondAggregated.getLastUpdateTimestamp());
     assertEquals(aggregateRequestTimestamp, activeSecondAggregated.getAggregateRequestTimestamp());
     assertEquals("payment-1", activeSecondAggregated.getPaymentId());
 
+    moneyMovements = List.of(
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("AAA").setAccountTo("BBB").setAmount(1.22).build(),
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("AAA").setAccountTo("DDD").setAmount(4.44).build(),
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("BBB").setAccountTo("AAA").setAmount(1.22).build(),
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("BBB").setAccountTo("CCC").setAmount(2.55).build(),
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("CCC").setAccountTo("AAA").setAmount(3.33).build(),
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("CCC").setAccountTo("BBB").setAmount(3.75).build()
+    );
+
     assertEquals("merchant-1", minuteAggregated.getMerchantKey().getMerchantId());
     assertEquals(epochMinute, minuteAggregated.getEpochMinute());
-    assertEquals(123.45 + 678.90, minuteAggregated.getTransactionTotalAmount(), 0.0);
-    assertEquals(10 + 20, minuteAggregated.getTransactionCount());
+    assertEquals(moneyMovements.size(), minuteAggregated.getMoneyMovementsCount());
+    assertTrue(minuteAggregated.getMoneyMovementsList().containsAll(moneyMovements));
     assertEquals(aggregateRequestTimestamp, minuteAggregated.getLastUpdateTimestamp());
     assertEquals(aggregateRequestTimestamp, minuteAggregated.getAggregateRequestTimestamp());
     assertEquals("payment-1", minuteAggregated.getPaymentId());
@@ -188,23 +211,31 @@ public class MinuteTest {
 
     testKit.aggregateMinute(aggregateMinuteCommand(epochMinute, aggregateRequestTimestamp));
 
-    response = testKit.secondAggregation(secondAggregationCommand(epochSecond, 543.21, 321, aggregateRequestTimestamp));
+    moneyMovements = List.of(
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("AAA").setAccountTo("BBB").setAmount(6.11).build(),
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("AAA").setAccountTo("DDD").setAmount(3.11).build(),
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("BBB").setAccountTo("AAA").setAmount(1.22).build(),
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("BBB").setAccountTo("CCC").setAmount(4.33).build(),
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("CCC").setAccountTo("BBB").setAmount(5.44).build(),
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("DDD").setAccountTo("BBB").setAmount(6.55).build()
+    );
+    response = testKit.secondAggregation(secondAggregationCommand(epochSecond, moneyMovements, aggregateRequestTimestamp));
 
     minuteAggregated = response.getNextEventOfType(MinuteEntity.MinuteAggregated.class);
     activeSecondAggregated = response.getNextEventOfType(MinuteEntity.ActiveSecondAggregated.class);
 
     assertEquals("merchant-1", activeSecondAggregated.getMerchantKey().getMerchantId());
     assertEquals(epochSecond, activeSecondAggregated.getEpochSecond());
-    assertEquals(543.21, activeSecondAggregated.getTransactionTotalAmount(), 0.0);
-    assertEquals(321, activeSecondAggregated.getTransactionCount());
+    assertEquals(moneyMovements.size(), activeSecondAggregated.getMoneyMovementsCount());
+    assertTrue(activeSecondAggregated.getMoneyMovementsList().containsAll(moneyMovements));
     assertEquals(aggregateRequestTimestamp, activeSecondAggregated.getLastUpdateTimestamp());
     assertEquals(aggregateRequestTimestamp, activeSecondAggregated.getAggregateRequestTimestamp());
     assertEquals("payment-1", activeSecondAggregated.getPaymentId());
 
     assertEquals("merchant-1", minuteAggregated.getMerchantKey().getMerchantId());
     assertEquals(epochMinute, minuteAggregated.getEpochMinute());
-    assertEquals(543.21, minuteAggregated.getTransactionTotalAmount(), 0.0);
-    assertEquals(321, minuteAggregated.getTransactionCount());
+    assertEquals(moneyMovements.size(), minuteAggregated.getMoneyMovementsCount());
+    assertTrue(minuteAggregated.getMoneyMovementsList().containsAll(moneyMovements));
     assertEquals(aggregateRequestTimestamp, minuteAggregated.getLastUpdateTimestamp());
     assertEquals(aggregateRequestTimestamp, minuteAggregated.getAggregateRequestTimestamp());
     assertEquals("payment-1", minuteAggregated.getPaymentId());
@@ -229,14 +260,13 @@ public class MinuteTest {
         .build();
   }
 
-  static MinuteApi.SecondAggregationCommand secondAggregationCommand(long epochSecond, double amount, int count, Timestamp timestamp) {
+  static MinuteApi.SecondAggregationCommand secondAggregationCommand(long epochSecond, Collection<TransactionMerchantKey.MoneyMovement> moneyMovements, Timestamp timestamp) {
     return MinuteApi.SecondAggregationCommand
         .newBuilder()
         .setMerchantId("merchant-1")
         .setEpochMinute(TimeTo.fromEpochSecond(epochSecond).toEpochMinute())
         .setEpochSecond(epochSecond)
-        .setTransactionTotalAmount(amount)
-        .setTransactionCount(count)
+        .addAllMoneyMovements(moneyMovements)
         .setLastUpdateTimestamp(timestamp)
         .setAggregateRequestTimestamp(timestamp)
         .setPaymentId("payment-1")

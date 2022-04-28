@@ -231,7 +231,6 @@ public class Second extends AbstractSecond {
   static List<?> eventsFor(SecondEntity.SecondState state, SecondApi.AggregateSecondCommand command) {
     if (state.getActiveSubSecondsCount() == 0) {
       var timestamp = command.getAggregateRequestTimestamp();
-//    TODO edit SecondAggregated and add map of aggregations
       return List.of(
           SecondEntity.SecondAggregated
               .newBuilder()
