@@ -1,7 +1,7 @@
 
 # Curl commands used with VS Code REST Client extension
 
-@urlPrefix = https://old-boat-2936.us-east1.akkaserverless.app
+@urlPrefix = https://old-boat-2936.us-east1.kalix.app
 @merchantIdRange = 1
 @transactionCount = 1000
 @transactionIdFirst = 1

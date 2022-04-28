@@ -1,6 +1,6 @@
 package io.aggregator.api;
 
-import com.akkaserverless.javasdk.testkit.junit.AkkaServerlessTestKitResource;
+import kalix.javasdk.testkit.junit.kalixTestKitResource;
 import com.google.protobuf.Empty;
 import io.aggregator.Main;
 import io.aggregator.entity.HourEntity;
@@ -22,8 +22,7 @@ public class HourIntegrationTest {
    * The test kit starts both the service container and the Akka Serverless proxy.
    */
   @ClassRule
-  public static final AkkaServerlessTestKitResource testKit =
-    new AkkaServerlessTestKitResource(Main.createAkkaServerless());
+  public static final kalixTestKitResource testKit = new kalixTestKitResource(Main.createkalix());
 
   /**
    * Use the generated gRPC client to call the service through the Akka Serverless proxy.
@@ -38,20 +37,20 @@ public class HourIntegrationTest {
   public void addMinuteOnNonExistingEntity() throws Exception {
     // TODO: set fields in command, and provide assertions to match replies
     // client.addMinute(HourApi.AddMinuteCommand.newBuilder().build())
-    //         .toCompletableFuture().get(5, SECONDS);
+    // .toCompletableFuture().get(5, SECONDS);
   }
 
   @Test
   public void aggregateHourOnNonExistingEntity() throws Exception {
     // TODO: set fields in command, and provide assertions to match replies
     // client.aggregateHour(HourApi.AggregateHourCommand.newBuilder().build())
-    //         .toCompletableFuture().get(5, SECONDS);
+    // .toCompletableFuture().get(5, SECONDS);
   }
 
   @Test
   public void minuteAggregationOnNonExistingEntity() throws Exception {
     // TODO: set fields in command, and provide assertions to match replies
     // client.minuteAggregation(HourApi.MinuteAggregationCommand.newBuilder().build())
-    //         .toCompletableFuture().get(5, SECONDS);
+    // .toCompletableFuture().get(5, SECONDS);
   }
 }

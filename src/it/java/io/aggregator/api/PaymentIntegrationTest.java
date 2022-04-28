@@ -1,6 +1,6 @@
 package io.aggregator.api;
 
-import com.akkaserverless.javasdk.testkit.junit.AkkaServerlessTestKitResource;
+import kalix.javasdk.testkit.junit.kalixTestKitResource;
 import com.google.protobuf.Empty;
 import io.aggregator.Main;
 import io.aggregator.entity.PaymentEntity;
@@ -22,8 +22,7 @@ public class PaymentIntegrationTest {
    * The test kit starts both the service container and the Akka Serverless proxy.
    */
   @ClassRule
-  public static final AkkaServerlessTestKitResource testKit =
-    new AkkaServerlessTestKitResource(Main.createAkkaServerless());
+  public static final kalixTestKitResource testKit = new kalixTestKitResource(Main.createkalix());
 
   /**
    * Use the generated gRPC client to call the service through the Akka Serverless proxy.
@@ -38,13 +37,13 @@ public class PaymentIntegrationTest {
   public void createPaymentOnNonExistingEntity() throws Exception {
     // TODO: set fields in command, and provide assertions to match replies
     // client.createPayment(PaymentApi.CreatePaymentCommand.newBuilder().build())
-    //         .toCompletableFuture().get(5, SECONDS);
+    // .toCompletableFuture().get(5, SECONDS);
   }
 
   @Test
   public void paymentDayAggregationOnNonExistingEntity() throws Exception {
     // TODO: set fields in command, and provide assertions to match replies
     // client.paymentDayAggregation(PaymentApi.PaymentDayAggregationCommand.newBuilder().build())
-    //         .toCompletableFuture().get(5, SECONDS);
+    // .toCompletableFuture().get(5, SECONDS);
   }
 }

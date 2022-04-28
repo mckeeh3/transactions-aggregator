@@ -4,7 +4,7 @@ package io.aggregator.view;
 
 import "google/api/annotations.proto";
 import "google/protobuf/any.proto";
-import "akkaserverless/annotations.proto";
+import "kalix/annotations.proto";
 import "google/protobuf/timestamp.proto";
 import "io/aggregator/entity/merchant_entity.proto";
 import "io/aggregator/view/merchant.proto";
@@ -12,12 +12,12 @@ import "io/aggregator/view/merchant.proto";
 option java_outer_classname = "MerchantsByMerchantIdModel";
 
 service MerchantsByMerchantId {
-  option (akkaserverless.codegen) = {
+  option (kalix.codegen) = {
     view: {}
   };
 
   rpc GetMerchantsByMerchantId(MerchantsByMerchantIdRequest) returns (MerchantsByMerchantIdResponse) {
-    option (akkaserverless.method).view.query = {
+    option (kalix.method).view.query = {
       query: "SELECT * AS merchants"
              "  FROM merchants_by_merchant_id OFFSET :merchant_offset LIMIT :merchant_limit"
              " WHERE merchant_id = :merchant_id"
@@ -28,30 +28,30 @@ service MerchantsByMerchantId {
   }
 
   rpc OnMerchantDayActivated(entity.MerchantDayActivated) returns (Merchant) {
-    option (akkaserverless.method).eventing.in = {
+    option (kalix.method).eventing.in = {
       event_sourced_entity: "merchant"
     };
-    option (akkaserverless.method).view.update = {
+    option (kalix.method).view.update = {
       table: "merchants_by_merchant_id"
       transform_updates: true
     };
   }
 
   rpc OnMerchantPaymentRequested(entity.MerchantPaymentRequested) returns (Merchant) {
-    option (akkaserverless.method).eventing.in = {
+    option (kalix.method).eventing.in = {
       event_sourced_entity: "merchant"
     };
-    option (akkaserverless.method).view.update = {
+    option (kalix.method).view.update = {
       table: "merchants_by_merchant_id"
       transform_updates: true
     };
   }
 
   rpc IgnoreOtherEvents(google.protobuf.Any) returns (Merchant) {
-    option (akkaserverless.method).eventing.in = {
+    option (kalix.method).eventing.in = {
       event_sourced_entity: "merchant"
     };
-    option (akkaserverless.method).view.update = {
+    option (kalix.method).view.update = {
       table: "merchants_by_merchant_id"
       transform_updates: true
     };

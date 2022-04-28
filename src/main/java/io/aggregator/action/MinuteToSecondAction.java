@@ -3,7 +3,7 @@ package io.aggregator.action;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-import com.akkaserverless.javasdk.action.ActionCreationContext;
+import kalix.javasdk.action.ActionCreationContext;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 

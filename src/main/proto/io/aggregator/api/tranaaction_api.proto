@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-import "akkaserverless/annotations.proto";
+import "kalix/annotations.proto";
 import "google/protobuf/empty.proto";
 import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
@@ -10,7 +10,7 @@ package io.aggregator.api;
 option java_outer_classname = "TransactionApi";
 
 service Transaction {
-  option (akkaserverless.codegen) = {
+  option (kalix.codegen) = {
     event_sourced_entity: {
       name: "io.aggregator.entity.Transaction"
       entity_type: "transaction"
@@ -44,10 +44,10 @@ service Transaction {
 }
 
 message CreateTransactionCommand {
-  string transaction_id = 1 [(akkaserverless.field).entity_key = true];
-  string service_code = 2 [(akkaserverless.field).entity_key = true];
-  string account_from = 3 [(akkaserverless.field).entity_key = true];
-  string account_to = 4 [(akkaserverless.field).entity_key = true];
+  string transaction_id = 1 [(kalix.field).entity_key = true];
+  string service_code = 2 [(kalix.field).entity_key = true];
+  string account_from = 3 [(kalix.field).entity_key = true];
+  string account_to = 4 [(kalix.field).entity_key = true];
   double transaction_amount = 5;
   string merchant_id = 6;
   string shop_id = 7;
@@ -55,18 +55,18 @@ message CreateTransactionCommand {
 }
 
 message AddPaymentCommand {
-  string transaction_id = 1 [(akkaserverless.field).entity_key = true];
-  string service_code = 2 [(akkaserverless.field).entity_key = true];
-  string account_from = 3 [(akkaserverless.field).entity_key = true];
-  string account_to = 4 [(akkaserverless.field).entity_key = true];
+  string transaction_id = 1 [(kalix.field).entity_key = true];
+  string service_code = 2 [(kalix.field).entity_key = true];
+  string account_from = 3 [(kalix.field).entity_key = true];
+  string account_to = 4 [(kalix.field).entity_key = true];
   string payment_id = 5;
 }
 
 message GetTransactionRequest {
-  string transaction_id = 1 [(akkaserverless.field).entity_key = true];
-  string service_code = 2 [(akkaserverless.field).entity_key = true];
-  string account_from = 3 [(akkaserverless.field).entity_key = true];
-  string account_to = 4 [(akkaserverless.field).entity_key = true];
+  string transaction_id = 1 [(kalix.field).entity_key = true];
+  string service_code = 2 [(kalix.field).entity_key = true];
+  string account_from = 3 [(kalix.field).entity_key = true];
+  string account_to = 4 [(kalix.field).entity_key = true];
 }
 
 message GetTransactionResponse {
