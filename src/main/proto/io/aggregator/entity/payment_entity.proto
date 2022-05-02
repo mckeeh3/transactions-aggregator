@@ -17,11 +17,10 @@ message PaymentDayAggregationRequested {
 message ActiveDayAggregated {
   MerchantKey merchant_key = 1;
   int64 epoch_day = 2;
-  double transaction_total_amount = 3;
-  int32 transaction_count = 4;
-  google.protobuf.Timestamp last_update_timestamp = 5;
-  google.protobuf.Timestamp aggregate_request_timestamp = 6;
-  string payment_id = 7;
+  repeated MoneyMovement money_movements = 3;
+  google.protobuf.Timestamp last_update_timestamp = 4;
+  google.protobuf.Timestamp aggregate_request_timestamp = 5;
+  string payment_id = 6;
 }
 
 message PaymentRequested {
@@ -33,22 +32,19 @@ message PaymentRequested {
 message PaymentAggregated {
   MerchantKey merchant_key = 1;
   string payment_id = 2;
-  double transaction_total_amount = 3;
-  int32 transaction_count = 4;
-  google.protobuf.Timestamp last_update_timestamp = 5;
-  google.protobuf.Timestamp aggregate_request_timestamp = 6;
+  repeated MoneyMovement money_movements = 3;
+  google.protobuf.Timestamp last_update_timestamp = 4;
+  google.protobuf.Timestamp aggregate_request_timestamp = 5;
 }
 
 message PaymentState {
   MerchantKey merchant_key = 1;
   string payment_id = 2;
-  double transaction_total_amount = 3;
-  int32 transaction_count = 4;
-  google.protobuf.Timestamp last_update_timestamp = 5;
-  google.protobuf.Timestamp aggregate_request_timestamp = 6;
-  repeated Aggregation aggregations = 7;
-  bool paymentRequested = 8;
-  bool paymentAggregated = 9;
+  google.protobuf.Timestamp last_update_timestamp = 3;
+  google.protobuf.Timestamp aggregate_request_timestamp = 4;
+  repeated Aggregation aggregations = 5;
+  bool paymentRequested = 6;
+  bool paymentAggregated = 7;
 }
 
 message Aggregation {
@@ -58,9 +54,8 @@ message Aggregation {
 
 message AggregationDay {
   int64 epoch_day = 1;
-  double transaction_total_amount = 2;
-  int32 transaction_count = 3;
-  google.protobuf.Timestamp last_update_timestamp = 4;
-  google.protobuf.Timestamp aggregate_request_timestamp = 5;
-  bool aggregated = 6;
+  repeated MoneyMovement money_movements = 2;
+  google.protobuf.Timestamp last_update_timestamp = 3;
+  google.protobuf.Timestamp aggregate_request_timestamp = 4;
+  bool aggregated = 5;
 }

@@ -322,7 +322,7 @@ public class Minute extends AbstractMinute {
   }
 
   static MinuteEntity.ActiveSecondAggregated toActiveSecondAggregated(MinuteApi.SecondAggregationCommand command) {
-    var activeSecondAggregated = MinuteEntity.ActiveSecondAggregated
+    return MinuteEntity.ActiveSecondAggregated
         .newBuilder()
         .setMerchantKey(
             TransactionMerchantKey.MerchantKey
@@ -335,7 +335,6 @@ public class Minute extends AbstractMinute {
         .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
         .setPaymentId(command.getPaymentId())
         .build();
-    return activeSecondAggregated;
   }
 
   static MinuteEntity.MinuteAggregated toMinuteAggregated(MinuteApi.SecondAggregationCommand command, List<MinuteEntity.ActiveSecond> activeSeconds) {

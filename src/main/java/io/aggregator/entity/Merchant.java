@@ -83,7 +83,7 @@ public class Merchant extends AbstractMerchant {
   }
 
   private Effect<Empty> handle(MerchantEntity.MerchantState state, MerchantApi.MerchantAggregationRequestCommand command) {
-    log.info("state: {}\nMerchantAggregationRequestCommand: {}", state, command);
+    log.debug("state: {}\nMerchantAggregationRequestCommand: {}", state, command);
     log.info(Thread.currentThread().getName() + " - RECEIVED COMMAND: MerchantAggregationRequestCommand");
 
     var event = eventFor(state, command);

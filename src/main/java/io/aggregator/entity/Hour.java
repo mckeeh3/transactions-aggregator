@@ -3,10 +3,12 @@ package io.aggregator.entity;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.akkaserverless.javasdk.eventsourcedentity.EventSourcedEntityContext;
 import com.google.protobuf.Empty;
 
+import io.aggregator.service.RuleService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -163,11 +165,11 @@ public class Hour extends AbstractHour {
   static HourEntity.HourState handle(HourEntity.HourState state, HourEntity.ActiveMinuteAggregated event) {
     return state.toBuilder()
         .clearAggregateHours()
-        .addAllAggregateHours(updateAggregateMinutes(state, event))
+        .addAllAggregateHours(updateAggregateHours(state, event))
         .build();
   }
 
-  static List<HourEntity.AggregateHour> updateAggregateMinutes(HourEntity.HourState state, HourEntity.ActiveMinuteAggregated event) {
+  static List<HourEntity.AggregateHour> updateAggregateHours(HourEntity.HourState state, HourEntity.ActiveMinuteAggregated event) {
     return state.getAggregateHoursList().stream()
         .map(aggregatedHour -> {
           if (aggregatedHour.getAggregateRequestTimestamp().equals(event.getAggregateRequestTimestamp())) {
@@ -188,8 +190,7 @@ public class Hour extends AbstractHour {
           if (activeMinute.getEpochMinute() == event.getEpochMinute()) {
             return activeMinute
                 .toBuilder()
-                .setTransactionTotalAmount(event.getTransactionTotalAmount())
-                .setTransactionCount(event.getTransactionCount())
+                .addAllMoneyMovements(event.getMoneyMovementsList())
                 .setLastUpdateTimestamp(event.getLastUpdateTimestamp())
                 .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
                 .build();
@@ -231,7 +232,6 @@ public class Hour extends AbstractHour {
   static List<?> eventsFor(HourEntity.HourState state, HourApi.AggregateHourCommand command) {
     if (state.getActiveMinutesCount() == 0) {
       var timestamp = command.getAggregateRequestTimestamp();
-//    TODO edit HourAggregated and add map of aggregations
       return List.of(
           HourEntity.HourAggregated
               .newBuilder()
@@ -241,8 +241,6 @@ public class Hour extends AbstractHour {
                       .setMerchantId(command.getMerchantId())
                       .build())
               .setEpochHour(command.getEpochHour())
-              .setTransactionTotalAmount(0.0)
-              .setTransactionCount(0)
               .setLastUpdateTimestamp(timestamp)
               .setAggregateRequestTimestamp(timestamp)
               .setPaymentId(command.getPaymentId())
@@ -310,8 +308,7 @@ public class Hour extends AbstractHour {
           if (activeMinute.getEpochMinute() == command.getEpochMinute()) {
             return activeMinute
                 .toBuilder()
-                .setTransactionTotalAmount(command.getTransactionTotalAmount())
-                .setTransactionCount(command.getTransactionCount())
+                .addAllMoneyMovements(command.getMoneyMovementsList())
                 .setLastUpdateTimestamp(command.getLastUpdateTimestamp())
                 .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
                 .build();
@@ -323,7 +320,7 @@ public class Hour extends AbstractHour {
   }
 
   static HourEntity.ActiveMinuteAggregated toActiveMinuteAggregated(HourApi.MinuteAggregationCommand command) {
-    var activeMinuteAggregated = HourEntity.ActiveMinuteAggregated
+    return HourEntity.ActiveMinuteAggregated
         .newBuilder()
         .setMerchantKey(
             TransactionMerchantKey.MerchantKey
@@ -331,26 +328,22 @@ public class Hour extends AbstractHour {
                 .setMerchantId(command.getMerchantId())
                 .build())
         .setEpochMinute(command.getEpochMinute())
-        .setTransactionTotalAmount(command.getTransactionTotalAmount())
-        .setTransactionCount(command.getTransactionCount())
+        .addAllMoneyMovements(command.getMoneyMovementsList())
         .setLastUpdateTimestamp(command.getLastUpdateTimestamp())
         .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
         .setPaymentId(command.getPaymentId())
         .build();
-    return activeMinuteAggregated;
   }
 
   static HourEntity.HourAggregated toHourAggregated(HourApi.MinuteAggregationCommand command, List<HourEntity.ActiveMinute> activeMinutes) {
-    var transactionTotalAmount = activeMinutes.stream()
-        .reduce(0.0, (amount, activeMinute) -> amount + activeMinute.getTransactionTotalAmount(), Double::sum);
-
-    var transactionCount = activeMinutes.stream()
-        .reduce(0, (count, activeMinute) -> count + activeMinute.getTransactionCount(), Integer::sum);
-
     var lastUpdateTimestamp = activeMinutes.stream()
-        .map(activeMinute -> activeMinute.getLastUpdateTimestamp())
+        .map(HourEntity.ActiveMinute::getLastUpdateTimestamp)
         .max(TimeTo.comparator())
         .get();
+
+    List<TransactionMerchantKey.MoneyMovement> summarisedMoneyMovements = activeMinutes.stream()
+        .flatMap(activeMinute -> activeMinute.getMoneyMovementsList().stream())
+        .collect(Collectors.toList());
 
     return HourEntity.HourAggregated
         .newBuilder()
@@ -360,8 +353,7 @@ public class Hour extends AbstractHour {
                 .setMerchantId(command.getMerchantId())
                 .build())
         .setEpochHour(command.getEpochHour())
-        .setTransactionTotalAmount(transactionTotalAmount)
-        .setTransactionCount(transactionCount)
+        .addAllMoneyMovements(RuleService.mergeMoneyMovements(summarisedMoneyMovements))
         .setLastUpdateTimestamp(lastUpdateTimestamp)
         .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
         .setPaymentId(command.getPaymentId())

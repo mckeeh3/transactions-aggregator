@@ -10,6 +10,9 @@ import org.junit.Test;
 import io.aggregator.TimeTo;
 import io.aggregator.api.DayApi;
 
+import java.util.Collection;
+import java.util.List;
+
 // This class was initially generated based on the .proto definition by Akka Serverless tooling.
 //
 // As long as this file exists it will not be overwritten: you can maintain it yourself,
@@ -129,8 +132,8 @@ public class DayTest {
     assertEquals(now, dayAggregated.getLastUpdateTimestamp());
     assertEquals(now, dayAggregated.getAggregateRequestTimestamp());
     assertEquals(now, dayAggregated.getAggregationCompletedTimestamp());
-    assertEquals(0, dayAggregated.getTransactionCount());
-    assertEquals(0.0, dayAggregated.getTransactionTotalAmount(), 0.0);
+    assertEquals(0, dayAggregated.getMoneyMovementsCount());
+    assertEquals("payment-1", dayAggregated.getPaymentId());
   }
 
   @Test
@@ -147,35 +150,55 @@ public class DayTest {
 
     testKit.aggregateDay(aggregateDayCommand(epochDay, aggregateRequestTimestamp));
 
-    var response = testKit.hourAggregation(hourAggregationCommand(epochHour, 123.45, 10, aggregateRequestTimestamp));
+    Collection<TransactionMerchantKey.MoneyMovement> moneyMovements = List.of(
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("AAA").setAccountTo("BBB").setAmount(1.22).build(),
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("CCC").setAccountTo("BBB").setAmount(2.20).build(),
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("BBB").setAccountTo("AAA").setAmount(1.22).build()
+    );
+    var response = testKit.hourAggregation(hourAggregationCommand(epochHour, moneyMovements, aggregateRequestTimestamp));
 
     var activeHourAggregated = response.getNextEventOfType(DayEntity.ActiveHourAggregated.class);
 
     assertEquals("merchant-1", activeHourAggregated.getMerchantKey().getMerchantId());
     assertEquals(epochHour, activeHourAggregated.getEpochHour());
-    assertEquals(123.45, activeHourAggregated.getTransactionTotalAmount(), 0.0);
-    assertEquals(10, activeHourAggregated.getTransactionCount());
+    assertEquals(moneyMovements.size(), activeHourAggregated.getMoneyMovementsCount());
+    assertTrue(activeHourAggregated.getMoneyMovementsList().containsAll(moneyMovements));
     assertEquals(aggregateRequestTimestamp, activeHourAggregated.getLastUpdateTimestamp());
     assertEquals(aggregateRequestTimestamp, activeHourAggregated.getAggregateRequestTimestamp());
     assertEquals("payment-1", activeHourAggregated.getPaymentId());
 
-    response = testKit.hourAggregation(hourAggregationCommand(nextEpochHour, 678.90, 20, aggregateRequestTimestamp));
+    moneyMovements = List.of(
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("CCC").setAccountTo("AAA").setAmount(3.33).build(),
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("AAA").setAccountTo("DDD").setAmount(4.44).build(),
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("CCC").setAccountTo("BBB").setAmount(1.55).build(),
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("BBB").setAccountTo("CCC").setAmount(2.55).build()
+    );
+    response = testKit.hourAggregation(hourAggregationCommand(nextEpochHour, moneyMovements, aggregateRequestTimestamp));
 
     var dayAggregated = response.getNextEventOfType(DayEntity.DayAggregated.class);
     activeHourAggregated = response.getNextEventOfType(DayEntity.ActiveHourAggregated.class);
 
     assertEquals("merchant-1", activeHourAggregated.getMerchantKey().getMerchantId());
     assertEquals(nextEpochHour, activeHourAggregated.getEpochHour());
-    assertEquals(678.90, activeHourAggregated.getTransactionTotalAmount(), 0.0);
-    assertEquals(20, activeHourAggregated.getTransactionCount());
+    assertEquals(moneyMovements.size(), activeHourAggregated.getMoneyMovementsCount());
+    assertTrue(activeHourAggregated.getMoneyMovementsList().containsAll(moneyMovements));
     assertEquals(aggregateRequestTimestamp, activeHourAggregated.getLastUpdateTimestamp());
     assertEquals(aggregateRequestTimestamp, activeHourAggregated.getAggregateRequestTimestamp());
     assertEquals("payment-1", activeHourAggregated.getPaymentId());
 
+    moneyMovements = List.of(
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("AAA").setAccountTo("BBB").setAmount(1.22).build(),
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("AAA").setAccountTo("DDD").setAmount(4.44).build(),
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("BBB").setAccountTo("AAA").setAmount(1.22).build(),
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("BBB").setAccountTo("CCC").setAmount(2.55).build(),
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("CCC").setAccountTo("AAA").setAmount(3.33).build(),
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("CCC").setAccountTo("BBB").setAmount(3.75).build()
+    );
+
     assertEquals("merchant-1", dayAggregated.getMerchantKey().getMerchantId());
     assertEquals(epochDay, dayAggregated.getEpochDay());
-    assertEquals(123.45 + 678.90, dayAggregated.getTransactionTotalAmount(), 0.0);
-    assertEquals(10 + 20, dayAggregated.getTransactionCount());
+    assertEquals(moneyMovements.size(), dayAggregated.getMoneyMovementsCount());
+    assertTrue(dayAggregated.getMoneyMovementsList().containsAll(moneyMovements));
     assertEquals(aggregateRequestTimestamp, dayAggregated.getLastUpdateTimestamp());
     assertEquals(aggregateRequestTimestamp, dayAggregated.getAggregateRequestTimestamp());
     assertEquals("payment-1", dayAggregated.getPaymentId());
@@ -190,23 +213,31 @@ public class DayTest {
 
     testKit.aggregateDay(aggregateDayCommand(epochDay, aggregateRequestTimestamp));
 
-    response = testKit.hourAggregation(hourAggregationCommand(epochHour, 543.21, 321, aggregateRequestTimestamp));
+    moneyMovements = List.of(
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("AAA").setAccountTo("BBB").setAmount(6.11).build(),
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("AAA").setAccountTo("DDD").setAmount(3.11).build(),
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("BBB").setAccountTo("AAA").setAmount(1.22).build(),
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("BBB").setAccountTo("CCC").setAmount(4.33).build(),
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("CCC").setAccountTo("BBB").setAmount(5.44).build(),
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("DDD").setAccountTo("BBB").setAmount(6.55).build()
+    );
+    response = testKit.hourAggregation(hourAggregationCommand(epochHour, moneyMovements, aggregateRequestTimestamp));
 
     dayAggregated = response.getNextEventOfType(DayEntity.DayAggregated.class);
     activeHourAggregated = response.getNextEventOfType(DayEntity.ActiveHourAggregated.class);
 
     assertEquals("merchant-1", activeHourAggregated.getMerchantKey().getMerchantId());
     assertEquals(epochHour, activeHourAggregated.getEpochHour());
-    assertEquals(543.21, activeHourAggregated.getTransactionTotalAmount(), 0.0);
-    assertEquals(321, activeHourAggregated.getTransactionCount());
+    assertEquals(moneyMovements.size(), activeHourAggregated.getMoneyMovementsCount());
+    assertTrue(activeHourAggregated.getMoneyMovementsList().containsAll(moneyMovements));
     assertEquals(aggregateRequestTimestamp, activeHourAggregated.getLastUpdateTimestamp());
     assertEquals(aggregateRequestTimestamp, activeHourAggregated.getAggregateRequestTimestamp());
     assertEquals("payment-1", activeHourAggregated.getPaymentId());
 
     assertEquals("merchant-1", dayAggregated.getMerchantKey().getMerchantId());
     assertEquals(epochDay, dayAggregated.getEpochDay());
-    assertEquals(543.21, dayAggregated.getTransactionTotalAmount(), 0.0);
-    assertEquals(321, dayAggregated.getTransactionCount());
+    assertEquals(moneyMovements.size(), dayAggregated.getMoneyMovementsCount());
+    assertTrue(dayAggregated.getMoneyMovementsList().containsAll(moneyMovements));
     assertEquals(aggregateRequestTimestamp, dayAggregated.getLastUpdateTimestamp());
     assertEquals(aggregateRequestTimestamp, dayAggregated.getAggregateRequestTimestamp());
     assertEquals("payment-1", dayAggregated.getPaymentId());
@@ -227,12 +258,25 @@ public class DayTest {
     testKit.addHour(activateHourCommand(epochHour));
     testKit.aggregateDay(aggregateDayCommand(epochDay, aggregateRequestTimestamp2));
 
-    var response = testKit.hourAggregation(hourAggregationCommand(epochHour, 123.45, 10, aggregateRequestTimestamp1));
+    Collection<TransactionMerchantKey.MoneyMovement> moneyMovements = List.of(
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("AAA").setAccountTo("BBB").setAmount(1.22).build(),
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("CCC").setAccountTo("BBB").setAmount(2.20).build(),
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("BBB").setAccountTo("AAA").setAmount(1.22).build()
+    );
+    var response = testKit.hourAggregation(hourAggregationCommand(epochHour, moneyMovements, aggregateRequestTimestamp1));
 
     response.getNextEventOfType(DayEntity.DayAggregated.class);
     response.getNextEventOfType(DayEntity.ActiveHourAggregated.class);
 
-    response = testKit.hourAggregation(hourAggregationCommand(epochHour, 678.90, 20, aggregateRequestTimestamp2));
+    moneyMovements = List.of(
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("AAA").setAccountTo("BBB").setAmount(1.22).build(),
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("AAA").setAccountTo("DDD").setAmount(4.44).build(),
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("BBB").setAccountTo("AAA").setAmount(1.22).build(),
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("BBB").setAccountTo("CCC").setAmount(2.55).build(),
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("CCC").setAccountTo("AAA").setAmount(3.33).build(),
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("CCC").setAccountTo("BBB").setAmount(3.75).build()
+    );
+    response = testKit.hourAggregation(hourAggregationCommand(epochHour, moneyMovements, aggregateRequestTimestamp2));
 
     response.getNextEventOfType(DayEntity.DayAggregated.class);
     response.getNextEventOfType(DayEntity.ActiveHourAggregated.class);
@@ -257,14 +301,13 @@ public class DayTest {
         .build();
   }
 
-  static DayApi.HourAggregationCommand hourAggregationCommand(long epochHour, double amount, int count, Timestamp timestamp) {
+  static DayApi.HourAggregationCommand hourAggregationCommand(long epochHour, Collection<TransactionMerchantKey.MoneyMovement> moneyMovements, Timestamp timestamp) {
     return DayApi.HourAggregationCommand
         .newBuilder()
         .setMerchantId("merchant-1")
         .setEpochDay(TimeTo.fromEpochHour(epochHour).toEpochDay())
         .setEpochHour(epochHour)
-        .setTransactionTotalAmount(amount)
-        .setTransactionCount(count)
+        .addAllMoneyMovements(moneyMovements)
         .setLastUpdateTimestamp(timestamp)
         .setAggregateRequestTimestamp(timestamp)
         .setPaymentId("payment-1")

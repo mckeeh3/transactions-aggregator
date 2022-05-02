@@ -85,7 +85,7 @@ public class RuleService {
         .build();
   }
 
-  private static BiFunction<TransactionMerchantKey.MoneyMovement, TransactionMerchantKey.MoneyMovement, TransactionMerchantKey.MoneyMovement> mergeFunction = (moneyMovement1, moneyMovement2) -> TransactionMerchantKey.MoneyMovement.newBuilder()
+  private static final BiFunction<TransactionMerchantKey.MoneyMovement, TransactionMerchantKey.MoneyMovement, TransactionMerchantKey.MoneyMovement> mergeFunction = (moneyMovement1, moneyMovement2) -> TransactionMerchantKey.MoneyMovement.newBuilder()
       .setAccountFrom(moneyMovement1.getAccountFrom())
       .setAccountTo(moneyMovement1.getAccountTo())
       .setAmount(moneyMovement1.getAmount() + moneyMovement2.getAmount())

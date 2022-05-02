@@ -3,10 +3,12 @@ package io.aggregator.entity;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.akkaserverless.javasdk.eventsourcedentity.EventSourcedEntityContext;
 import com.google.protobuf.Empty;
 
+import io.aggregator.service.RuleService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -175,7 +177,7 @@ public class Day extends AbstractDay {
           if (aggregatedDay.getAggregateRequestTimestamp().equals(event.getAggregateRequestTimestamp())) {
             return aggregatedDay.toBuilder()
                 .clearActiveHours()
-                .addAllActiveHours(updateActiveSecond(event, aggregatedDay))
+                .addAllActiveHours(updateActiveHours(event, aggregatedDay))
                 .build();
           } else {
             return aggregatedDay;
@@ -184,14 +186,13 @@ public class Day extends AbstractDay {
         .toList();
   }
 
-  static List<DayEntity.ActiveHour> updateActiveSecond(DayEntity.ActiveHourAggregated event, DayEntity.AggregateDay aggregateDay) {
+  static List<DayEntity.ActiveHour> updateActiveHours(DayEntity.ActiveHourAggregated event, DayEntity.AggregateDay aggregateDay) {
     return aggregateDay.getActiveHoursList().stream()
         .map(activeHour -> {
           if (activeHour.getEpochHour() == event.getEpochHour()) {
             return activeHour
                 .toBuilder()
-                .setTransactionTotalAmount(event.getTransactionTotalAmount())
-                .setTransactionCount(event.getTransactionCount())
+                .addAllMoneyMovements(event.getMoneyMovementsList())
                 .setLastUpdateTimestamp(event.getLastUpdateTimestamp())
                 .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
                 .build();
@@ -233,7 +234,6 @@ public class Day extends AbstractDay {
   static List<?> eventsFor(DayEntity.DayState state, DayApi.AggregateDayCommand command) {
     if (state.getActiveHoursCount() == 0) {
       var timestamp = command.getAggregateRequestTimestamp();
-//    TODO edit DayAggregated and add map of aggregations
       return List.of(
           DayEntity.DayAggregated
               .newBuilder()
@@ -243,8 +243,6 @@ public class Day extends AbstractDay {
                       .setMerchantId(command.getMerchantId())
                       .build())
               .setEpochDay(command.getEpochDay())
-              .setTransactionTotalAmount(0.0)
-              .setTransactionCount(0)
               .setLastUpdateTimestamp(timestamp)
               .setAggregateRequestTimestamp(timestamp)
               .setAggregationCompletedTimestamp(timestamp)
@@ -314,8 +312,7 @@ public class Day extends AbstractDay {
           if (activeHour.getEpochHour() == command.getEpochHour()) {
             return activeHour
                 .toBuilder()
-                .setTransactionTotalAmount(command.getTransactionTotalAmount())
-                .setTransactionCount(command.getTransactionCount())
+                .addAllMoneyMovements(command.getMoneyMovementsList())
                 .setLastUpdateTimestamp(command.getLastUpdateTimestamp())
                 .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
                 .build();
@@ -335,8 +332,7 @@ public class Day extends AbstractDay {
                 .setMerchantId(command.getMerchantId())
                 .build())
         .setEpochHour(command.getEpochHour())
-        .setTransactionTotalAmount(command.getTransactionTotalAmount())
-        .setTransactionCount(command.getTransactionCount())
+        .addAllMoneyMovements(command.getMoneyMovementsList())
         .setLastUpdateTimestamp(command.getLastUpdateTimestamp())
         .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
         .setPaymentId(command.getPaymentId())
@@ -344,16 +340,14 @@ public class Day extends AbstractDay {
   }
 
   static DayEntity.DayAggregated toDayAggregated(DayEntity.DayState state, HourAggregationCommand command, List<ActiveHour> activeHours) {
-    var transactionTotalAmount = activeHours.stream()
-        .reduce(0.0, (amount, activeHour) -> amount + activeHour.getTransactionTotalAmount(), Double::sum);
-
-    var transactionCount = activeHours.stream()
-        .reduce(0, (count, activeHour) -> count + activeHour.getTransactionCount(), Integer::sum);
-
     var lastUpdateTimestamp = activeHours.stream()
         .map(ActiveHour::getLastUpdateTimestamp)
         .max(TimeTo.comparator())
         .get();
+
+    List<TransactionMerchantKey.MoneyMovement> summarisedMoneyMovements = activeHours.stream()
+        .flatMap(activeHour -> activeHour.getMoneyMovementsList().stream())
+        .collect(Collectors.toList());
 
     return DayEntity.DayAggregated
         .newBuilder()
@@ -363,8 +357,7 @@ public class Day extends AbstractDay {
                 .setMerchantId(command.getMerchantId())
                 .build())
         .setEpochDay(state.getEpochDay())
-        .setTransactionTotalAmount(transactionTotalAmount)
-        .setTransactionCount(transactionCount)
+        .addAllMoneyMovements(RuleService.mergeMoneyMovements(summarisedMoneyMovements))
         .setLastUpdateTimestamp(lastUpdateTimestamp)
         .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
         .setAggregationCompletedTimestamp(TimeTo.now())

@@ -1,12 +1,15 @@
 package io.aggregator.entity;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.akkaserverless.javasdk.eventsourcedentity.EventSourcedEntityContext;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Timestamp;
 
+import io.aggregator.service.RuleService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +45,11 @@ public class Payment extends AbstractPayment {
 
   @Override
   public Effect<Empty> dayAggregation(PaymentEntity.PaymentState state, PaymentApi.DayAggregationCommand command) {
+    return handle(state, command);
+  }
+
+  @Override
+  public Effect<PaymentApi.PaymentStatusResponse> paymentStatus(PaymentEntity.PaymentState state, PaymentApi.PaymentStatusCommand command) {
     return handle(state, command);
   }
 
@@ -89,6 +97,21 @@ public class Payment extends AbstractPayment {
         .thenReply(newState -> Empty.getDefaultInstance());
   }
 
+  private Effect<PaymentApi.PaymentStatusResponse> handle(PaymentEntity.PaymentState state, PaymentApi.PaymentStatusCommand command) {
+    log.info("state: {}\nPaymentStatusCommand: {}", state, command);
+
+    return effects()
+        .reply(PaymentApi.PaymentStatusResponse
+            .newBuilder()
+            .setPaymentId(state.getPaymentId())
+            .setMerchantId(state.getMerchantKey().getMerchantId())
+            .setLastUpdateTimestamp(state.getLastUpdateTimestamp())
+            .setAggregateRequestTimestamp(state.getAggregateRequestTimestamp())
+            .addAllMoneyMovements(currentMoneyMovements(state))
+            .setPaymentAggregated(state.getPaymentAggregated())
+            .build());
+  }
+
   static PaymentEntity.PaymentState handle(PaymentEntity.PaymentState state, PaymentEntity.ActiveDayAggregated event) {
     log.info(Thread.currentThread().getName() + " - RECEIVED EVENT: ActiveDayAggregated");
 
@@ -131,8 +154,7 @@ public class Payment extends AbstractPayment {
   static PaymentEntity.AggregationDay updateAggregationDay(PaymentEntity.ActiveDayAggregated event, PaymentEntity.AggregationDay aggDay) {
     if (aggDay.getEpochDay() == event.getEpochDay() && aggDay.getAggregateRequestTimestamp().equals(event.getAggregateRequestTimestamp())) {
       return aggDay.toBuilder()
-          .setTransactionTotalAmount(event.getTransactionTotalAmount())
-          .setTransactionCount(event.getTransactionCount())
+          .addAllMoneyMovements(event.getMoneyMovementsList())
           .setLastUpdateTimestamp(event.getLastUpdateTimestamp())
           .setAggregated(true)
           .build();
@@ -223,8 +245,6 @@ public class Payment extends AbstractPayment {
     log.debug("state: {}\nPaymentAggregated: {}", state, event);
 
     return state.toBuilder()
-        .setTransactionTotalAmount(event.getTransactionTotalAmount())
-        .setTransactionCount(event.getTransactionCount())
         .setLastUpdateTimestamp(event.getLastUpdateTimestamp())
         .setPaymentAggregated(true)
         .build();
@@ -293,25 +313,20 @@ public class Payment extends AbstractPayment {
 
   static PaymentEntity.PaymentAggregated updatePaymentAggregated(PaymentEntity.PaymentAggregated paymentAggregated, PaymentApi.DayAggregationCommand command) {
     return paymentAggregated.toBuilder()
-        .setTransactionTotalAmount(paymentAggregated.getTransactionTotalAmount() + command.getTransactionTotalAmount())
-        .setTransactionCount(paymentAggregated.getTransactionCount() + command.getTransactionCount())
+        .clearMoneyMovements()
+        .addAllMoneyMovements(RuleService.mergeMoneyMovements(Stream.concat(
+            paymentAggregated.getMoneyMovementsList().stream(), command.getMoneyMovementsList().stream())
+            .collect(Collectors.toList())
+        ))
         .setLastUpdateTimestamp(TimeTo.max(paymentAggregated.getLastUpdateTimestamp(), command.getLastUpdateTimestamp()))
         .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
         .build();
   }
 
   static PaymentEntity.PaymentAggregated toPaymentAggregated(PaymentEntity.PaymentState state, Timestamp aggregateRequestTimestamp) {
-    var transactionTotalAmount = state.getAggregationsList().stream()
-        .flatMap(aggregation -> aggregation.getAggregationDaysList().stream())
-        .mapToDouble(aggregationDay -> aggregationDay.getTransactionTotalAmount())
-        .sum();
-    var transactionCount = state.getAggregationsList().stream()
-        .flatMap(aggregation -> aggregation.getAggregationDaysList().stream())
-        .mapToInt(aggregationDay -> aggregationDay.getTransactionCount())
-        .sum();
     var lastUpdateTimestamp = state.getAggregationsList().stream()
         .flatMap(aggregation -> aggregation.getAggregationDaysList().stream())
-        .map(aggregationDay -> aggregationDay.getLastUpdateTimestamp())
+        .map(PaymentEntity.AggregationDay::getLastUpdateTimestamp)
         .max(TimeTo.comparator())
         .get();
 
@@ -323,13 +338,19 @@ public class Payment extends AbstractPayment {
                 .setMerchantId(state.getMerchantKey().getMerchantId())
                 .build())
         .setPaymentId(state.getPaymentId())
-        .setTransactionTotalAmount(transactionTotalAmount)
-        .setTransactionCount(transactionCount)
+        .addAllMoneyMovements(currentMoneyMovements(state))
         .setLastUpdateTimestamp(lastUpdateTimestamp)
         .setAggregateRequestTimestamp(aggregateRequestTimestamp)
         .build();
   }
 
+  static Collection<TransactionMerchantKey.MoneyMovement> currentMoneyMovements(PaymentEntity.PaymentState state) {
+    return RuleService.mergeMoneyMovements(state.getAggregationsList().stream()
+        .flatMap(aggregation -> aggregation.getAggregationDaysList().stream())
+        .flatMap(aggregationDay -> aggregationDay.getMoneyMovementsList().stream())
+        .collect(Collectors.toList())
+    );
+  }
   static List<PaymentEntity.PaymentDayAggregationRequested> toPaymentDayAggregationRequestedList(
       PaymentEntity.PaymentState state, Timestamp aggregateRequestTimestamp, List<Long> epochDays, TransactionMerchantKey.MerchantKey merchantKey, String paymentId) {
     var aggregationAlreadyRequested = state.getAggregationsList().stream()
@@ -339,6 +360,7 @@ public class Payment extends AbstractPayment {
       return List.of();
     }
 
+    // TODO unreachable?
     var aggregation = state.getAggregationsList().stream()
         .filter(agg -> agg.getAggregateRequestTimestamp().equals(aggregateRequestTimestamp))
         .findFirst()
@@ -356,10 +378,10 @@ public class Payment extends AbstractPayment {
                 .build());
 
     return aggregation.getAggregationDaysList().stream()
-        .map(activeDay -> PaymentEntity.PaymentDayAggregationRequested
+        .map(aggregationDay -> PaymentEntity.PaymentDayAggregationRequested
             .newBuilder()
             .setMerchantKey(merchantKey)
-            .setEpochDay(activeDay.getEpochDay())
+            .setEpochDay(aggregationDay.getEpochDay())
             .setPaymentId(paymentId)
             .setAggregateRequestTimestamp(aggregateRequestTimestamp)
             .build())
@@ -390,8 +412,7 @@ public class Payment extends AbstractPayment {
                 .build())
         .setPaymentId(command.getPaymentId())
         .setEpochDay(command.getEpochDay())
-        .setTransactionTotalAmount(command.getTransactionTotalAmount())
-        .setTransactionCount(command.getTransactionCount())
+        .addAllMoneyMovements(command.getMoneyMovementsList())
         .setLastUpdateTimestamp(command.getLastUpdateTimestamp())
         .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
         .build();

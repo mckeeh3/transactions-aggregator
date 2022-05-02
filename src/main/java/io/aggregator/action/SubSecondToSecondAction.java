@@ -46,6 +46,7 @@ public class SubSecondToSecondAction extends AbstractSubSecondToSecondAction {
             .setMerchantId(event.getMerchantKey().getMerchantId())
             .setEpochSecond(TimeTo.fromEpochSubSecond(event.getEpochSubSecond()).toEpochSecond())
             .setEpochSubSecond(event.getEpochSubSecond())
+            .addAllMoneyMovements(event.getMoneyMovementsList())
             .setLastUpdateTimestamp(event.getLastUpdateTimestamp())
             .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
             .setPaymentId(event.getPaymentId())
