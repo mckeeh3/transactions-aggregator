@@ -73,7 +73,7 @@ public class Day extends AbstractDay {
   }
 
   private Effect<Empty> handle(DayEntity.DayState state, DayApi.ActivateHourCommand command) {
-    log.info("state: {}\nActivateHourCommand: {}", state, command);
+    log.debug("state: {}\nActivateHourCommand: {}", state, command);
 
     return effects()
         .emitEvents(eventsFor(state, command))
@@ -81,7 +81,7 @@ public class Day extends AbstractDay {
   }
 
   private Effect<Empty> handle(DayEntity.DayState state, DayApi.AggregateDayCommand command) {
-    log.info("state: {}\nAggregateDayCommand: {}", state, command);
+    log.debug("state: {}\nAggregateDayCommand: {}", state, command);
 
     return effects()
         .emitEvents(eventsFor(state, command))
@@ -89,7 +89,7 @@ public class Day extends AbstractDay {
   }
 
   private Effect<Empty> handle(DayEntity.DayState state, DayApi.HourAggregationCommand command) {
-    log.info("state: {}\nHourAggregationCommand: {}", state, command);
+    log.debug("state: {}\nHourAggregationCommand: {}", state, command);
 
     return effects()
         .emitEvents(eventsFor(state, command))

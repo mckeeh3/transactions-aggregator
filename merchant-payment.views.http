@@ -1,7 +1,7 @@
 
 # Curl commands used with VS Code REST Client extension
 
-@urlPrefix = https://old-boat-2936.us-east1.kalix.app
+@urlPrefix = https://sweet-scene-6700.eu-central-1.kalix.app
 @merchantId = merchant-1
 @fromDate = 2022-01-01T00:00:00.000-05:00
 @toDate = 2023-01-01T00:00:00.000-05:00
@@ -15,3 +15,8 @@ curl -XGET -H "Content-Type: application/json"
 
 curl -XGET -H "Content-Type: application/json"
   '{{urlPrefix}}/merchant-payments-by-merchant-by-date?merchant_id={{merchantId}}&from_date={{fromDate}}&to_date={{toDate}}'
+
+### io.aggregator.view.MerchantPaymentsAll.GetMerchantPaymentsAll
+
+GET {{urlPrefix}}/merchant-payments-all HTTP/1.1
+Content-Type: application/json

@@ -19,10 +19,11 @@ service MerchantPaymentsByMerchantByDate {
   rpc GetMerchantPaymentsByMerchantByDate(MerchantPaymentsByMerchantByDateRequest) returns (MerchantPaymentsByMerchantByDateResponse) {
     option (kalix.method).view.query = {
       query: "SELECT * AS merchant_payments"
-             "  FROM merchant_payments_by_merchant_by_date"
-             " WHERE payment_timestamp.seconds >= :`from_date.seconds`"
-             "   AND payment_timestamp.seconds < :`to_date.seconds`"
+             "  FROM merchant_payments_by_merchant_by_date_1"
+             " WHERE payment_timestamp >= :from_date"
+             "   AND payment_timestamp < :to_date"
              "   AND merchant_id = :merchant_id"
+             " ORDER BY payment_timestamp DESC"
     };
     option (google.api.http) = {
       get: "/merchant-payments-by-merchant-by-date"
@@ -34,7 +35,7 @@ service MerchantPaymentsByMerchantByDate {
       event_sourced_entity: "payment"
     };
     option (kalix.method).view.update = {
-      table: "merchant_payments_by_merchant_by_date"
+      table: "merchant_payments_by_merchant_by_date_1"
       transform_updates: true
     };
   }
@@ -44,7 +45,7 @@ service MerchantPaymentsByMerchantByDate {
       event_sourced_entity: "payment"
     };
     option (kalix.method).view.update = {
-      table: "merchant_payments_by_merchant_by_date"
+      table: "merchant_payments_by_merchant_by_date_1"
       transform_updates: true
     };
   }

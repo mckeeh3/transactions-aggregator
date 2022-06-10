@@ -46,6 +46,11 @@ public class Payment extends AbstractPayment {
   }
 
   @Override
+  public Effect<PaymentApi.GetPaymentResponse> getPayment(PaymentEntity.PaymentState state, PaymentApi.GetPaymentRequest request) {
+    return handle(state, request);
+  }
+
+  @Override
   public PaymentEntity.PaymentState activeDayAggregated(PaymentEntity.PaymentState state, PaymentEntity.ActiveDayAggregated event) {
     return handle(state, event);
   }
@@ -89,6 +94,14 @@ public class Payment extends AbstractPayment {
         .thenReply(newState -> Empty.getDefaultInstance());
   }
 
+  private Effect<PaymentApi.GetPaymentResponse> handle(PaymentEntity.PaymentState state, PaymentApi.GetPaymentRequest request) {
+    return effects().reply(
+        PaymentApi.GetPaymentResponse
+            .newBuilder()
+            .setPaymentState(state)
+            .build());
+  }
+
   static PaymentEntity.PaymentState handle(PaymentEntity.PaymentState state, PaymentEntity.ActiveDayAggregated event) {
     var aggregation = state.getAggregationsList().stream()
         .filter(agg -> agg.getAggregateRequestTimestamp().equals(event.getAggregateRequestTimestamp()))
@@ -107,9 +120,37 @@ public class Payment extends AbstractPayment {
                     .map(agg -> updateAggregation(event, agg))
                     .toList())
             .build();
+        // return updateState(state, event);
       }
     }
     return state; // TODO: handle error
+  }
+
+  static PaymentEntity.PaymentState updateState(PaymentEntity.PaymentState state, PaymentEntity.ActiveDayAggregated event) {
+    var updatedState = updateAggregation(state, event);
+    var allAggregationDays = updatedState.getAggregationsList().stream()
+        .flatMap(aggregation -> aggregation.getAggregationDaysList().stream())
+        .toList();
+    var transactionCount = allAggregationDays.stream()
+        .mapToInt(aggregationDay -> aggregationDay.getTransactionCount())
+        .sum();
+    var totalAmount = allAggregationDays.stream()
+        .mapToDouble(aggregationDay -> aggregationDay.getTransactionTotalAmount())
+        .sum();
+    return updatedState.toBuilder()
+        .setTransactionCount(transactionCount)
+        .setTransactionTotalAmount(totalAmount)
+        .build();
+  }
+
+  static PaymentEntity.PaymentState updateAggregation(PaymentEntity.PaymentState state, PaymentEntity.ActiveDayAggregated event) {
+    return state.toBuilder()
+        .clearAggregations()
+        .addAllAggregations(
+            state.getAggregationsList().stream()
+                .map(agg -> updateAggregation(event, agg))
+                .toList())
+        .build();
   }
 
   static PaymentEntity.Aggregation updateAggregation(PaymentEntity.ActiveDayAggregated event, PaymentEntity.Aggregation aggregation) {
@@ -216,6 +257,8 @@ public class Payment extends AbstractPayment {
     log.info("state: {}\nPaymentAggregated: {}", state, event);
 
     return state.toBuilder()
+        .setMerchantKey(event.getMerchantKey())
+        .setPaymentId(event.getPaymentId())
         .setTransactionTotalAmount(event.getTransactionTotalAmount())
         .setTransactionCount(event.getTransactionCount())
         .setLastUpdateTimestamp(event.getLastUpdateTimestamp())
@@ -256,6 +299,8 @@ public class Payment extends AbstractPayment {
   static List<?> eventsFor(PaymentEntity.PaymentState state, PaymentApi.PaymentRequestCommand command) {
     if (state.getPaymentRequested()) {
       return List.of();
+      // } else if (state.getPaymentId().isBlank()) {
+      // return List.of(aggregateEmptyPayment(state, command));
     }
 
     var allAggregated = state.getAggregationsList().stream()
@@ -293,6 +338,14 @@ public class Payment extends AbstractPayment {
         .build();
   }
 
+  static PaymentEntity.PaymentAggregated aggregateEmptyPayment(PaymentEntity.PaymentState state, PaymentApi.PaymentRequestCommand command) {
+    return PaymentEntity.PaymentAggregated
+        .newBuilder()
+        .setMerchantKey(toMerchantKey(command))
+        .setPaymentId(command.getPaymentId())
+        .build();
+  }
+
   static PaymentEntity.PaymentAggregated toPaymentAggregated(PaymentEntity.PaymentState state, Timestamp aggregateRequestTimestamp) {
     var transactionTotalAmount = state.getAggregationsList().stream()
         .flatMap(aggregation -> aggregation.getAggregationDaysList().stream())
@@ -306,7 +359,7 @@ public class Payment extends AbstractPayment {
         .flatMap(aggregation -> aggregation.getAggregationDaysList().stream())
         .map(aggregationDay -> aggregationDay.getLastUpdateTimestamp())
         .max(TimeTo.comparator())
-        .get();
+        .orElse(TimeTo.zero());
 
     return PaymentEntity.PaymentAggregated
         .newBuilder()

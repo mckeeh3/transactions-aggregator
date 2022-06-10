@@ -1,11 +1,11 @@
 
 # Curl commands used with VS Code REST Client extension
 
-@urlPrefix = https://old-boat-2936.us-east1.kalix.app
+@urlPrefix = https://sweet-scene-6700.eu-central-1.kalix.app
 @merchantIdRange = 1
-@transactionCount = 1000
+@transactionCount = 1
 @transactionIdFirst = 1
-@transactionIdLast = 2000
+@transactionIdLast = 2
 @transactionIntervalMs = 5
 @day = 2022-03-10T01:05:00.000Z
 @merchantId = merchant-1

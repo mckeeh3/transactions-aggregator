@@ -4,6 +4,7 @@ import "kalix/annotations.proto";
 import "google/protobuf/empty.proto";
 import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
+import "io/aggregator/entity/merchant_entity.proto";
 
 package io.aggregator.api;
 
@@ -43,6 +44,13 @@ service Merchant {
       body: "*"
     };
   }
+
+  rpc GetMerchant(GetMerchantRequest) returns (GetMerchantResponse) {
+    option (google.api.http) = {
+      get: "/merchant"
+      body: "*"
+    };
+  }
 }
 
 message ActivateDayCommand {
@@ -65,4 +73,15 @@ message MerchantPaymentRequestCommand {
   string service_code = 2 [(kalix.field).entity_key = true];
   string account_from = 3 [(kalix.field).entity_key = true];
   string account_to = 4 [(kalix.field).entity_key = true];
+}
+
+message GetMerchantRequest {
+  string merchant_id = 1 [(kalix.field).entity_key = true];
+  string service_code = 2 [(kalix.field).entity_key = true];
+  string account_from = 3 [(kalix.field).entity_key = true];
+  string account_to = 4 [(kalix.field).entity_key = true];
+}
+
+message GetMerchantResponse {
+  entity.MerchantState merchant_state = 1;
 }

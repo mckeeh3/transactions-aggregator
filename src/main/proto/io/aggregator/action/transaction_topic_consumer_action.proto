@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package io.aggregator.action;
+
+import "kalix/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
+
+option java_outer_classname = "TransactionTopicConsumerService";
+
+service TransactionTopicConsumer {
+  option (kalix.codegen) = {
+    action: {}
+  };
+
+  rpc TransactionFromTopic(TopicTransaction) returns (google.protobuf.Empty) {
+    option (kalix.method).eventing.in = {
+      topic: "jpmc-transactions"
+    };
+  }
+}
+
+message TopicTransactionKey {
+  string transaction_id = 1;
+  string service_code = 2;
+  string account_from = 3;
+  string account_to = 4;
+}
+
+message TopicTransaction {
+  TopicTransactionKey transaction_key = 1;
+  string merchant_id = 2;
+  string shop_id = 3;
+  double transaction_amount = 4;
+}

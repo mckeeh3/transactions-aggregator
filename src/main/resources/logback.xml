@@ -29,6 +29,7 @@
     <logger name="kalix" level="INFO"/>
     <logger name="akka.http" level="INFO"/>
     <logger name="io.grpc" level="INFO"/>
+    <logger name="io.aggregator" level="INFO"/>
 
     <root level="INFO">
 <!--        <appender-ref ref="STDOUT"/>-->

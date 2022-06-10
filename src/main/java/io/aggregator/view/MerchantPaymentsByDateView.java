@@ -2,6 +2,10 @@ package io.aggregator.view;
 
 import kalix.javasdk.view.View;
 import kalix.javasdk.view.ViewContext;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.protobuf.Any;
 import io.aggregator.entity.PaymentEntity;
 
@@ -12,6 +16,7 @@ import io.aggregator.entity.PaymentEntity;
 // or delete it so it is regenerated as needed.
 
 public class MerchantPaymentsByDateView extends AbstractMerchantPaymentsByDateView {
+  private static final Logger log = LoggerFactory.getLogger(MerchantPaymentsByDateView.class);
 
   public MerchantPaymentsByDateView(ViewContext context) {
   }
@@ -23,6 +28,8 @@ public class MerchantPaymentsByDateView extends AbstractMerchantPaymentsByDateVi
 
   @Override
   public View.UpdateEffect<MerchantPaymentsModel.MerchantPayment> onPaymentAggregated(MerchantPaymentsModel.MerchantPayment state, PaymentEntity.PaymentAggregated event) {
+    log.info("onPaymentAggregated: state: {}\nPaymentAggregated: {}", state, event);
+
     return effects().updateState(MerchantPaymentsEventHandler.handle(state, event));
   }
 

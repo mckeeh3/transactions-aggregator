@@ -1,7 +1,7 @@
 
-# Curl commands used with VS Code REST Client extension
+# HTTP requests used with VS Code REST Client extension
 
-@urlPrefix = https://old-boat-2936.us-east1.kalix.app
+@urlPrefix = https://sweet-scene-6700.eu-central-1.kalix.app
 @merchantId = merchant-1
 @serviceCode = service-code-1
 @accountFrom = account-from-1
@@ -18,9 +18,24 @@ curl -XPOST -H "Content-Type: application/json" -d '{
 
 ### io.aggregator.api.Merchant.MerchantPaymentRequest
 
-curl -XPOST -H "Content-Type: application/json" -d '{
+POST {{urlPrefix}}/merchant/payment-request
+Content-Type: application/json
+
+{
   "merchant_id":"{{merchantId}}",
   "service_code":"{{serviceCode}}",
   "account_from":"{{accountFrom}}",
-  "account_to":"{{accountTo}}"}'
-  {{urlPrefix}}/merchant/payment-request
+  "account_to":"{{accountTo}}"
+}
+
+### io.aggregator.api.Merchant.GetHerchand
+
+GET {{urlPrefix}}/merchant HTTP/1.1
+Content-Type: application/json
+
+{
+  "merchant_id":"{{merchantId}}",
+  "service_code":"{{serviceCode}}",
+  "account_from":"{{accountFrom}}",
+  "account_to":"{{accountTo}}"
+}

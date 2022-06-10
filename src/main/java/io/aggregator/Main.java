@@ -15,6 +15,7 @@ import io.aggregator.action.SecondToSubSecondAction;
 import io.aggregator.action.SubSecondToSecondAction;
 import io.aggregator.action.SubSecondToTransactionAction;
 import io.aggregator.action.TransactionToSubSecondAction;
+import io.aggregator.action.TransactionTopicConsumerAction;
 import io.aggregator.entity.Day;
 import io.aggregator.entity.Hour;
 import io.aggregator.entity.Merchant;
@@ -23,6 +24,7 @@ import io.aggregator.entity.Payment;
 import io.aggregator.entity.Second;
 import io.aggregator.entity.SubSecond;
 import io.aggregator.entity.Transaction;
+import io.aggregator.view.MerchantPaymentsAllView;
 import io.aggregator.view.MerchantPaymentsByDateView;
 import io.aggregator.view.MerchantPaymentsByMerchantByDateView;
 import io.aggregator.view.MerchantsByMerchantIdView;
@@ -62,6 +64,7 @@ public final class Main {
       FrontendAction::new,
       HourToDayAction::new,
       HourToMinuteAction::new,
+      MerchantPaymentsAllView::new,
       MerchantPaymentsByDateView::new,
       MerchantPaymentsByMerchantByDateView::new,
       MerchantToDayAction::new,
@@ -75,6 +78,7 @@ public final class Main {
       SubSecondToSecondAction::new,
       SubSecondToTransactionAction::new,
       TransactionToSubSecondAction::new,
+      TransactionTopicConsumerAction::new,
       TransactionsNotPaidByDateView::new,
       TransactionsPaidByPaymentByDateView::new);
   }

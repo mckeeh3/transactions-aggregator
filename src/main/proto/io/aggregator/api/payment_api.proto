@@ -4,6 +4,7 @@ import "kalix/annotations.proto";
 import "google/protobuf/empty.proto";
 import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
+import "io/aggregator/entity/payment_entity.proto";
 
 package io.aggregator.api;
 
@@ -44,6 +45,13 @@ service Payment {
       body: "*"
     };
   }
+
+  rpc GetPayment(GetPaymentRequest) returns (GetPaymentResponse) {
+    option (google.api.http) = {
+      get: "/payment"
+      body: "*"
+    };
+  }
 }
 
 message AggregationRequestCommand {
@@ -77,4 +85,16 @@ message DayAggregationCommand {
   int32 transaction_count = 8;
   google.protobuf.Timestamp last_update_timestamp = 9;
   google.protobuf.Timestamp aggregate_request_timestamp = 10;
+}
+
+message GetPaymentRequest {
+  string merchant_id = 1 [(kalix.field).entity_key = true];
+  string service_code = 2 [(kalix.field).entity_key = true];
+  string account_from = 3 [(kalix.field).entity_key = true];
+  string account_to = 4 [(kalix.field).entity_key = true];
+  string payment_id = 5 [(kalix.field).entity_key = true];
+}
+
+message GetPaymentResponse {
+  entity.PaymentState payment_state = 1;
 }

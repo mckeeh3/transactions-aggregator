@@ -1,11 +1,11 @@
 package io.aggregator.view;
 
-import io.aggregator.entity.PaymentEntity;
+import io.aggregator.entity.PaymentEntity.PaymentAggregated;
 import io.aggregator.view.MerchantPaymentsModel.MerchantPayment;
 
 class MerchantPaymentsEventHandler {
 
-  static MerchantPayment handle(MerchantPayment state, PaymentEntity.PaymentAggregated event) {
+  static MerchantPayment handle(MerchantPayment state, PaymentAggregated event) {
     var amount = state.getTransactionTotalAmount() + event.getTransactionTotalAmount();
     var count = state.getTransactionCount() + event.getTransactionCount();
 

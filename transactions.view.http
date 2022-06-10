@@ -1,15 +1,15 @@
 
 # Curl commands used with VS Code REST Client extension
 
-@urlPrefix = https://old-boat-2936.us-east1.kalix.app
-@paymentId = payment-3
+@urlPrefix = https://sweet-scene-6700.eu-central-1.kalix.app
+@paymentId = payment-1
 @merchantId = merchant-1
 @serviceCode = service-code-1
 @accountFrom = account-from-1
 @accountTo = account-to-1
 @fromDate = 2022-03-09T00:00:00.000Z
 @toDate = 2023-01-01T00:00:00.000-00:00
-@offset = 1850
+@offset = 260
 @limit = 10
 
 ### io.aggregator.view.TransactionsPaidByPaymentByDate.GetTransactionsPaidByPaymentByDate

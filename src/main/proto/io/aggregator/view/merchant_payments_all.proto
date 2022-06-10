@@ -5,27 +5,24 @@ package io.aggregator.view;
 import "google/api/annotations.proto";
 import "google/protobuf/any.proto";
 import "kalix/annotations.proto";
-import "google/protobuf/timestamp.proto";
 import "io/aggregator/entity/payment_entity.proto";
+import "io/aggregator/entity/day_entity.proto";
 import "io/aggregator/view/merchant_payments.proto";
 
-option java_outer_classname = "MerchantPaymentsByDateModel";
+option java_outer_classname = "MerchantPaymentsAllModel";
 
-service MerchantPaymentsByDate {
+service MerchantPaymentsAll {
   option (kalix.codegen) = {
     view: {}
   };
 
-  rpc GetMerchantPaymentsByDate(MerchantPaymentsByDateRequest) returns (MerchantPaymentsByDateResponse) {
+  rpc GetMerchantPaymentsAll(MerchantPaymentsAllRequest) returns (MerchantPaymentsAllResponse) {
     option (kalix.method).view.query = {
       query: "SELECT * AS merchant_payments"
-             "  FROM merchant_payments_by_date_1"
-             " WHERE payment_timestamp >= :from_date"
-             "   AND payment_timestamp < :to_date"
-             " ORDER BY payment_timestamp DESC"
+             "  FROM merchant_payments_all_1"
     };
     option (google.api.http) = {
-      get: "/merchant-payments-by-date"
+      get: "/merchant-payments-all"
     };
   }
 
@@ -34,7 +31,7 @@ service MerchantPaymentsByDate {
       event_sourced_entity: "payment"
     };
     option (kalix.method).view.update = {
-      table: "merchant_payments_by_date_1"
+      table: "merchant_payments_all_1"
       transform_updates: true
     };
   }
@@ -44,17 +41,14 @@ service MerchantPaymentsByDate {
       event_sourced_entity: "payment"
     };
     option (kalix.method).view.update = {
-      table: "merchant_payments_by_date_1"
+      table: "merchant_payments_all_1"
       transform_updates: true
     };
   }
 }
 
-message MerchantPaymentsByDateRequest {
-  google.protobuf.Timestamp from_date = 1;
-  google.protobuf.Timestamp to_date = 2;
-}
+message MerchantPaymentsAllRequest {}
 
-message MerchantPaymentsByDateResponse {
+message MerchantPaymentsAllResponse {
   repeated MerchantPayment merchant_payments = 1;
 }

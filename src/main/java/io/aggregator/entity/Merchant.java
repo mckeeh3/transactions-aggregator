@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import io.aggregator.TimeTo;
 import io.aggregator.api.MerchantApi;
+import io.aggregator.entity.MerchantEntity.MerchantState;
 
 // This class was initially generated based on the .proto definition by Akka Serverless tooling.
 // This is the implementation for the Event Sourced Entity Service described in your io/aggregator/api/merchant_api.proto file.
@@ -42,6 +43,11 @@ public class Merchant extends AbstractMerchant {
   @Override
   public Effect<Empty> merchantPaymentRequest(MerchantEntity.MerchantState state, MerchantApi.MerchantPaymentRequestCommand command) {
     return reject(state, command).orElseGet(() -> handle(state, command));
+  }
+
+  @Override
+  public Effect<MerchantApi.GetMerchantResponse> getMerchant(MerchantState state, MerchantApi.GetMerchantRequest request) {
+    return handle(state, request);
   }
 
   @Override
@@ -125,6 +131,14 @@ public class Merchant extends AbstractMerchant {
     } else {
       return effects().reply(Empty.getDefaultInstance());
     }
+  }
+
+  private Effect<MerchantApi.GetMerchantResponse> handle(MerchantEntity.MerchantState state, MerchantApi.GetMerchantRequest request) {
+    return effects().reply(
+        MerchantApi.GetMerchantResponse
+            .newBuilder()
+            .setMerchantState(state)
+            .build());
   }
 
   static MerchantEntity.MerchantState handle(MerchantEntity.MerchantState state, MerchantEntity.MerchantDayActivated event) {

@@ -19,9 +19,9 @@ service TransactionsPaidByPaymentByDate {
   rpc GetTransactionsPaidByPaymentByDate(TransactionsPaidByPaymentByDateRequest) returns (TransactionsPaidByPaymentByDateResponse) {
     option (kalix.method).view.query = {
       query: "SELECT * AS transactions"
-             "  FROM transactions_paid OFFSET :transaction_offset LIMIT :transaction_limit"
-             " WHERE transaction_timestamp.seconds >= :`from_date.seconds`"
-             "   AND transaction_timestamp.seconds < :`to_date.seconds`"
+             "  FROM transactions_paid_1 OFFSET :transaction_offset LIMIT :transaction_limit"
+             " WHERE transaction_timestamp >= :from_date"
+             "   AND transaction_timestamp < :to_date"
              "   AND payment_id = :payment_id"
              "   AND merchant_id = :merchant_id"
              "   AND service_code = :service_code"
@@ -38,7 +38,7 @@ service TransactionsPaidByPaymentByDate {
       event_sourced_entity: "transaction"
     };
     option (kalix.method).view.update = {
-      table: "transactions_paid"
+      table: "transactions_paid_1"
       transform_updates: true
     };
   }
@@ -48,7 +48,7 @@ service TransactionsPaidByPaymentByDate {
       event_sourced_entity: "transaction"
     };
     option (kalix.method).view.update = {
-      table: "transactions_paid"
+      table: "transactions_paid_1"
       transform_updates: true
     };
   }
@@ -58,7 +58,7 @@ service TransactionsPaidByPaymentByDate {
       event_sourced_entity: "transaction"
     };
     option (kalix.method).view.update = {
-      table: "transactions_paid"
+      table: "transactions_paid_1"
       transform_updates: true
     };
   }

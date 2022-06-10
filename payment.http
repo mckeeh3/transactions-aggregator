@@ -1,0 +1,22 @@
+
+# HTTP requests used with VS Code REST Client extension
+
+@urlPrefix = https://sweet-scene-6700.eu-central-1.kalix.app
+@merchantId = merchant-1
+@serviceCode = service-code-1
+@accountFrom = account-from-1
+@accountTo = account-to-1
+@paymentId = payment-5
+
+### io.aggregator.api.Payment.GetPayment
+
+GET {{urlPrefix}}/payment HTTP/1.1
+Content-Type: application/json
+
+{
+  "merchant_id": "{{merchantId}}",
+  "service_code": "{{serviceCode}}",
+  "account_from": "{{accountFrom}}",
+  "account_to": "{{accountTo}}",
+  "payment_id": "{{paymentId}}"
+}

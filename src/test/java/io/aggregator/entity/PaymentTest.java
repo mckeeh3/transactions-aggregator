@@ -147,6 +147,9 @@ public class PaymentTest {
     var now = TimeTo.now();
     var epochDay = TimeTo.fromTimestamp(now).toEpochDay();
 
+    var req = paymentRequestCommand(now, epochDay);
+    req.getAggregateRequestTimestamp();
+
     var response = testKit.paymentRequest(paymentRequestCommand(now, epochDay));
 
     assertEquals(2, response.getAllEvents().size());
@@ -170,6 +173,37 @@ public class PaymentTest {
     // assertEquals(now, testKit.getState().getPaymentsList().get(0).getPaymentRequestTimestamp());
     // assertEquals(1, testKit.getState().getPaymentsList().get(0).getPaymentDaysList().size());
     // assertEquals(epochDay, testKit.getState().getPaymentsList().get(0).getPaymentDaysList().get(0
+  }
+
+  @Test
+  public void paymentRequestWithZeroDaysZeroRequestTimestamp() {
+    PaymentTestKit testKit = PaymentTestKit.of(Payment::new);
+
+    var now = TimeTo.now();
+    var epochDay = TimeTo.fromTimestamp(now).toEpochDay();
+
+    var req = paymentRequestCommand(now, epochDay);
+    req.getAggregateRequestTimestamp();
+
+    var response = testKit.paymentRequest(paymentRequestCommandZeroTimeZeroDays());
+
+    assertEquals(1, response.getAllEvents().size());
+
+    var event = response.getNextEventOfType(PaymentEntity.PaymentAggregated.class);
+
+    assertEquals("merchant-1", event.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", event.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", event.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", event.getMerchantKey().getAccountTo());
+    assertEquals("payment-1", event.getPaymentId());
+
+    var state = testKit.getState();
+
+    assertEquals("merchant-1", state.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", state.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", state.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", state.getMerchantKey().getAccountTo());
+    assertEquals("payment-1", state.getPaymentId());
   }
 
   @Test
@@ -435,6 +469,17 @@ public class PaymentTest {
         .setPaymentId("payment-1")
         .setAggregateRequestTimestamp(timestamp)
         .addAllEpochDays(Arrays.asList(epochDays))
+        .build();
+  }
+
+  static PaymentApi.PaymentRequestCommand paymentRequestCommandZeroTimeZeroDays() {
+    return PaymentApi.PaymentRequestCommand
+        .newBuilder()
+        .setMerchantId("merchant-1")
+        .setServiceCode("service-code-1")
+        .setAccountFrom("account-from-1")
+        .setAccountTo("account-to-1")
+        .setPaymentId("payment-1")
         .build();
   }
 }

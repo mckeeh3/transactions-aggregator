@@ -1,6 +1,10 @@
 package io.aggregator.action;
 
 import kalix.javasdk.action.ActionCreationContext;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 
@@ -15,12 +19,15 @@ import io.aggregator.entity.TransactionEntity;
 // or delete it so it is regenerated as needed.
 
 public class TransactionToSubSecondAction extends AbstractTransactionToSubSecondAction {
+  private static final Logger log = LoggerFactory.getLogger(TransactionToSubSecondAction.class);
 
   public TransactionToSubSecondAction(ActionCreationContext creationContext) {
   }
 
   @Override
   public Effect<Empty> onTransactionCreated(TransactionEntity.TransactionCreated event) {
+    log.debug("onTransactionCreated: {}", event);
+
     var timestamp = event.getTransactionTimestamp();
     var epochSubSecond = TimeTo.fromTimestamp(timestamp).toEpochSubSecond();
 

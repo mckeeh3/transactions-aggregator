@@ -201,6 +201,11 @@ public class MerchantTest {
     assertEquals("account-from-1", merchantPaymentRequested.getMerchantKey().getAccountFrom());
     assertEquals("account-to-1", merchantPaymentRequested.getMerchantKey().getAccountTo());
     assertEquals("payment-1", merchantPaymentRequested.getPaymentId());
+
+    var state = testKit.getState();
+
+    assertEquals(0, state.getActiveDaysCount());
+    assertEquals(1, state.getPaymentIdSequenceNumber());
   }
 
   @Test
