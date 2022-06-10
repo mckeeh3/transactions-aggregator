@@ -297,10 +297,14 @@ public class Payment extends AbstractPayment {
   }
 
   static List<?> eventsFor(PaymentEntity.PaymentState state, PaymentApi.PaymentRequestCommand command) {
+    if (state.getMerchantKey().getMerchantId().isBlank()) {
+      state = state.toBuilder()
+          .setMerchantKey(toMerchantKey(command))
+          .setPaymentId(command.getPaymentId())
+          .build();
+    }
     if (state.getPaymentRequested()) {
       return List.of();
-      // } else if (state.getPaymentId().isBlank()) {
-      // return List.of(aggregateEmptyPayment(state, command));
     }
 
     var allAggregated = state.getAggregationsList().stream()
