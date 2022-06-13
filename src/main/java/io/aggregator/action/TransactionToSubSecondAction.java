@@ -2,6 +2,10 @@ package io.aggregator.action;
 
 import kalix.javasdk.action.ActionCreationContext;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Random;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +23,7 @@ import io.aggregator.entity.TransactionEntity;
 // or delete it so it is regenerated as needed.
 
 public class TransactionToSubSecondAction extends AbstractTransactionToSubSecondAction {
+  private static final Random random = new Random();
   private static final Logger log = LoggerFactory.getLogger(TransactionToSubSecondAction.class);
 
   public TransactionToSubSecondAction(ActionCreationContext creationContext) {
@@ -26,12 +31,13 @@ public class TransactionToSubSecondAction extends AbstractTransactionToSubSecond
 
   @Override
   public Effect<Empty> onTransactionCreated(TransactionEntity.TransactionCreated event) {
+    var startTime = Instant.now();
     log.debug("onTransactionCreated: {}", event);
 
     var timestamp = event.getTransactionTimestamp();
     var epochSubSecond = TimeTo.fromTimestamp(timestamp).toEpochSubSecond();
 
-    return effects().forward(components().subSecond().addTransaction(
+    var reply = components().subSecond().addTransaction(
         SubSecondApi.AddTransactionCommand
             .newBuilder()
             .setMerchantId(event.getMerchantId())
@@ -42,11 +48,30 @@ public class TransactionToSubSecondAction extends AbstractTransactionToSubSecond
             .setTransactionId(event.getTransactionKey().getTransactionId())
             .setAmount(event.getTransactionAmount())
             .setTimestamp(timestamp)
-            .build()));
+            .build())
+        .execute();
+
+    return effects().asyncReply(
+        reply.handle((response, ex) -> {
+          if (ex != null) {
+            log.warn("transactionFromTopic: {}", ex.getMessage());
+            log.error("transactionFromTopic: failed", ex);
+            return Empty.getDefaultInstance(); // this is where unhandled messages should be directed/dead letters
+          }
+
+          logRandomTransactionCreated(event, startTime);
+          return Empty.getDefaultInstance();
+        }));
   }
 
   @Override
   public Effect<Empty> ignoreOtherEvents(Any any) {
     return effects().reply(Empty.getDefaultInstance());
+  }
+
+  static void logRandomTransactionCreated(TransactionEntity.TransactionCreated event, Instant startTime) {
+    if (random.nextInt(100) == 0) {
+      log.info("onTransactionCreated: {}, elapsed: {}ms", event, Duration.between(startTime, Instant.now()).toMillis());
+    }
   }
 }

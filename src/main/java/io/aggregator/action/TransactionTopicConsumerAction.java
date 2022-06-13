@@ -1,5 +1,7 @@
 package io.aggregator.action;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Random;
 
 import org.slf4j.Logger;
@@ -19,7 +21,7 @@ import kalix.javasdk.action.ActionCreationContext;
 // or delete it so it is regenerated as needed.
 
 public class TransactionTopicConsumerAction extends AbstractTransactionTopicConsumerAction {
-  static final Random random = new Random();
+  private static final Random random = new Random();
   private static final Logger log = LoggerFactory.getLogger(TransactionTopicConsumerAction.class);
 
   public TransactionTopicConsumerAction(ActionCreationContext creationContext) {
@@ -27,6 +29,7 @@ public class TransactionTopicConsumerAction extends AbstractTransactionTopicCons
 
   @Override
   public Effect<Empty> transactionFromTopic(TopicTransaction topicTransaction) {
+    var startTime = Instant.now();
     log.debug("transactionFromTopic: {}", topicTransaction);
 
     var reply = components().transaction().createTransaction(
@@ -51,7 +54,14 @@ public class TransactionTopicConsumerAction extends AbstractTransactionTopicCons
             return Empty.getDefaultInstance(); // this is where unhandled messages should be directed/dead letters
           }
 
+          logRandomTransaction(topicTransaction, startTime);
           return Empty.getDefaultInstance();
         }));
+  }
+
+  static void logRandomTransaction(TopicTransaction topicTransaction, Instant startTime) {
+    if (random.nextInt(100) == 0) {
+      log.info("transactionFromTopic: {}, elapsed: {}ms", topicTransaction, Duration.between(startTime, Instant.now()).toMillis());
+    }
   }
 }
