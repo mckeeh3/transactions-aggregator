@@ -1,16 +1,16 @@
 package io.aggregator.entity;
 
-import com.google.protobuf.Empty;
-import com.google.protobuf.Timestamp;
-import io.aggregator.TimeTo;
-import io.aggregator.api.StripedSecondApi;
-import kalix.javasdk.eventsourcedentity.EventSourcedEntity;
-import kalix.javasdk.eventsourcedentity.EventSourcedEntityContext;
-import kalix.javasdk.testkit.EventSourcedResult;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Ignore;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import com.google.protobuf.Timestamp;
+
+import io.aggregator.TimeTo;
+import io.aggregator.api.StripedSecondApi;
 
 // This class was initially generated based on the .proto definition by Kalix tooling.
 //
@@ -22,7 +22,7 @@ public class StripedSecondTest {
   @Test
   @Ignore("to be implemented")
   public void exampleTest() {
-    StripedSecondTestKit service = StripedSecondTestKit.of(StripedSecond::new);
+    // StripedSecondTestKit service = StripedSecondTestKit.of(StripedSecond::new);
     // // use the testkit to execute a command
     // // of events emitted, or a final updated state:
     // SomeCommand command = SomeCommand.newBuilder()...build();
@@ -176,7 +176,7 @@ public class StripedSecondTest {
     assertEquals("payment-1", stripedSecondAggregated.getPaymentId());
 
     // add more transactions after aggregation
-    response = testKit.addTransaction(addTransactionCommand(timestamp.getSeconds(), stripe,  "transaction-4", 6.54, TimeTo.fromTimestamp(timestamp).plus().nanos(30).toTimestamp()));
+    response = testKit.addTransaction(addTransactionCommand(timestamp.getSeconds(), stripe, "transaction-4", 6.54, TimeTo.fromTimestamp(timestamp).plus().nanos(30).toTimestamp()));
 
     assertEquals(2, response.getAllEvents().size());
     response.getNextEventOfType(StripedSecondEntity.StripedSecondActivated.class);
@@ -257,5 +257,4 @@ public class StripedSecondTest {
         .setPaymentId(paymentId)
         .build();
   }
-
 }

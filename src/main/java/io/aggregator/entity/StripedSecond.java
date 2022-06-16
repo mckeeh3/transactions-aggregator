@@ -1,16 +1,16 @@
 package io.aggregator.entity;
 
-import com.google.protobuf.Empty;
-import io.aggregator.TimeTo;
-import io.aggregator.api.StripedSecondApi;
-import kalix.javasdk.eventsourcedentity.EventSourcedEntity;
-import kalix.javasdk.eventsourcedentity.EventSourcedEntity.Effect;
-import kalix.javasdk.eventsourcedentity.EventSourcedEntityContext;
+import java.util.List;
+import java.util.stream.Stream;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.stream.Stream;
+import com.google.protobuf.Empty;
+
+import io.aggregator.TimeTo;
+import io.aggregator.api.StripedSecondApi;
+import kalix.javasdk.eventsourcedentity.EventSourcedEntityContext;
 
 // This class was initially generated based on the .proto definition by Kalix tooling.
 // This is the implementation for the Event Sourced Entity Service described in your io/aggregator/api/striped_second_api.proto file.
