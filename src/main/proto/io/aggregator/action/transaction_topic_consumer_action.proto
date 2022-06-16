@@ -17,6 +17,10 @@ service TransactionTopicConsumer {
     option (kalix.method).eventing.in = {
       topic: "jpmc-transactions"
     };
+    option (google.api.http) = {
+      post: "/transaction-topic/create"
+      body: "*"
+    };
   }
 }
 
