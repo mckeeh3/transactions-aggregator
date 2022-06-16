@@ -7,6 +7,8 @@ import com.google.protobuf.Empty;
 import io.aggregator.TimeTo;
 import io.aggregator.api.DayApi;
 import io.aggregator.entity.HourEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // This class was initially generated based on the .proto definition by Akka Serverless tooling.
 //
@@ -14,12 +16,14 @@ import io.aggregator.entity.HourEntity;
 // or delete it so it is regenerated as needed.
 
 public class HourToDayAction extends AbstractHourToDayAction {
+  private static final Logger log = LoggerFactory.getLogger(HourToDayAction.class);
 
   public HourToDayAction(ActionCreationContext creationContext) {
   }
 
   @Override
   public Effect<Empty> onHourActivated(HourEntity.HourActivated event) {
+    log.debug("onHourActivated: {}", event);
     return effects().forward(components().day().activateHour(
         DayApi.ActivateHourCommand
             .newBuilder()

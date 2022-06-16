@@ -2,33 +2,34 @@
 
 This project is a demo of a merchant payment transaction aggregator. The processing flow is transactions consumed from a topic then aggregated into periodic merchant payments. Each transaction includes merchant information that routes aggregated transaction amounts to specific merchant payments. Merchants define the frequency and times of their payment schedule.
 
-Transactions initially flow into a transaction entity, and transaction-created events flow into a series of time-based aggregation entities. These time-based aggregation entities form a tree from sub-second leaves to second branches through more time-based branches down to merchant payment trunks. A reduction of payment data occurs as payment amounts flow from the sub-second leaves down to the trunk.
+Transactions initially flow into a transaction entity, and transaction-created events flow into a series of time-based aggregation entities. These time-based aggregation entities form a tree from striped-second leaves to second branches through more time-based branches down to merchant payment trunks. A reduction of payment data occurs as payment amounts flow from the striped-second leaves down to the trunk.
 
 The time-based aggregation entities perform two tasks. The first task is called activation, and the second task is called aggregation.
 
-Activation starts when a sub-second entity first receives a transaction. Each sub-second entity represents a specific 10ms period in time. For example, when a transaction arrives as 2022-03-23T15:20:56.674546967Z, the below table shows times from epoch sub-second to epoch day.
+Activation starts when a striped-second entity first receives a transaction. Each striped-second entity represents a subset of transactions within a second. Each second is split into 20 stripes to reduce contention of the entities that aggregate transactions into striped seconds and then seconds. Selection of stripe is derived from the transaction id.
+
+For example, when a transaction arrives as 2022-03-23T15:20:56.674546967Z, the below table shows times from epoch sub-second to epoch day.
 
 | Timestamp  | 2022-03-23T15:20:56.674546967Z |
 | :--------- | -----------------------------: |
 | Epoch unit |                     Epoch time |
 | ms         |              1,648,048,856,674 |
-| sub-second |                164,804,885,667 |
 | second     |                  1,648,048,856 |
 | minute     |                     27,467,480 |
 | hour       |                        457,791 |
 | day        |                         19,074 |
 
-Once an epoch sub-second instance is activated, no other activation events are needed as more transactions arrive within that same sub-second.
+Once a striped-second instance is activated, no other activation events are needed as more transactions arrive within that same striped-second.
 
-As each sub-second entity is activated, it emits an activation event consumed by its associated second entity, which triggers activation of the second entity. No other second activations occur as more sub-seconds within the exact second are activated, and activations propagate up the time tree until they reach a merchant entity.
+As each striped-second entity is activated, it emits an activation event consumed by its associated second entity, which triggers activation of the second entity. No other second activations occur as more striped-seconds within the exact second are activated, and activations propagate up the time tree until they reach a merchant entity.
 
-Each time-based entity keeps a list of its currently active sub-time entities. For example, a given day entity knows which hours are active, an hour knows which minutes are active, minutes know which seconds are active, and seconds know which sub-seconds are active. Sub-second entities maintain a list of transactions, and these transactions also indicate if they are ready to be aggregated or previously aggregated.
+Each time-based entity keeps a list of its currently active sub-time entities. For example, a given day entity knows which hours are active, an hour knows which minutes are active, minutes know which seconds are active, and seconds know which striped-seconds are active. Sub-second entities maintain a list of transactions, and these transactions also indicate if they are ready to be aggregated or previously aggregated.
 
-When a merchant entity receives a day-activated event, it emits an aggregation requested event. This aggregation requested event triggers the active day entity to forward the request to its active hours—then hours to minutes, minutes to seconds, and seconds to sub-seconds. Aggregation requests flow up the tree in a highly concurrent wave that flows from the trunk out of each of the currently active sub-second leaves.
+When a merchant entity receives a day-activated event, it emits an aggregation requested event. This aggregation requested event triggers the active day entity to forward the request to its active hours—then hours to minutes, minutes to seconds, and seconds to striped-seconds. Aggregation requests flow up the tree in a highly concurrent wave that flows from the trunk out of each of the currently active striped-second leaves.
 
-Each active sub-second entity receives an aggregation request. This request triggers an operation that sums up the ready-to-be aggregated transactions. Aggregated transactions are flagged as aggregated by setting a payment Id field. After an aggregation is completed, the entity emits an event with a reduced transaction amount. Second entities receive these sub-second reduced events, and when all of the active sub-seconds have sent their results, the second entity sums those amounts. It emits an event that contains the transaction amount total.
+Each active striped-second entity receives an aggregation request. This request triggers an operation that sums up the ready-to-be aggregated transactions. Aggregated transactions are flagged as aggregated by setting a payment Id field. After an aggregation is completed, the entity emits an event with a reduced transaction amount. Second entities receive these striped-second reduced events, and when all of the active striped-seconds have sent their results, the second entity sums those amounts. It emits an event that contains the transaction amount total.
 
-The aggregation process goes down the tree through sub-seconds, seconds, minutes, hours, days, and up to the current merchant payment entity. The payment entity accumulates the incremental amounts on each aggregation cycle until it is requested to produce a payment.
+The aggregation process goes down the tree through striped-seconds, seconds, minutes, hours, days, and up to the current merchant payment entity. The payment entity accumulates the incremental amounts on each aggregation cycle until it is requested to produce a payment.
 
 
 | ![Merchant Payment Transactions Aggregator Design](src/main/resources/images/merchant-payment-transaction-aggregation-demo.png)

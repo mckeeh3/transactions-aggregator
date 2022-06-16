@@ -1,25 +1,23 @@
 package io.aggregator.action;
 
-import kalix.javasdk.action.ActionCreationContext;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
-
 import io.aggregator.api.TransactionApi;
-import io.aggregator.entity.SubSecondEntity;
+import io.aggregator.entity.StripedSecondEntity;
+import kalix.javasdk.action.ActionCreationContext;
 
-// This class was initially generated based on the .proto definition by Akka Serverless tooling.
-// This is the implementation for the Action Service described in your io/aggregator/action/sub_second_to_transaction_action.proto file.
+// This class was initially generated based on the .proto definition by Kalix tooling.
+// This is the implementation for the Action Service described in your io/aggregator/action/striped_second_to_transaction_action.proto file.
 //
 // As long as this file exists it will not be overwritten: you can maintain it yourself,
 // or delete it so it is regenerated as needed.
 
-public class SubSecondToTransactionAction extends AbstractSubSecondToTransactionAction {
+public class StripedSecondToTransactionAction extends AbstractStripedSecondToTransactionAction {
 
-  public SubSecondToTransactionAction(ActionCreationContext creationContext) {
-  }
+  public StripedSecondToTransactionAction(ActionCreationContext creationContext) {}
 
   @Override
-  public Effect<Empty> onTransactionPaid(SubSecondEntity.TransactionPaid event) {
+  public Effect<Empty> onTransactionPaid(StripedSecondEntity.TransactionPaid event) {
     return effects().forward(components().transaction().addPayment(
         TransactionApi.AddPaymentCommand
             .newBuilder()
@@ -30,7 +28,6 @@ public class SubSecondToTransactionAction extends AbstractSubSecondToTransaction
             .setPaymentId(event.getPaymentId())
             .build()));
   }
-
   @Override
   public Effect<Empty> ignoreOtherEvents(Any any) {
     return effects().reply(Empty.getDefaultInstance());

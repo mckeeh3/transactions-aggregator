@@ -31,7 +31,7 @@ public class Second extends AbstractSecond {
   }
 
   @Override
-  public Effect<Empty> activateSubSecond(SecondEntity.SecondState state, SecondApi.ActivateSubSecondCommand command) {
+  public Effect<Empty> activateStripedSecond(SecondEntity.SecondState state, SecondApi.ActivateStripedSecondCommand command) {
     return handle(state, command);
   }
 
@@ -41,7 +41,7 @@ public class Second extends AbstractSecond {
   }
 
   @Override
-  public Effect<Empty> subSecondAggregation(SecondEntity.SecondState state, SecondApi.SubSecondAggregationCommand command) {
+  public Effect<Empty> stripedSecondAggregation(SecondEntity.SecondState state, SecondApi.StripedSecondAggregationCommand command) {
     return handle(state, command);
   }
 
@@ -51,7 +51,7 @@ public class Second extends AbstractSecond {
   }
 
   @Override
-  public SecondEntity.SecondState subSecondAdded(SecondEntity.SecondState state, SecondEntity.SubSecondAdded event) {
+  public SecondEntity.SecondState stripedSecondAdded(SecondEntity.SecondState state, SecondEntity.StripedSecondAdded event) {
     return handle(state, event);
   }
 
@@ -66,12 +66,12 @@ public class Second extends AbstractSecond {
   }
 
   @Override
-  public SecondEntity.SecondState activeSubSecondAggregated(SecondEntity.SecondState state, SecondEntity.ActiveSubSecondAggregated event) {
+  public SecondEntity.SecondState activeStripedSecondAggregated(SecondEntity.SecondState state, SecondEntity.ActiveStripedSecondAggregated event) {
     return handle(state, event);
   }
 
-  private Effect<Empty> handle(SecondEntity.SecondState state, SecondApi.ActivateSubSecondCommand command) {
-    log.debug("state: {}\nActivateSubSecondCommand: {}", state, command);
+  private Effect<Empty> handle(SecondEntity.SecondState state, SecondApi.ActivateStripedSecondCommand command) {
+    log.debug("state: {}\nActivateStripedSecondCommand: {}", state, command);
 
     return effects()
         .emitEvents(eventsFor(state, command))
@@ -86,8 +86,8 @@ public class Second extends AbstractSecond {
         .thenReply(newState -> Empty.getDefaultInstance());
   }
 
-  private Effect<Empty> handle(SecondEntity.SecondState state, SecondApi.SubSecondAggregationCommand command) {
-    log.debug("state: {}\nSubSecondAggregationCommand: {}", state, command);
+  private Effect<Empty> handle(SecondEntity.SecondState state, SecondApi.StripedSecondAggregationCommand command) {
+    log.debug("state: {}\nStripedSecondAggregationCommand: {}", state, command);
 
     return effects()
         .emitEvents(eventsFor(state, command))
@@ -110,18 +110,19 @@ public class Second extends AbstractSecond {
         .build();
   }
 
-  static SecondEntity.SecondState handle(SecondEntity.SecondState state, SecondEntity.SubSecondAdded event) {
-    var alreadyActivated = state.getActiveSubSecondsList().stream()
-        .anyMatch(activeSecond -> activeSecond.getEpochSubSecond() == event.getEpochSubSecond());
+  static SecondEntity.SecondState handle(SecondEntity.SecondState state, SecondEntity.StripedSecondAdded event) {
+    var alreadyActivated = state.getActiveStripedSecondsList().stream()
+        .anyMatch(activeSecond -> activeSecond.getEpochSecond() == event.getEpochSecond() && activeSecond.getStripe() == event.getStripe());
 
     if (alreadyActivated) {
       return state;
     } else {
       return state.toBuilder()
-          .addActiveSubSeconds(
-              SecondEntity.ActiveSubSecond
+          .addActiveStripedSeconds(
+              SecondEntity.ActiveStripedSecond
                   .newBuilder()
-                  .setEpochSubSecond(event.getEpochSubSecond())
+                  .setEpochSecond(event.getEpochSecond())
+                  .setStripe(event.getStripe())
                   .build())
           .build();
     }
@@ -134,19 +135,19 @@ public class Second extends AbstractSecond {
     if (activeAlreadyMoved) {
       return state;
     } else {
-      return moveActiveSubSecondsToAggregateSecond(state, event);
+      return moveActiveStripedSecondsToAggregateSecond(state, event);
     }
   }
 
-  static SecondEntity.SecondState moveActiveSubSecondsToAggregateSecond(SecondEntity.SecondState state, SecondEntity.SecondAggregationRequested event) {
+  static SecondEntity.SecondState moveActiveStripedSecondsToAggregateSecond(SecondEntity.SecondState state, SecondEntity.SecondAggregationRequested event) {
     return state.toBuilder()
-        .clearActiveSubSeconds()
+        .clearActiveStripedSeconds()
         .addAggregateSeconds(
             SecondEntity.AggregateSecond
                 .newBuilder()
                 .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
                 .setPaymentId(event.getPaymentId())
-                .addAllActiveSubSeconds(state.getActiveSubSecondsList())
+                .addAllActiveStripedSeconds(state.getActiveStripedSecondsList())
                 .build())
         .build();
   }
@@ -155,20 +156,20 @@ public class Second extends AbstractSecond {
     return state; // non-state change event
   }
 
-  static SecondEntity.SecondState handle(SecondEntity.SecondState state, SecondEntity.ActiveSubSecondAggregated event) {
+  static SecondEntity.SecondState handle(SecondEntity.SecondState state, SecondEntity.ActiveStripedSecondAggregated event) {
     return state.toBuilder()
         .clearAggregateSeconds()
         .addAllAggregateSeconds(updateAggregateSeconds(state, event))
         .build();
   }
 
-  static List<SecondEntity.AggregateSecond> updateAggregateSeconds(SecondEntity.SecondState state, SecondEntity.ActiveSubSecondAggregated event) {
+  static List<SecondEntity.AggregateSecond> updateAggregateSeconds(SecondEntity.SecondState state, SecondEntity.ActiveStripedSecondAggregated event) {
     return state.getAggregateSecondsList().stream()
         .map(aggregatedSecond -> {
           if (aggregatedSecond.getAggregateRequestTimestamp().equals(event.getAggregateRequestTimestamp())) {
             return aggregatedSecond.toBuilder()
-                .clearActiveSubSeconds()
-                .addAllActiveSubSeconds(updateActiveSubSeconds(event, aggregatedSecond))
+                .clearActiveStripedSeconds()
+                .addAllActiveStripedSeconds(updateActiveStripedSeconds(event, aggregatedSecond))
                 .build();
           } else {
             return aggregatedSecond;
@@ -177,11 +178,11 @@ public class Second extends AbstractSecond {
         .toList();
   }
 
-  static List<SecondEntity.ActiveSubSecond> updateActiveSubSeconds(SecondEntity.ActiveSubSecondAggregated event, SecondEntity.AggregateSecond aggregateSubSecond) {
-    return aggregateSubSecond.getActiveSubSecondsList().stream()
-        .map(activeSubSecond -> {
-          if (activeSubSecond.getEpochSubSecond() == event.getEpochSubSecond()) {
-            return activeSubSecond
+  static List<SecondEntity.ActiveStripedSecond> updateActiveStripedSeconds(SecondEntity.ActiveStripedSecondAggregated event, SecondEntity.AggregateSecond aggregateStripedSecond) {
+    return aggregateStripedSecond.getActiveStripedSecondsList().stream()
+        .map(activeStripedSecond -> {
+          if (activeStripedSecond.getEpochSecond() == event.getEpochSecond() && activeStripedSecond.getStripe() == event.getStripe()) {
+            return activeStripedSecond
                 .toBuilder()
                 .setTransactionTotalAmount(event.getTransactionTotalAmount())
                 .setTransactionCount(event.getTransactionCount())
@@ -189,14 +190,19 @@ public class Second extends AbstractSecond {
                 .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
                 .build();
           } else {
-            return activeSubSecond;
+            return activeStripedSecond;
           }
         })
         .toList();
   }
 
-  static List<?> eventsFor(SecondEntity.SecondState state, SecondApi.ActivateSubSecondCommand command) {
-    var subSecondAdded = SecondEntity.SubSecondAdded
+  static List<?> eventsFor(SecondEntity.SecondState state, SecondApi.ActivateStripedSecondCommand command) {
+    var alreadyActivated = state.getActiveStripedSecondsList().stream()
+        .anyMatch(activeSecond -> activeSecond.getEpochSecond() == command.getEpochSecond() && activeSecond.getStripe() == command.getStripe());
+    if (alreadyActivated)
+      return Collections.emptyList();
+
+    var stripedSecondAdded = SecondEntity.StripedSecondAdded
         .newBuilder()
         .setMerchantKey(
             TransactionMerchantKey.MerchantKey
@@ -206,10 +212,11 @@ public class Second extends AbstractSecond {
                 .setAccountFrom(command.getAccountFrom())
                 .setAccountTo(command.getAccountTo())
                 .build())
-        .setEpochSubSecond(command.getEpochSubSecond())
+        .setEpochSecond(command.getEpochSecond())
+        .setStripe(command.getStripe())
         .build();
 
-    if (state.getActiveSubSecondsCount() == 0) {
+    if (state.getActiveStripedSecondsCount() == 0) {
       var secondActivated = SecondEntity.SecondActivated
           .newBuilder()
           .setMerchantKey(
@@ -223,14 +230,14 @@ public class Second extends AbstractSecond {
           .setEpochSecond(command.getEpochSecond())
           .build();
 
-      return List.of(secondActivated, subSecondAdded);
+      return List.of(secondActivated, stripedSecondAdded);
     } else {
-      return List.of(subSecondAdded);
+      return List.of(stripedSecondAdded);
     }
   }
 
   static List<?> eventsFor(SecondEntity.SecondState state, SecondApi.AggregateSecondCommand command) {
-    if (state.getActiveSubSecondsCount() == 0) {
+    if (state.getActiveStripedSecondsCount() == 0) {
       var timestamp = command.getAggregateRequestTimestamp();
       return List.of(
           SecondEntity.SecondAggregated
@@ -262,18 +269,18 @@ public class Second extends AbstractSecond {
                       .setAccountFrom(command.getAccountFrom())
                       .setAccountTo(command.getAccountTo())
                       .build())
-              .setEpochSecond(command.getEpochSecond())
               .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
               .setPaymentId(command.getPaymentId())
-              .addAllEpochSubSeconds(
-                  state.getActiveSubSecondsList().stream()
-                      .map(activeSubSecond -> activeSubSecond.getEpochSubSecond())
+              .setEpochSecond(command.getEpochSecond())
+              .addAllStripes(
+                  state.getActiveStripedSecondsList().stream()
+                      .map(SecondEntity.ActiveStripedSecond::getStripe)
                       .toList())
               .build());
     }
   }
 
-  static List<?> eventsFor(SecondEntity.SecondState state, SecondApi.SubSecondAggregationCommand command) {
+  static List<?> eventsFor(SecondEntity.SecondState state, SecondApi.StripedSecondAggregationCommand command) {
     var aggregateSecond = state.getAggregateSecondsList().stream()
         .filter(aggSec -> aggSec.getAggregateRequestTimestamp().equals(command.getAggregateRequestTimestamp()))
         .findFirst()
@@ -281,40 +288,41 @@ public class Second extends AbstractSecond {
             SecondEntity.AggregateSecond
                 .newBuilder()
                 .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
-                .addAllActiveSubSeconds(state.getActiveSubSecondsList())
+                .addAllActiveStripedSeconds(state.getActiveStripedSecondsList())
                 .build());
     var aggregateRequestTimestamp = aggregateSecond.getAggregateRequestTimestamp();
-    var activeSubSeconds = aggregateSecond.getActiveSubSecondsList();
+    var activeStripedSeconds = aggregateSecond.getActiveStripedSecondsList();
 
-    var alreadyInList = activeSubSeconds.stream()
-        .anyMatch(activeSubSecond -> activeSubSecond.getEpochSubSecond() == command.getEpochSubSecond());
+    var alreadyInList = activeStripedSeconds.stream()
+        .anyMatch(activeStripedSecond -> activeStripedSecond.getEpochSecond() == command.getEpochSecond() && activeStripedSecond.getStripe() == command.getStripe());
 
     if (!alreadyInList) {
-      activeSubSeconds = new ArrayList<>(activeSubSeconds);
-      activeSubSeconds.add(
-          SecondEntity.ActiveSubSecond
+      activeStripedSeconds = new ArrayList<>(activeStripedSeconds);
+      activeStripedSeconds.add(
+          SecondEntity.ActiveStripedSecond
               .newBuilder()
-              .setEpochSubSecond(command.getEpochSubSecond())
+              .setEpochSecond(command.getEpochSecond())
+              .setStripe(command.getStripe())
               .build());
-      activeSubSeconds = Collections.unmodifiableList(activeSubSeconds);
+      activeStripedSeconds = Collections.unmodifiableList(activeStripedSeconds);
     }
 
-    activeSubSeconds = updateActiveSubSeconds(command, activeSubSeconds);
+    activeStripedSeconds = updateActiveStripedSeconds(command, activeStripedSeconds);
 
-    var allSecondsAggregated = activeSubSeconds.stream()
+    var allSecondsAggregated = activeStripedSeconds.stream()
         .allMatch(activeSecond -> activeSecond.getAggregateRequestTimestamp().equals(aggregateRequestTimestamp));
 
     if (allSecondsAggregated) {
-      return List.of(toSecondAggregated(command, activeSubSeconds), toActiveSubSecondAggregated(command));
+      return List.of(toSecondAggregated(command, activeStripedSeconds), toActiveStripedSecondAggregated(command));
     } else {
-      return List.of(toActiveSubSecondAggregated(command));
+      return List.of(toActiveStripedSecondAggregated(command));
     }
   }
 
-  static List<SecondEntity.ActiveSubSecond> updateActiveSubSeconds(SecondApi.SubSecondAggregationCommand command, List<SecondEntity.ActiveSubSecond> activeSeconds) {
+  static List<SecondEntity.ActiveStripedSecond> updateActiveStripedSeconds(SecondApi.StripedSecondAggregationCommand command, List<SecondEntity.ActiveStripedSecond> activeSeconds) {
     return activeSeconds.stream()
         .map(activeSecond -> {
-          if (activeSecond.getEpochSubSecond() == command.getEpochSubSecond()) {
+          if (activeSecond.getEpochSecond() == command.getEpochSecond() && activeSecond.getStripe() == command.getStripe()) {
             return activeSecond
                 .toBuilder()
                 .setTransactionTotalAmount(command.getTransactionTotalAmount())
@@ -329,8 +337,8 @@ public class Second extends AbstractSecond {
         .toList();
   }
 
-  static SecondEntity.ActiveSubSecondAggregated toActiveSubSecondAggregated(SecondApi.SubSecondAggregationCommand command) {
-    return SecondEntity.ActiveSubSecondAggregated
+  static SecondEntity.ActiveStripedSecondAggregated toActiveStripedSecondAggregated(SecondApi.StripedSecondAggregationCommand command) {
+    return SecondEntity.ActiveStripedSecondAggregated
         .newBuilder()
         .setMerchantKey(
             TransactionMerchantKey.MerchantKey
@@ -340,7 +348,8 @@ public class Second extends AbstractSecond {
                 .setAccountFrom(command.getAccountFrom())
                 .setAccountTo(command.getAccountTo())
                 .build())
-        .setEpochSubSecond(command.getEpochSubSecond())
+        .setEpochSecond(command.getEpochSecond())
+        .setStripe(command.getStripe())
         .setTransactionTotalAmount(command.getTransactionTotalAmount())
         .setTransactionCount(command.getTransactionCount())
         .setLastUpdateTimestamp(command.getLastUpdateTimestamp())
@@ -349,7 +358,7 @@ public class Second extends AbstractSecond {
         .build();
   }
 
-  static SecondEntity.SecondAggregated toSecondAggregated(SecondApi.SubSecondAggregationCommand command, List<SecondEntity.ActiveSubSecond> activeSeconds) {
+  static SecondEntity.SecondAggregated toSecondAggregated(SecondApi.StripedSecondAggregationCommand command, List<SecondEntity.ActiveStripedSecond> activeSeconds) {
     var transactionTotalAmount = activeSeconds.stream()
         .reduce(0.0, (amount, activeSecond) -> amount + activeSecond.getTransactionTotalAmount(), Double::sum);
 

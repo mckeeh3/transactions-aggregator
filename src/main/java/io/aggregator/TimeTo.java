@@ -9,6 +9,10 @@ import java.util.Comparator;
 import com.google.protobuf.Timestamp;
 
 public class TimeTo {
+  public static int stripe(String transactionId) {
+    return Math.abs(transactionId.hashCode() % 20);
+  }
+
   public static Timestamp zero() {
     return Timestamp
         .newBuilder()
@@ -48,14 +52,6 @@ public class TimeTo {
     return Arrays.stream(timestamps)
         .max(comparator())
         .orElse(zero());
-  }
-
-  public static From fromEpochSubSecond(long epochSubSecond) {
-    return new From(Timestamp
-        .newBuilder()
-        .setSeconds(epochSubSecond / 100)
-        .setNanos((int) (epochSubSecond % 100) * 10_000_000)
-        .build());
   }
 
   public static From fromEpochMilliSeconds(long epochMilliSeconds) {
@@ -122,7 +118,7 @@ public class TimeTo {
     }
 
     public long toEpochSubSecond() {
-      return timestamp.getSeconds() * 100 + timestamp.getNanos() / 10_000_000;
+      return timestamp.getSeconds() * 1000 + timestamp.getNanos() / 100_000_000;
     }
 
     public long toEpochSecond() {
@@ -186,10 +182,6 @@ public class TimeTo {
 
     public From milliSeconds(long milliSeconds) {
       return nanos(milliSeconds * 1_000_000);
-    }
-
-    public From subSeconds(long subSeconds) {
-      return nanos(subSeconds * 10_000_000);
     }
 
     public From seconds(long seconds) {

@@ -5,24 +5,27 @@ import "io/aggregator/entity/transaction_merchant_key.proto";
 
 package io.aggregator.entity;
 
-option java_outer_classname = "SubSecondEntity";
+option java_outer_classname = "StripedSecondEntity";
 
-message SubSecondActivated {
+message StripedSecondActivated {
   MerchantKey merchant_key = 1;
-  int64 epoch_sub_second = 2;
+  int64 epoch_second = 2;
+  int32 stripe = 3;
 }
 
-message SubSecondTransactionAdded {
+message StripedSecondTransactionAdded {
   MerchantKey merchant_key = 1;
-  int64 epoch_sub_second = 2;
-  TransactionKey transaction_key = 3;
-  double amount = 4;
-  google.protobuf.Timestamp timestamp = 5;
+  int64 epoch_second = 2;
+  int32 stripe = 3;
+  TransactionKey transaction_key = 4;
+  double amount = 5;
+  google.protobuf.Timestamp timestamp = 6;
 }
 
-message SubSecondAggregated {
+message StripedSecondAggregated {
   MerchantKey merchant_key = 1;
-  int64 epoch_sub_second = 2;
+  int64 epoch_second = 2;
+  int32 stripe = 3;
   double transaction_total_amount = 4;
   int32 transaction_count = 5;
   google.protobuf.Timestamp last_update_timestamp = 6;
@@ -33,13 +36,14 @@ message SubSecondAggregated {
 message TransactionPaid {
   TransactionKey transaction_key = 1;
   string merchant_id = 2;
-  int64 epoch_sub_second = 3;
-  string payment_id = 4;
+  int64 epoch_second = 3;
+  int32 stripe = 4;
+  string payment_id = 5;
 }
 
-message SubSecondState {
+message StripedSecondState {
   MerchantKey merchant_key = 1;
-  int64 epoch_sub_second = 2;
+  int32 stripe = 2;
   int64 epoch_second = 3;
   int64 epoch_minute = 4;
   int64 epoch_hour = 5;
@@ -51,9 +55,10 @@ message SubSecondState {
 message Transaction {
   TransactionKey transaction_key = 1;
   string merchant_id = 2;
-  int64 epoch_sub_second = 3;
-  double amount = 4;
-  google.protobuf.Timestamp timestamp = 5;
-  google.protobuf.Timestamp aggregate_request_timestamp = 6;
-  string payment_id = 7;
+  int64 epoch_second = 3;
+  int32 stripe = 4;
+  double amount = 5;
+  google.protobuf.Timestamp timestamp = 6;
+  google.protobuf.Timestamp aggregate_request_timestamp = 7;
+  string payment_id = 8;
 }
