@@ -1,13 +1,15 @@
 package io.aggregator.action;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
+
 import io.aggregator.TimeTo;
 import io.aggregator.api.StripedSecondApi;
 import io.aggregator.entity.TransactionEntity;
 import kalix.javasdk.action.ActionCreationContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 // This class was initially generated based on the .proto definition by Kalix tooling.
 // This is the implementation for the Action Service described in your io/aggregator/action/transaction_to_striped_second_action.proto file.
@@ -19,7 +21,8 @@ public class TransactionToStripedSecondAction extends AbstractTransactionToStrip
 
   private static final Logger log = LoggerFactory.getLogger(TransactionToStripedSecondAction.class);
 
-  public TransactionToStripedSecondAction(ActionCreationContext creationContext) {}
+  public TransactionToStripedSecondAction(ActionCreationContext creationContext) {
+  }
 
   @Override
   public Effect<Empty> onTransactionCreated(TransactionEntity.TransactionCreated event) {
@@ -42,6 +45,7 @@ public class TransactionToStripedSecondAction extends AbstractTransactionToStrip
             .setTimestamp(timestamp)
             .build()));
   }
+
   @Override
   public Effect<Empty> ignoreOtherEvents(Any any) {
     return effects().reply(Empty.getDefaultInstance());

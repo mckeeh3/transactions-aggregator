@@ -2,6 +2,7 @@ package io.aggregator.action;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
+
 import io.aggregator.api.TransactionApi;
 import io.aggregator.entity.StripedSecondEntity;
 import kalix.javasdk.action.ActionCreationContext;
@@ -14,7 +15,8 @@ import kalix.javasdk.action.ActionCreationContext;
 
 public class StripedSecondToTransactionAction extends AbstractStripedSecondToTransactionAction {
 
-  public StripedSecondToTransactionAction(ActionCreationContext creationContext) {}
+  public StripedSecondToTransactionAction(ActionCreationContext creationContext) {
+  }
 
   @Override
   public Effect<Empty> onTransactionPaid(StripedSecondEntity.TransactionPaid event) {
@@ -28,6 +30,7 @@ public class StripedSecondToTransactionAction extends AbstractStripedSecondToTra
             .setPaymentId(event.getPaymentId())
             .build()));
   }
+
   @Override
   public Effect<Empty> ignoreOtherEvents(Any any) {
     return effects().reply(Empty.getDefaultInstance());
