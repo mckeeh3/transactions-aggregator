@@ -1,31 +1,25 @@
 package io.aggregator;
 
-import io.aggregator.action.DayToHourAction;
-import io.aggregator.action.DayToMerchantAction;
-import io.aggregator.action.DayToPaymentAction;
-import io.aggregator.action.FrontendAction;
-import io.aggregator.action.HourToDayAction;
-import io.aggregator.action.HourToMinuteAction;
-import io.aggregator.action.MerchantToDayAction;
-import io.aggregator.action.MerchantToPaymentAction;
-import io.aggregator.action.MinuteToHourAction;
-import io.aggregator.action.MinuteToSecondAction;
-import io.aggregator.action.SecondToMinuteAction;
-import io.aggregator.action.SecondToStripedSecondAction;
-import io.aggregator.action.StripedSecondToSecondAction;
-import io.aggregator.action.StripedSecondToTransactionAction;
-import io.aggregator.action.TransactionToStripedSecondAction;
-import io.aggregator.action.TransactionTopicConsumerAction;
+import io.aggregator.action.*;
 import io.aggregator.entity.Day;
+import io.aggregator.entity.DayProvider;
 import io.aggregator.entity.Hour;
+import io.aggregator.entity.HourProvider;
 import io.aggregator.entity.Merchant;
+import io.aggregator.entity.MerchantProvider;
 import io.aggregator.entity.Minute;
+import io.aggregator.entity.MinuteProvider;
 import io.aggregator.entity.Payment;
+import io.aggregator.entity.PaymentProvider;
 import io.aggregator.entity.Second;
+import io.aggregator.entity.SecondProvider;
 import io.aggregator.entity.StripedSecond;
+import io.aggregator.entity.StripedSecondProvider;
 import io.aggregator.entity.Transaction;
+import io.aggregator.entity.TransactionProvider;
 import io.aggregator.view.MerchantPaymentsAllView;
 import io.aggregator.view.MerchantPaymentsByDateView;
+import io.aggregator.view.MerchantPaymentsByDateViewProvider;
 import io.aggregator.view.MerchantPaymentsByMerchantByDateView;
 import io.aggregator.view.MerchantsByMerchantIdView;
 import io.aggregator.view.MerchantsNotPaidView;
@@ -45,42 +39,40 @@ public final class Main {
   private static final Logger LOG = LoggerFactory.getLogger(Main.class);
 
   public static Kalix createKalix() {
-    // The KalixFactory automatically registers any generated Actions, Views or Entities,
-    // and is kept up-to-date with any changes in your protobuf definitions.
-    // If you prefer, you may remove this and manually register these components in a
-    // `new Kalix()` instance.
-    return KalixFactory.withComponents(
-      Day::new,
-      Hour::new,
-      Merchant::new,
-      Minute::new,
-      Payment::new,
-      Second::new,
-      StripedSecond::new,
-      Transaction::new,
-      DayToHourAction::new,
-      DayToMerchantAction::new,
-      DayToPaymentAction::new,
-      FrontendAction::new,
-      HourToDayAction::new,
-      HourToMinuteAction::new,
-      MerchantPaymentsAllView::new,
-      MerchantPaymentsByDateView::new,
-      MerchantPaymentsByMerchantByDateView::new,
-      MerchantToDayAction::new,
-      MerchantToPaymentAction::new,
-      MerchantsByMerchantIdView::new,
-      MerchantsNotPaidView::new,
-      MinuteToHourAction::new,
-      MinuteToSecondAction::new,
-      SecondToMinuteAction::new,
-      SecondToStripedSecondAction::new,
-      StripedSecondToSecondAction::new,
-      StripedSecondToTransactionAction::new,
-      TransactionToStripedSecondAction::new,
-      TransactionTopicConsumerAction::new,
-      TransactionsNotPaidByDateView::new,
-      TransactionsPaidByPaymentByDateView::new);
+    Kalix kalix = new Kalix();
+    return kalix
+        .register(DayProvider.of(Day::new))
+        .register(DayToHourActionProvider.of(DayToHourAction::new))
+        .register(DayToMerchantActionProvider.of(DayToMerchantAction::new))
+        .register(DayToPaymentActionProvider.of(DayToPaymentAction::new))
+        .register(FrontendActionProvider.of(FrontendAction::new))
+        .register(HourProvider.of(Hour::new))
+        .register(HourToDayActionProvider.of(HourToDayAction::new))
+        .register(HourToMinuteActionProvider.of(HourToMinuteAction::new))
+//        .register(MerchantPaymentsAllViewProvider.of(MerchantPaymentsAllView::new))
+//        .register(MerchantPaymentsByDateViewProvider.of(MerchantPaymentsByDateView::new))
+//        .register(MerchantPaymentsByMerchantByDateViewProvider.of(MerchantPaymentsByMerchantByDateView::new))
+        .register(MerchantProvider.of(Merchant::new))
+        .register(MerchantToDayActionProvider.of(MerchantToDayAction::new))
+        .register(MerchantToPaymentActionProvider.of(MerchantToPaymentAction::new))
+//        .register(MerchantsByMerchantIdViewProvider.of(MerchantsByMerchantIdView::new))
+//        .register(MerchantsNotPaidViewProvider.of(MerchantsNotPaidView::new))
+        .register(MinuteProvider.of(Minute::new))
+        .register(MinuteToHourActionProvider.of(MinuteToHourAction::new))
+        .register(MinuteToSecondActionProvider.of(MinuteToSecondAction::new))
+        .register(PaymentProvider.of(Payment::new))
+        .register(SecondProvider.of(Second::new))
+        .register(SecondToMinuteActionProvider.of(SecondToMinuteAction::new))
+        .register(SecondToStripedSecondActionProvider.of(SecondToStripedSecondAction::new))
+        .register(StripedSecondProvider.of(StripedSecond::new))
+        .register(StripedSecondToSecondActionProvider.of(StripedSecondToSecondAction::new))
+        .register(StripedSecondToTransactionActionProvider.of(StripedSecondToTransactionAction::new))
+        .register(TransactionProvider.of(Transaction::new))
+        .register(TransactionToStripedSecondActionProvider.of(TransactionToStripedSecondAction::new))
+        .register(TransactionTopicConsumerActionProvider.of(TransactionTopicConsumerAction::new))
+//        .register(TransactionsNotPaidByDateViewProvider.of(TransactionsNotPaidByDateView::new))
+//        .register(TransactionsPaidByPaymentByDateViewProvider.of(TransactionsPaidByPaymentByDateView::new))
+        ;
   }
 
   public static void main(String[] args) throws Exception {
