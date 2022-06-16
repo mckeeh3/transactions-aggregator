@@ -209,6 +209,7 @@ public class Hour extends AbstractHour {
         .build();
 
     if (state.getActiveMinutesCount() == 0) {
+      log.debug("HourActivated from command {}", command);
       var hourActivated = HourEntity.HourActivated
           .newBuilder()
           .setMerchantKey(

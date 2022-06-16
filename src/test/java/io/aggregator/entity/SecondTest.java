@@ -18,7 +18,7 @@ public class SecondTest {
 
   @Test
   public void exampleTest() {
-    // SecondTestKit testKit = SecondTestKit.of(SubSecond::new);
+    // SecondTestKit testKit = SecondTestKit.of(StripedSecond::new);
     // use the testkit to execute a command
     // of events emitted, or a final updated state:
     // EventSourcedResult<SomeResponse> result = testKit.someOperation(SomeRequest);
@@ -33,17 +33,18 @@ public class SecondTest {
   }
 
   @Test
-  public void addSubSubSecondTest() {
+  public void addSubStripedSecondTest() {
     SecondTestKit testKit = SecondTestKit.of(Second::new);
 
-    var epochSubSecond = TimeTo.fromNow().toEpochSubSecond();
-    var nextEpochSubSecond = TimeTo.fromEpochSubSecond(epochSubSecond).plus().seconds(1).toEpochSubSecond();
-    var epochSecond = TimeTo.fromEpochSubSecond(epochSubSecond).toEpochSecond();
+    var timestamp = TimeTo.now();
+    var epochSecond = TimeTo.fromTimestamp(timestamp).toEpochSecond();
+    var nextEpochSecond = TimeTo.fromTimestamp(timestamp).plus().seconds(1).toEpochSecond();
+    var stripe = 3;
 
-    var response = testKit.activateSubSecond(activateSubSecondCommand(epochSubSecond));
+    var response = testKit.activateStripedSecond(activateStripedSecondCommand(epochSecond, stripe));
 
     var secondActivated = response.getNextEventOfType(SecondEntity.SecondActivated.class);
-    var subSecondAdded = response.getNextEventOfType(SecondEntity.SubSecondAdded.class);
+    var stripedSecondAdded = response.getNextEventOfType(SecondEntity.StripedSecondAdded.class);
 
     assertEquals("merchant-1", secondActivated.getMerchantKey().getMerchantId());
     assertEquals("service-code-1", secondActivated.getMerchantKey().getServiceCode());
@@ -51,11 +52,12 @@ public class SecondTest {
     assertEquals("account-to-1", secondActivated.getMerchantKey().getAccountTo());
     assertEquals(epochSecond, secondActivated.getEpochSecond());
 
-    assertEquals("merchant-1", subSecondAdded.getMerchantKey().getMerchantId());
-    assertEquals("service-code-1", subSecondAdded.getMerchantKey().getServiceCode());
-    assertEquals("account-from-1", subSecondAdded.getMerchantKey().getAccountFrom());
-    assertEquals("account-to-1", subSecondAdded.getMerchantKey().getAccountTo());
-    assertEquals(epochSubSecond, subSecondAdded.getEpochSubSecond());
+    assertEquals("merchant-1", stripedSecondAdded.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", stripedSecondAdded.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", stripedSecondAdded.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", stripedSecondAdded.getMerchantKey().getAccountTo());
+    assertEquals(epochSecond, stripedSecondAdded.getEpochSecond());
+    assertEquals(stripe, stripedSecondAdded.getStripe());
 
     var state = testKit.getState();
 
@@ -64,21 +66,23 @@ public class SecondTest {
     assertEquals("account-from-1", state.getMerchantKey().getAccountFrom());
     assertEquals("account-to-1", state.getMerchantKey().getAccountTo());
     assertEquals(epochSecond, state.getEpochSecond());
-    assertEquals(1, state.getActiveSubSecondsCount());
+    assertEquals(1, state.getActiveStripedSecondsCount());
 
-    var activeSubSecond = state.getActiveSubSeconds(0);
+    var activeStripedSecond = state.getActiveStripedSeconds(0);
 
-    assertEquals(epochSubSecond, activeSubSecond.getEpochSubSecond());
+    assertEquals(epochSecond, activeStripedSecond.getEpochSecond());
+    assertEquals(stripe, activeStripedSecond.getStripe());
 
-    response = testKit.activateSubSecond(activateSubSecondCommand(nextEpochSubSecond));
+    response = testKit.activateStripedSecond(activateStripedSecondCommand(nextEpochSecond, stripe));
 
-    subSecondAdded = response.getNextEventOfType(SecondEntity.SubSecondAdded.class);
+    stripedSecondAdded = response.getNextEventOfType(SecondEntity.StripedSecondAdded.class);
 
-    assertEquals("merchant-1", subSecondAdded.getMerchantKey().getMerchantId());
-    assertEquals("service-code-1", subSecondAdded.getMerchantKey().getServiceCode());
-    assertEquals("account-from-1", subSecondAdded.getMerchantKey().getAccountFrom());
-    assertEquals("account-to-1", subSecondAdded.getMerchantKey().getAccountTo());
-    assertEquals(nextEpochSubSecond, subSecondAdded.getEpochSubSecond());
+    assertEquals("merchant-1", stripedSecondAdded.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", stripedSecondAdded.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", stripedSecondAdded.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", stripedSecondAdded.getMerchantKey().getAccountTo());
+    assertEquals(nextEpochSecond, stripedSecondAdded.getEpochSecond());
+    assertEquals(stripe, stripedSecondAdded.getStripe());
 
     state = testKit.getState();
 
@@ -87,26 +91,27 @@ public class SecondTest {
     assertEquals("account-from-1", state.getMerchantKey().getAccountFrom());
     assertEquals("account-to-1", state.getMerchantKey().getAccountTo());
     assertEquals(epochSecond, state.getEpochSecond());
-    assertEquals(2, state.getActiveSubSecondsCount());
+    assertEquals(2, state.getActiveStripedSecondsCount());
 
-    activeSubSecond = state.getActiveSubSeconds(1);
+    activeStripedSecond = state.getActiveStripedSeconds(1);
 
-    assertEquals(nextEpochSubSecond, activeSubSecond.getEpochSubSecond());
+    assertEquals(nextEpochSecond, activeStripedSecond.getEpochSecond());
+    assertEquals(stripe, stripedSecondAdded.getStripe());
   }
 
   @Test
   public void aggregateSecondTest() {
     SecondTestKit testKit = SecondTestKit.of(Second::new);
 
-    var epochSubSecond = TimeTo.fromNow().toEpochSubSecond();
-    var nextEpochSubSecond = TimeTo.fromEpochSubSecond(epochSubSecond).plus().seconds(1).toEpochSubSecond();
-    var epochSecond = TimeTo.fromEpochSubSecond(epochSubSecond).toEpochSecond();
-    var now = TimeTo.fromEpochSubSecond(epochSubSecond).toTimestamp();
+    var timestamp = TimeTo.now();
+    var epochSecond = TimeTo.fromTimestamp(timestamp).toEpochSecond();
+    var stripe1 = 3;
+    var stripe2 = 5;
 
-    testKit.activateSubSecond(activateSubSecondCommand(epochSubSecond));
-    testKit.activateSubSecond(activateSubSecondCommand(nextEpochSubSecond));
+    testKit.activateStripedSecond(activateStripedSecondCommand(epochSecond, stripe1));
+    testKit.activateStripedSecond(activateStripedSecondCommand(epochSecond, stripe2));
 
-    var response = testKit.aggregateSecond(aggregateSecondCommand(epochSecond, now));
+    var response = testKit.aggregateSecond(aggregateSecondCommand(epochSecond, timestamp));
 
     var secondAggregationRequested = response.getNextEventOfType(SecondEntity.SecondAggregationRequested.class);
 
@@ -115,30 +120,29 @@ public class SecondTest {
     assertEquals("account-from-1", secondAggregationRequested.getMerchantKey().getAccountFrom());
     assertEquals("account-to-1", secondAggregationRequested.getMerchantKey().getAccountTo());
     assertEquals(epochSecond, secondAggregationRequested.getEpochSecond());
-    assertEquals(now, secondAggregationRequested.getAggregateRequestTimestamp());
-    assertEquals(2, secondAggregationRequested.getEpochSubSecondsCount());
-    assertEquals(epochSubSecond, secondAggregationRequested.getEpochSubSeconds(0));
-    assertEquals(nextEpochSubSecond, secondAggregationRequested.getEpochSubSeconds(1));
+    assertEquals(timestamp, secondAggregationRequested.getAggregateRequestTimestamp());
+    assertEquals(2, secondAggregationRequested.getStripesCount());
+    assertEquals(stripe1, secondAggregationRequested.getStripes(0));
+    assertEquals(stripe2, secondAggregationRequested.getStripes(1));
     assertEquals("payment-1", secondAggregationRequested.getPaymentId());
 
     var state = testKit.getState();
 
     var aggregateSecond = state.getAggregateSecondsList().stream()
-        .filter(aggSec -> aggSec.getAggregateRequestTimestamp().equals(now))
+        .filter(aggSec -> aggSec.getAggregateRequestTimestamp().equals(timestamp))
         .findFirst();
     assertTrue(aggregateSecond.isPresent());
-    assertEquals(now, aggregateSecond.get().getAggregateRequestTimestamp());
+    assertEquals(timestamp, aggregateSecond.get().getAggregateRequestTimestamp());
   }
 
   @Test
   public void aggregateSecondWithNoSecondsTest() {
     SecondTestKit testKit = SecondTestKit.of(Second::new);
 
-    var epochSubSecond = TimeTo.fromNow().toEpochSubSecond();
-    var epochSecond = TimeTo.fromEpochSubSecond(epochSubSecond).toEpochSecond();
-    var now = TimeTo.fromEpochSubSecond(epochSubSecond).toTimestamp();
+    var timestamp = TimeTo.now();
+    var epochSecond = TimeTo.fromTimestamp(timestamp).toEpochSecond();
 
-    var response = testKit.aggregateSecond(aggregateSecondCommand(epochSecond, now));
+    var response = testKit.aggregateSecond(aggregateSecondCommand(epochSecond, timestamp));
 
     var secondAggregationRequested = response.getNextEventOfType(SecondEntity.SecondAggregated.class);
 
@@ -147,93 +151,97 @@ public class SecondTest {
     assertEquals("account-from-1", secondAggregationRequested.getMerchantKey().getAccountFrom());
     assertEquals("account-to-1", secondAggregationRequested.getMerchantKey().getAccountTo());
     assertEquals(epochSecond, secondAggregationRequested.getEpochSecond());
-    assertEquals(now, secondAggregationRequested.getAggregateRequestTimestamp());
+    assertEquals(timestamp, secondAggregationRequested.getAggregateRequestTimestamp());
     assertEquals(0, secondAggregationRequested.getTransactionCount());
     assertEquals(0.0, secondAggregationRequested.getTransactionTotalAmount(), 0.0);
     assertEquals("payment-1", secondAggregationRequested.getPaymentId());
   }
 
   @Test
-  public void subSubSecondAggregationTest() {
+  public void stripedSecondAggregationTest() {
     SecondTestKit testKit = SecondTestKit.of(Second::new);
 
-    var epochSubSecond = TimeTo.fromNow().toEpochSubSecond();
-    var nextEpochSubSecond = TimeTo.fromEpochSubSecond(epochSubSecond).plus().subSeconds(1).toEpochSubSecond();
-    var epochSecond = TimeTo.fromEpochSubSecond(epochSubSecond).toEpochSecond();
-    var aggregateRequestTimestamp = TimeTo.fromEpochSubSecond(epochSubSecond).toTimestamp();
+    var timestamp = TimeTo.now();
+    var epochSecond = TimeTo.fromTimestamp(timestamp).toEpochSecond();
+    var nextEpochSecond = TimeTo.fromTimestamp(timestamp).plus().seconds(1).toEpochSecond();
+    var stripe = 3;
+    var aggregateRequestTimestamp = timestamp;
 
-    testKit.activateSubSecond(activateSubSecondCommand(epochSubSecond));
-    testKit.activateSubSecond(activateSubSecondCommand(nextEpochSubSecond));
+    testKit.activateStripedSecond(activateStripedSecondCommand(epochSecond, stripe));
+    testKit.activateStripedSecond(activateStripedSecondCommand(nextEpochSecond, stripe));
 
     testKit.aggregateSecond(aggregateSecondCommand(epochSecond, aggregateRequestTimestamp));
 
-    var response = testKit.subSecondAggregation(subSecondAggregationCommand(epochSubSecond, 123.45, 10, aggregateRequestTimestamp));
+    var response = testKit.stripedSecondAggregation(stripedSecondAggregationCommand(epochSecond, stripe, 123.45, 10, aggregateRequestTimestamp));
 
-    var activeSubSecondAggregated = response.getNextEventOfType(SecondEntity.ActiveSubSecondAggregated.class);
+    var activeStripedSecondAggregated = response.getNextEventOfType(SecondEntity.ActiveStripedSecondAggregated.class);
 
-    assertEquals("merchant-1", activeSubSecondAggregated.getMerchantKey().getMerchantId());
-    assertEquals("service-code-1", activeSubSecondAggregated.getMerchantKey().getServiceCode());
-    assertEquals("account-from-1", activeSubSecondAggregated.getMerchantKey().getAccountFrom());
-    assertEquals("account-to-1", activeSubSecondAggregated.getMerchantKey().getAccountTo());
-    assertEquals(epochSubSecond, activeSubSecondAggregated.getEpochSubSecond());
-    assertEquals(123.45, activeSubSecondAggregated.getTransactionTotalAmount(), 0.0);
-    assertEquals(10, activeSubSecondAggregated.getTransactionCount());
-    assertEquals(aggregateRequestTimestamp, activeSubSecondAggregated.getLastUpdateTimestamp());
-    assertEquals(aggregateRequestTimestamp, activeSubSecondAggregated.getAggregateRequestTimestamp());
-    assertEquals("payment-1", activeSubSecondAggregated.getPaymentId());
+    assertEquals("merchant-1", activeStripedSecondAggregated.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", activeStripedSecondAggregated.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", activeStripedSecondAggregated.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", activeStripedSecondAggregated.getMerchantKey().getAccountTo());
+    assertEquals(epochSecond, activeStripedSecondAggregated.getEpochSecond());
+    assertEquals(stripe, activeStripedSecondAggregated.getStripe());
+    assertEquals(123.45, activeStripedSecondAggregated.getTransactionTotalAmount(), 0.0);
+    assertEquals(10, activeStripedSecondAggregated.getTransactionCount());
+    assertEquals(aggregateRequestTimestamp, activeStripedSecondAggregated.getLastUpdateTimestamp());
+    assertEquals(aggregateRequestTimestamp, activeStripedSecondAggregated.getAggregateRequestTimestamp());
+    assertEquals("payment-1", activeStripedSecondAggregated.getPaymentId());
 
-    response = testKit.subSecondAggregation(subSecondAggregationCommand(nextEpochSubSecond, 678.90, 20, aggregateRequestTimestamp));
+    response = testKit.stripedSecondAggregation(stripedSecondAggregationCommand(nextEpochSecond, stripe, 678.90, 20, aggregateRequestTimestamp));
 
     var secondAggregated = response.getNextEventOfType(SecondEntity.SecondAggregated.class);
-    activeSubSecondAggregated = response.getNextEventOfType(SecondEntity.ActiveSubSecondAggregated.class);
+    activeStripedSecondAggregated = response.getNextEventOfType(SecondEntity.ActiveStripedSecondAggregated.class);
 
-    assertEquals("merchant-1", activeSubSecondAggregated.getMerchantKey().getMerchantId());
-    assertEquals("service-code-1", activeSubSecondAggregated.getMerchantKey().getServiceCode());
-    assertEquals("account-from-1", activeSubSecondAggregated.getMerchantKey().getAccountFrom());
-    assertEquals("account-to-1", activeSubSecondAggregated.getMerchantKey().getAccountTo());
-    assertEquals(nextEpochSubSecond, activeSubSecondAggregated.getEpochSubSecond());
-    assertEquals(678.90, activeSubSecondAggregated.getTransactionTotalAmount(), 0.0);
-    assertEquals(20, activeSubSecondAggregated.getTransactionCount());
-    assertEquals(aggregateRequestTimestamp, activeSubSecondAggregated.getLastUpdateTimestamp());
-    assertEquals(aggregateRequestTimestamp, activeSubSecondAggregated.getAggregateRequestTimestamp());
-    assertEquals("payment-1", activeSubSecondAggregated.getPaymentId());
+    assertEquals("merchant-1", activeStripedSecondAggregated.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", activeStripedSecondAggregated.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", activeStripedSecondAggregated.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", activeStripedSecondAggregated.getMerchantKey().getAccountTo());
+    assertEquals(nextEpochSecond, activeStripedSecondAggregated.getEpochSecond());
+    assertEquals(stripe, activeStripedSecondAggregated.getStripe());
+    assertEquals(678.90, activeStripedSecondAggregated.getTransactionTotalAmount(), 0.0);
+    assertEquals(20, activeStripedSecondAggregated.getTransactionCount());
+    assertEquals(aggregateRequestTimestamp, activeStripedSecondAggregated.getLastUpdateTimestamp());
+    assertEquals(aggregateRequestTimestamp, activeStripedSecondAggregated.getAggregateRequestTimestamp());
+    assertEquals("payment-1", activeStripedSecondAggregated.getPaymentId());
 
     assertEquals("merchant-1", secondAggregated.getMerchantKey().getMerchantId());
     assertEquals("service-code-1", secondAggregated.getMerchantKey().getServiceCode());
     assertEquals("account-from-1", secondAggregated.getMerchantKey().getAccountFrom());
     assertEquals("account-to-1", secondAggregated.getMerchantKey().getAccountTo());
-    assertEquals(epochSecond, secondAggregated.getEpochSecond());
+    assertEquals(nextEpochSecond, secondAggregated.getEpochSecond());
     assertEquals(123.45 + 678.90, secondAggregated.getTransactionTotalAmount(), 0.0);
     assertEquals(10 + 20, secondAggregated.getTransactionCount());
     assertEquals(aggregateRequestTimestamp, secondAggregated.getLastUpdateTimestamp());
     assertEquals(aggregateRequestTimestamp, secondAggregated.getAggregateRequestTimestamp());
     assertEquals("payment-1", secondAggregated.getPaymentId());
 
-    // this sequence re-activates the sub-second and second aggregation
-    aggregateRequestTimestamp = TimeTo.fromEpochSubSecond(epochSubSecond).plus().minutes(1).toTimestamp();
+    // this sequence re-activates the striped-second and second aggregation
+    aggregateRequestTimestamp = TimeTo.fromTimestamp(timestamp).plus().minutes(1).toTimestamp();
 
-    response = testKit.activateSubSecond(activateSubSecondCommand(epochSubSecond));
+    response = testKit.activateStripedSecond(activateStripedSecondCommand(epochSecond, stripe));
 
     response.getNextEventOfType(SecondEntity.SecondActivated.class);
-    response.getNextEventOfType(SecondEntity.SubSecondAdded.class);
+    response.getNextEventOfType(SecondEntity.StripedSecondAdded.class);
 
     testKit.aggregateSecond(aggregateSecondCommand(epochSecond, aggregateRequestTimestamp));
 
-    response = testKit.subSecondAggregation(subSecondAggregationCommand(epochSubSecond, 543.21, 321, aggregateRequestTimestamp));
+    response = testKit.stripedSecondAggregation(stripedSecondAggregationCommand(epochSecond, stripe, 543.21, 321, aggregateRequestTimestamp));
 
     secondAggregated = response.getNextEventOfType(SecondEntity.SecondAggregated.class);
-    activeSubSecondAggregated = response.getNextEventOfType(SecondEntity.ActiveSubSecondAggregated.class);
+    activeStripedSecondAggregated = response.getNextEventOfType(SecondEntity.ActiveStripedSecondAggregated.class);
 
-    assertEquals("merchant-1", activeSubSecondAggregated.getMerchantKey().getMerchantId());
-    assertEquals("service-code-1", activeSubSecondAggregated.getMerchantKey().getServiceCode());
-    assertEquals("account-from-1", activeSubSecondAggregated.getMerchantKey().getAccountFrom());
-    assertEquals("account-to-1", activeSubSecondAggregated.getMerchantKey().getAccountTo());
-    assertEquals(epochSubSecond, activeSubSecondAggregated.getEpochSubSecond());
-    assertEquals(543.21, activeSubSecondAggregated.getTransactionTotalAmount(), 0.0);
-    assertEquals(321, activeSubSecondAggregated.getTransactionCount());
-    assertEquals(aggregateRequestTimestamp, activeSubSecondAggregated.getLastUpdateTimestamp());
-    assertEquals(aggregateRequestTimestamp, activeSubSecondAggregated.getAggregateRequestTimestamp());
-    assertEquals("payment-1", activeSubSecondAggregated.getPaymentId());
+    assertEquals("merchant-1", activeStripedSecondAggregated.getMerchantKey().getMerchantId());
+    assertEquals("service-code-1", activeStripedSecondAggregated.getMerchantKey().getServiceCode());
+    assertEquals("account-from-1", activeStripedSecondAggregated.getMerchantKey().getAccountFrom());
+    assertEquals("account-to-1", activeStripedSecondAggregated.getMerchantKey().getAccountTo());
+    assertEquals(epochSecond, activeStripedSecondAggregated.getEpochSecond());
+    assertEquals(stripe, activeStripedSecondAggregated.getStripe());
+    assertEquals(543.21, activeStripedSecondAggregated.getTransactionTotalAmount(), 0.0);
+    assertEquals(321, activeStripedSecondAggregated.getTransactionCount());
+    assertEquals(aggregateRequestTimestamp, activeStripedSecondAggregated.getLastUpdateTimestamp());
+    assertEquals(aggregateRequestTimestamp, activeStripedSecondAggregated.getAggregateRequestTimestamp());
+    assertEquals("payment-1", activeStripedSecondAggregated.getPaymentId());
 
     assertEquals("merchant-1", secondAggregated.getMerchantKey().getMerchantId());
     assertEquals("service-code-1", secondAggregated.getMerchantKey().getServiceCode());
@@ -251,66 +259,67 @@ public class SecondTest {
   public void multipleAggregationRequestsWithStaggeredResponses() {
     SecondTestKit testKit = SecondTestKit.of(Second::new);
 
-    var epochSecond = TimeTo.fromNow().toEpochSecond();
-    var epochSubSecond1 = TimeTo.fromEpochSecond(epochSecond).toEpochSubSecond();
-    var epochSubSecond2 = TimeTo.fromEpochSubSecond(epochSubSecond1).plus().subSeconds(1).toEpochSubSecond();
-    var aggregateRequestTimestamp1 = TimeTo.fromEpochSubSecond(epochSubSecond1).toTimestamp();
-    var aggregateRequestTimestamp2 = TimeTo.fromEpochSubSecond(epochSubSecond1).plus().seconds(1).toTimestamp();
+    var timestamp = TimeTo.now();
+    var epochSecond1 = TimeTo.fromTimestamp(timestamp).toEpochSecond();
+    var epochSecond2 = TimeTo.fromTimestamp(timestamp).plus().nanos(1).toEpochSecond();
+    var aggregateRequestTimestamp1 = timestamp;
+    var aggregateRequestTimestamp2 = TimeTo.fromTimestamp(timestamp).plus().nanos(1).toTimestamp();
+    var stripe = 3;
 
-    testKit.activateSubSecond(activateSubSecondCommand(epochSubSecond1));
-    testKit.aggregateSecond(aggregateSecondCommand(epochSecond, aggregateRequestTimestamp1));
+    testKit.activateStripedSecond(activateStripedSecondCommand(epochSecond1, stripe));
+    testKit.aggregateSecond(aggregateSecondCommand(epochSecond1, aggregateRequestTimestamp1));
 
-    testKit.activateSubSecond(activateSubSecondCommand(epochSubSecond2));
-    testKit.aggregateSecond(aggregateSecondCommand(epochSecond, aggregateRequestTimestamp2));
+    testKit.activateStripedSecond(activateStripedSecondCommand(epochSecond2, stripe));
+    testKit.aggregateSecond(aggregateSecondCommand(epochSecond1, aggregateRequestTimestamp2));
 
-    var response = testKit.subSecondAggregation(subSecondAggregationCommand(epochSubSecond2, 123.45, 10, aggregateRequestTimestamp2));
+    var response = testKit.stripedSecondAggregation(stripedSecondAggregationCommand(epochSecond2, stripe, 123.45, 10, aggregateRequestTimestamp2));
 
     var secondAggregated = response.getNextEventOfType(SecondEntity.SecondAggregated.class);
-    var activeSubSecondAggregated = response.getNextEventOfType(SecondEntity.ActiveSubSecondAggregated.class);
+    var activeStripedSecondAggregated = response.getNextEventOfType(SecondEntity.ActiveStripedSecondAggregated.class);
 
-    assertEquals(epochSecond, secondAggregated.getEpochSecond());
+    assertEquals(epochSecond1, secondAggregated.getEpochSecond());
     assertEquals(123.45, secondAggregated.getTransactionTotalAmount(), 0.0);
     assertEquals(10, secondAggregated.getTransactionCount());
     assertEquals(aggregateRequestTimestamp2, secondAggregated.getLastUpdateTimestamp());
     assertEquals(aggregateRequestTimestamp2, secondAggregated.getAggregateRequestTimestamp());
     assertEquals("payment-1", secondAggregated.getPaymentId());
 
-    assertEquals(epochSubSecond2, activeSubSecondAggregated.getEpochSubSecond());
-    assertEquals(123.45, activeSubSecondAggregated.getTransactionTotalAmount(), 0.0);
-    assertEquals(10, activeSubSecondAggregated.getTransactionCount());
-    assertEquals(aggregateRequestTimestamp2, activeSubSecondAggregated.getLastUpdateTimestamp());
-    assertEquals(aggregateRequestTimestamp2, activeSubSecondAggregated.getAggregateRequestTimestamp());
-    assertEquals("payment-1", activeSubSecondAggregated.getPaymentId());
+    assertEquals(epochSecond2, activeStripedSecondAggregated.getEpochSecond());
+    assertEquals(123.45, activeStripedSecondAggregated.getTransactionTotalAmount(), 0.0);
+    assertEquals(10, activeStripedSecondAggregated.getTransactionCount());
+    assertEquals(aggregateRequestTimestamp2, activeStripedSecondAggregated.getLastUpdateTimestamp());
+    assertEquals(aggregateRequestTimestamp2, activeStripedSecondAggregated.getAggregateRequestTimestamp());
+    assertEquals("payment-1", activeStripedSecondAggregated.getPaymentId());
 
-    response = testKit.subSecondAggregation(subSecondAggregationCommand(epochSubSecond1, 678.90, 20, aggregateRequestTimestamp1));
+    response = testKit.stripedSecondAggregation(stripedSecondAggregationCommand(epochSecond1, stripe, 678.90, 20, aggregateRequestTimestamp1));
 
     secondAggregated = response.getNextEventOfType(SecondEntity.SecondAggregated.class);
-    activeSubSecondAggregated = response.getNextEventOfType(SecondEntity.ActiveSubSecondAggregated.class);
+    activeStripedSecondAggregated = response.getNextEventOfType(SecondEntity.ActiveStripedSecondAggregated.class);
 
-    assertEquals(epochSecond, secondAggregated.getEpochSecond());
+    assertEquals(epochSecond1, secondAggregated.getEpochSecond());
     assertEquals(678.90, secondAggregated.getTransactionTotalAmount(), 0.0);
     assertEquals(20, secondAggregated.getTransactionCount());
     assertEquals(aggregateRequestTimestamp1, secondAggregated.getLastUpdateTimestamp());
     assertEquals(aggregateRequestTimestamp1, secondAggregated.getAggregateRequestTimestamp());
     assertEquals("payment-1", secondAggregated.getPaymentId());
 
-    assertEquals(epochSubSecond1, activeSubSecondAggregated.getEpochSubSecond());
-    assertEquals(678.90, activeSubSecondAggregated.getTransactionTotalAmount(), 0.0);
-    assertEquals(20, activeSubSecondAggregated.getTransactionCount());
-    assertEquals(aggregateRequestTimestamp1, activeSubSecondAggregated.getLastUpdateTimestamp());
-    assertEquals(aggregateRequestTimestamp1, activeSubSecondAggregated.getAggregateRequestTimestamp());
-    assertEquals("payment-1", activeSubSecondAggregated.getPaymentId());
+    assertEquals(epochSecond1, activeStripedSecondAggregated.getEpochSecond());
+    assertEquals(678.90, activeStripedSecondAggregated.getTransactionTotalAmount(), 0.0);
+    assertEquals(20, activeStripedSecondAggregated.getTransactionCount());
+    assertEquals(aggregateRequestTimestamp1, activeStripedSecondAggregated.getLastUpdateTimestamp());
+    assertEquals(aggregateRequestTimestamp1, activeStripedSecondAggregated.getAggregateRequestTimestamp());
+    assertEquals("payment-1", activeStripedSecondAggregated.getPaymentId());
   }
 
-  static SecondApi.ActivateSubSecondCommand activateSubSecondCommand(long epochSubSecond) {
-    return SecondApi.ActivateSubSecondCommand
+  static SecondApi.ActivateStripedSecondCommand activateStripedSecondCommand(long epochSecond, int stripe) {
+    return SecondApi.ActivateStripedSecondCommand
         .newBuilder()
         .setMerchantId("merchant-1")
         .setServiceCode("service-code-1")
         .setAccountFrom("account-from-1")
         .setAccountTo("account-to-1")
-        .setEpochSecond(TimeTo.fromEpochSubSecond(epochSubSecond).toEpochSecond())
-        .setEpochSubSecond(epochSubSecond)
+        .setEpochSecond(epochSecond)
+        .setStripe(stripe)
         .build();
 
   }
@@ -328,15 +337,15 @@ public class SecondTest {
         .build();
   }
 
-  static SecondApi.SubSecondAggregationCommand subSecondAggregationCommand(long epochSubSecond, double amount, int count, Timestamp aggregateRequestTimestamp) {
-    return SecondApi.SubSecondAggregationCommand
+  static SecondApi.StripedSecondAggregationCommand stripedSecondAggregationCommand(long epochSecond, int stripe, double amount, int count, Timestamp aggregateRequestTimestamp) {
+    return SecondApi.StripedSecondAggregationCommand
         .newBuilder()
         .setMerchantId("merchant-1")
         .setServiceCode("service-code-1")
         .setAccountFrom("account-from-1")
         .setAccountTo("account-to-1")
-        .setEpochSecond(TimeTo.fromEpochSubSecond(epochSubSecond).toEpochSecond())
-        .setEpochSubSecond(epochSubSecond)
+        .setEpochSecond(epochSecond)
+        .setStripe(stripe)
         .setTransactionTotalAmount(amount)
         .setTransactionCount(count)
         .setLastUpdateTimestamp(aggregateRequestTimestamp)

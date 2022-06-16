@@ -7,18 +7,18 @@ import "google/protobuf/timestamp.proto";
 
 package io.aggregator.api;
 
-option java_outer_classname = "SubSecondApi";
+option java_outer_classname = "StripedSecondApi";
 
-service SubSecond {
+service StripedSecond {
   option (kalix.codegen) = {
     event_sourced_entity: {
-      name: "io.aggregator.entity.SubSecond"
-      entity_type: "sub_second"
-      state: "io.aggregator.entity.SubSecondState"
+      name: "io.aggregator.entity.StripedSecond"
+      entity_type: "striped_second"
+      state: "io.aggregator.entity.StripedSecondState"
       events: [
-        "io.aggregator.entity.SubSecondActivated",
-        "io.aggregator.entity.SubSecondTransactionAdded",
-        "io.aggregator.entity.SubSecondAggregated",
+        "io.aggregator.entity.StripedSecondActivated",
+        "io.aggregator.entity.StripedSecondTransactionAdded",
+        "io.aggregator.entity.StripedSecondAggregated",
         "io.aggregator.entity.TransactionPaid"  //
       ]
     }
@@ -26,14 +26,14 @@ service SubSecond {
 
   rpc AddTransaction(AddTransactionCommand) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      post: "/sub_second/add-transaction"
+      post: "/striped_second/add-transaction"
       body: "*"
     };
   }
 
-  rpc AggregateSubSecond(AggregateSubSecondCommand) returns (google.protobuf.Empty) {
+  rpc AggregateStripedSecond(AggregateStripedSecondCommand) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      post: "/sub_second/aggregate"
+      post: "/striped_second/aggregate"
       body: "*"
     };
   }
@@ -44,18 +44,20 @@ message AddTransactionCommand {
   string service_code = 2 [(kalix.field).entity_key = true];
   string account_from = 3 [(kalix.field).entity_key = true];
   string account_to = 4 [(kalix.field).entity_key = true];
-  int64 epoch_sub_second = 5 [(kalix.field).entity_key = true];
-  string transaction_id = 6;
-  double amount = 7;
-  google.protobuf.Timestamp timestamp = 8;
+  int64 epoch_second = 5 [(kalix.field).entity_key = true];
+  int32 stripe = 6 [(kalix.field).entity_key = true];
+  string transaction_id = 7;
+  double amount = 8;
+  google.protobuf.Timestamp timestamp = 9;
 }
 
-message AggregateSubSecondCommand {
+message AggregateStripedSecondCommand {
   string merchant_id = 1 [(kalix.field).entity_key = true];
   string service_code = 2 [(kalix.field).entity_key = true];
   string account_from = 3 [(kalix.field).entity_key = true];
   string account_to = 4 [(kalix.field).entity_key = true];
-  int64 epoch_sub_second = 5 [(kalix.field).entity_key = true];
-  google.protobuf.Timestamp aggregate_request_timestamp = 6;
-  string payment_id = 7;
+  int64 epoch_second = 5 [(kalix.field).entity_key = true];
+  int32 stripe = 6 [(kalix.field).entity_key = true];
+  google.protobuf.Timestamp aggregate_request_timestamp = 7;
+  string payment_id = 8;
 }

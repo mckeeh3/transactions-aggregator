@@ -211,6 +211,7 @@ public class Day extends AbstractDay {
         .build();
 
     if (state.getActiveHoursCount() == 0) {
+      log.debug("DayActivated from command {}", command);
       var dayActivated = DayEntity.DayActivated
           .newBuilder()
           .setMerchantKey(

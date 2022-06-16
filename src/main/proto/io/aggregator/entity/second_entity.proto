@@ -12,9 +12,10 @@ message SecondActivated {
   int64 epoch_second = 2;
 }
 
-message SubSecondAdded {
+message StripedSecondAdded {
   MerchantKey merchant_key = 1;
-  int64 epoch_sub_second = 2;
+  int64 epoch_second = 2;
+  int32 stripe = 3;
 }
 
 message SecondAggregated {
@@ -27,20 +28,21 @@ message SecondAggregated {
   string payment_id = 7;
 }
 
-message ActiveSubSecondAggregated {
+message ActiveStripedSecondAggregated {
   MerchantKey merchant_key = 1;
-  int64 epoch_sub_second = 2;
-  double transaction_total_amount = 3;
-  int32 transaction_count = 4;
-  google.protobuf.Timestamp last_update_timestamp = 5;
-  google.protobuf.Timestamp aggregate_request_timestamp = 6;
-  string payment_id = 7;
+  int64 epoch_second = 2;
+  int32 stripe = 3;
+  double transaction_total_amount = 4;
+  int32 transaction_count = 5;
+  google.protobuf.Timestamp last_update_timestamp = 6;
+  google.protobuf.Timestamp aggregate_request_timestamp = 7;
+  string payment_id = 8;
 }
 
 message SecondAggregationRequested {
   MerchantKey merchant_key = 1;
   int64 epoch_second = 2;
-  repeated int64 epoch_sub_seconds = 3;
+  repeated int32 stripes = 3;
   google.protobuf.Timestamp aggregate_request_timestamp = 6;
   string payment_id = 7;
 }
@@ -51,22 +53,23 @@ message SecondState {
   int64 epoch_minute = 3;
   int64 epoch_hour = 4;
   int64 epoch_day = 5;
-  repeated ActiveSubSecond activeSubSeconds = 6;
+  repeated ActiveStripedSecond activeStripedSeconds = 6;
   repeated AggregateSecond aggregateSeconds = 7;
   google.protobuf.Timestamp last_update_timestamp = 8;
 }
 
 message AggregateSecond {
-  repeated ActiveSubSecond activeSubSeconds = 1;
+  repeated ActiveStripedSecond activeStripedSeconds = 1;
   google.protobuf.Timestamp aggregate_request_timestamp = 2;
   string payment_id = 3;
 }
 
-message ActiveSubSecond {
-  int64 epoch_sub_second = 1;
-  double transaction_total_amount = 2;
-  int32 transaction_count = 3;
-  google.protobuf.Timestamp last_update_timestamp = 4;
-  google.protobuf.Timestamp aggregate_request_timestamp = 5;
-  string payment_id = 6;
+message ActiveStripedSecond {
+  int64 epoch_second = 1;
+  int32 stripe = 2;
+  double transaction_total_amount = 3;
+  int32 transaction_count = 4;
+  google.protobuf.Timestamp last_update_timestamp = 5;
+  google.protobuf.Timestamp aggregate_request_timestamp = 6;
+  string payment_id = 7;
 }

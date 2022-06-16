@@ -11,10 +11,10 @@ import io.aggregator.action.MerchantToPaymentAction;
 import io.aggregator.action.MinuteToHourAction;
 import io.aggregator.action.MinuteToSecondAction;
 import io.aggregator.action.SecondToMinuteAction;
-import io.aggregator.action.SecondToSubSecondAction;
-import io.aggregator.action.SubSecondToSecondAction;
-import io.aggregator.action.SubSecondToTransactionAction;
-import io.aggregator.action.TransactionToSubSecondAction;
+import io.aggregator.action.SecondToStripedSecondAction;
+import io.aggregator.action.StripedSecondToSecondAction;
+import io.aggregator.action.StripedSecondToTransactionAction;
+import io.aggregator.action.TransactionToStripedSecondAction;
 import io.aggregator.action.TransactionTopicConsumerAction;
 import io.aggregator.entity.Day;
 import io.aggregator.entity.Hour;
@@ -22,7 +22,7 @@ import io.aggregator.entity.Merchant;
 import io.aggregator.entity.Minute;
 import io.aggregator.entity.Payment;
 import io.aggregator.entity.Second;
-import io.aggregator.entity.SubSecond;
+import io.aggregator.entity.StripedSecond;
 import io.aggregator.entity.Transaction;
 import io.aggregator.view.MerchantPaymentsAllView;
 import io.aggregator.view.MerchantPaymentsByDateView;
@@ -56,7 +56,7 @@ public final class Main {
       Minute::new,
       Payment::new,
       Second::new,
-      SubSecond::new,
+      StripedSecond::new,
       Transaction::new,
       DayToHourAction::new,
       DayToMerchantAction::new,
@@ -74,10 +74,10 @@ public final class Main {
       MinuteToHourAction::new,
       MinuteToSecondAction::new,
       SecondToMinuteAction::new,
-      SecondToSubSecondAction::new,
-      SubSecondToSecondAction::new,
-      SubSecondToTransactionAction::new,
-      TransactionToSubSecondAction::new,
+      SecondToStripedSecondAction::new,
+      StripedSecondToSecondAction::new,
+      StripedSecondToTransactionAction::new,
+      TransactionToStripedSecondAction::new,
       TransactionTopicConsumerAction::new,
       TransactionsNotPaidByDateView::new,
       TransactionsPaidByPaymentByDateView::new);
