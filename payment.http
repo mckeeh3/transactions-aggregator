@@ -6,7 +6,7 @@
 @serviceCode = service-code-1
 @accountFrom = account-from-1
 @accountTo = account-to-1
-@paymentId = payment-5
+@paymentId = payment-6
 
 ### io.aggregator.api.Payment.GetPayment
 
