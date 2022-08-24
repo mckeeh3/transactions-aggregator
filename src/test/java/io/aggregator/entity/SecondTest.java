@@ -194,7 +194,7 @@ public class SecondTest {
     );
 
     assertEquals("merchant-1", secondAggregated.getMerchantKey().getMerchantId());
-    assertEquals(epochSecond, secondAggregated.getEpochSecond());
+    assertEquals(TimeTo.fromEpochSubSecond(nextEpochSubSecond).toEpochSecond(), secondAggregated.getEpochSecond());
     assertEquals(moneyMovements.size(), secondAggregated.getMoneyMovementsCount());
     assertTrue(secondAggregated.getMoneyMovementsList().containsAll(moneyMovements));
     assertEquals(aggregateRequestTimestamp, secondAggregated.getLastUpdateTimestamp());

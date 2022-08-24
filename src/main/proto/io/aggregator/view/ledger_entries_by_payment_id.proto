@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package io.aggregator.view;
+
+import "google/api/annotations.proto";
+import "google/protobuf/any.proto";
+import "akkaserverless/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "io/aggregator/entity/transaction_entity.proto";
+import "io/aggregator/view/transaction.proto";
+
+option java_outer_classname = "LedgerEntriesByPaymentIdModel";
+
+service LedgerEntriesByPaymentId {
+  option (akkaserverless.codegen) = {
+    view: {}
+  };
+
+  rpc GetLedgerEntriesByPaymentId(LedgerEntriesByPaymentIdRequest) returns (LedgerEntriesByPaymentIdResponse) {
+    option (akkaserverless.method).view.query = {
+      query: "SELECT * AS entries"
+          "  FROM ledger_entries_by_payment_id OFFSET :ledger_entry_offset LIMIT :ledger_entry_limit"
+          " WHERE payment_id = :payment_id"
+    };
+    option (google.api.http) = {
+      get: "/ledger-entries-by-payment-id"
+    };
+  }
+
+  rpc OnIncidentAdded(entity.IncidentAdded) returns (Transaction) {
+    option (akkaserverless.method).eventing.in = {
+      event_sourced_entity: "transaction"
+    };
+    option (akkaserverless.method).view.update = {
+      table: "ledger_entries_by_payment_id"
+      transform_updates: true
+    };
+  }
+
+  rpc IgnoreOtherEvents(google.protobuf.Any) returns (Transaction) {
+    option (akkaserverless.method).eventing.in = {
+      event_sourced_entity: "transaction"
+    };
+    option (akkaserverless.method).view.update = {
+      table: "ledger_entries_by_payment_id"
+      transform_updates: true
+    };
+  }
+}
+
+message LedgerEntriesByPaymentIdRequest {
+  string payment_id = 1;
+}
+
+message LedgerEntriesByPaymentIdResponse {
+  string payment_id = 1;
+}
