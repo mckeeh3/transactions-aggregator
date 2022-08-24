@@ -7,7 +7,6 @@ import org.junit.Test;
 import io.aggregator.TimeTo;
 import io.aggregator.api.SubSecondApi;
 import io.aggregator.entity.TransactionEntity;
-import io.aggregator.entity.TransactionMerchantKey;
 
 // This class was initially generated based on the .proto definition by Kalix tooling.
 //
@@ -43,7 +42,7 @@ public class TransactionToSubSecondActionTest {
             .setIncidentTimestamp(timestamp)
             .addTransactionIncident(TransactionEntity.TransactionIncident.newBuilder()
                     .setServiceCode("service-code-1")
-                    .setIncidentAmount(123.45)
+                    .setIncidentAmount("123.45")
                     .setAccountFrom("from")
                     .setAccountTo("to")
                     .build())
@@ -57,7 +56,7 @@ public class TransactionToSubSecondActionTest {
     assertEquals(timestamp, reply.getTimestamp());
     assertEquals(1, reply.getLedgerItemList().size());
     assertEquals("service-code-1", reply.getLedgerItemList().get(0).getServiceCode());
-    assertEquals(123.45, reply.getLedgerItemList().get(0).getAmount(), 0);
+    assertEquals("123.45", reply.getLedgerItemList().get(0).getAmount());
     assertEquals("from", reply.getLedgerItemList().get(0).getAccountFrom());
     assertEquals("to", reply.getLedgerItemList().get(0).getAccountTo());
   }

@@ -45,7 +45,7 @@ message PaymentPricedCommand {
 
 message PricedItem {
   string service_code = 1;
-  double priced_item_amount = 2;
+  string priced_item_amount = 2;
 }
 
 message GetTransactionRequest {
@@ -56,6 +56,6 @@ message GetTransactionResponse {
   string transaction_id = 1;
   string merchant_id = 2;
   string shop_id = 3;
-  double transaction_amount = 4;
+  string transaction_amount = 4;
   google.protobuf.Timestamp transaction_timestamp = 5;
 }

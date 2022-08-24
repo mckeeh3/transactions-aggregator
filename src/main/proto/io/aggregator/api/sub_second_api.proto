@@ -50,7 +50,7 @@ message LedgerItem {
   string service_code = 1 [(kalix.field).entity_key = true];
   string account_from = 2 [(kalix.field).entity_key = true];
   string account_to = 3 [(kalix.field).entity_key = true];
-  double amount = 4;
+  string amount = 4;
 }
 
 message AggregateSubSecondCommand {

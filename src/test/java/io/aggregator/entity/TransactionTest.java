@@ -44,7 +44,7 @@ public class TransactionTest {
             .setEventType("event-type-1")
                 .addPricedItem(TransactionApi.PricedItem.newBuilder()
                         .setServiceCode("SVC1")
-                        .setPricedItemAmount(123.45)
+                        .setPricedItemAmount("123.45")
                         .build())
             .setTimestamp(now)
             .build());
@@ -56,7 +56,7 @@ public class TransactionTest {
     assertEquals(now, incidentAdded.getIncidentTimestamp());
     assertEquals(1, incidentAdded.getTransactionIncidentList().size());
     assertEquals("SVC1", incidentAdded.getTransactionIncidentList().get(0).getServiceCode());
-    assertEquals(123.45, incidentAdded.getTransactionIncidentList().get(0).getIncidentAmount(), 0);
+    assertEquals("123.45", incidentAdded.getTransactionIncidentList().get(0).getIncidentAmount());
     assertEquals("JPMC", incidentAdded.getTransactionIncidentList().get(0).getAccountFrom());
     assertEquals("MERCHANT-SHOP", incidentAdded.getTransactionIncidentList().get(0).getAccountTo());
 
@@ -66,7 +66,7 @@ public class TransactionTest {
     assertEquals("shop-1", state.getShopId());
     assertEquals(1, state.getTransactionIncidentList().size());
     assertEquals("SVC1", state.getTransactionIncidentList().get(0).getServiceCode());
-    assertEquals(123.45, state.getTransactionIncidentList().get(0).getIncidentAmount(), 0);
+    assertEquals("123.45", state.getTransactionIncidentList().get(0).getIncidentAmount());
     assertEquals("JPMC", state.getTransactionIncidentList().get(0).getAccountFrom());
     assertEquals("MERCHANT-SHOP", state.getTransactionIncidentList().get(0).getAccountTo());
   }
@@ -94,7 +94,7 @@ public class TransactionTest {
     assertNotNull(transaction);
     assertEquals("transaction-1", transaction.getTransactionId());
     assertEquals("merchant-1", transaction.getMerchantId());
-    assertEquals(123.45, transaction.getTransactionAmount(), 0.0);
+    assertEquals("123.45", transaction.getTransactionAmount());
     assertTrue(transaction.getTransactionTimestamp().getSeconds() > 0);
   }
 }

@@ -18,5 +18,5 @@ message MerchantKey {
 message MoneyMovement {
   string account_from = 1;
   string account_to = 2;
-  double amount = 3;
+  string amount = 3;
 }

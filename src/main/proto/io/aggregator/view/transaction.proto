@@ -14,6 +14,6 @@ message Transaction {
   string account_to = 5;
   string shop_id = 6;
   string transaction_id = 7;
-  double transaction_amount = 8;
+  string transaction_amount = 8;
   google.protobuf.Timestamp transaction_timestamp = 9;
 }

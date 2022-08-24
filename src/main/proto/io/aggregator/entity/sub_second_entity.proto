@@ -42,7 +42,7 @@ message SubSecondState {
 message LedgerEntry {
   TransactionKey transaction_key = 1;
   int64 epoch_sub_second = 2;
-  double amount = 3;
+  string amount = 3;
   google.protobuf.Timestamp timestamp = 4;
   google.protobuf.Timestamp aggregate_request_timestamp = 5;
   string payment_id = 6;

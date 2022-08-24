@@ -44,7 +44,7 @@ public class FrontendAction extends AbstractFrontendAction {
               .setShopId("tesco-chelsea")
               .addPricedItem(TransactionApi.PricedItem.newBuilder()
                   .setServiceCode("SVC" + random.nextInt(4) + 1)
-                  .setPricedItemAmount(random.nextInt(90) + 5)
+                  .setPricedItemAmount(String.valueOf(random.nextInt(90) + 5))
                   .build())
               .setTimestamp(timestamp)
               .build();

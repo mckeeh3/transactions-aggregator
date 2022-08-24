@@ -12,7 +12,7 @@ message TransactionCreated {
   string transaction_id = 1;
   string merchant_id = 2;
   string shop_id = 3;
-  double transaction_amount = 4;
+  string transaction_amount = 4;
   google.protobuf.Timestamp transaction_timestamp = 5;
 }
 
@@ -34,7 +34,7 @@ message TransactionState {
   string transaction_id = 1;
   string merchant_id = 2;
   string shop_id = 3;
-  double transaction_amount = 4;
+  string transaction_amount = 4;
   google.protobuf.Timestamp transaction_timestamp = 5;
   repeated TransactionIncident transaction_incident = 6;
 }
@@ -43,5 +43,5 @@ message TransactionIncident {
   string service_code = 1;
   string account_from = 2;
   string account_to = 3;
-  double incident_amount = 4;
+  string incident_amount = 4;
 }

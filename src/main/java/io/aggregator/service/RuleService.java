@@ -4,6 +4,7 @@ import io.aggregator.api.TransactionApi;
 import io.aggregator.entity.TransactionEntity;
 import io.aggregator.entity.TransactionMerchantKey;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -85,10 +86,14 @@ public class RuleService {
         .build();
   }
 
+  public static String sumFunction(String amount1, String amount2) {
+    return new BigDecimal(amount1).add(new BigDecimal(amount2)).toString();
+  }
+
   private static final BiFunction<TransactionMerchantKey.MoneyMovement, TransactionMerchantKey.MoneyMovement, TransactionMerchantKey.MoneyMovement> mergeFunction = (moneyMovement1, moneyMovement2) -> TransactionMerchantKey.MoneyMovement.newBuilder()
       .setAccountFrom(moneyMovement1.getAccountFrom())
       .setAccountTo(moneyMovement1.getAccountTo())
-      .setAmount(moneyMovement1.getAmount() + moneyMovement2.getAmount())
+      .setAmount(sumFunction(moneyMovement1.getAmount(), moneyMovement2.getAmount()))
       .build();
 }
 

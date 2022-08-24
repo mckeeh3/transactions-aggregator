@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import io.aggregator.service.RuleService;
 import kalix.javasdk.eventsourcedentity.EventSourcedEntityContext;
 import com.google.protobuf.Empty;
 
@@ -198,7 +199,7 @@ public class SubSecond extends AbstractSubSecond {
             summarisedMoneyMovementsMap.merge(key, transfer, (transfer1, transfer2) -> TransactionMerchantKey.MoneyMovement.newBuilder()
                 .setAccountFrom(transfer1.getAccountFrom())
                 .setAccountTo(transfer1.getAccountTo())
-                .setAmount(transfer1.getAmount() + transfer2.getAmount())
+                .setAmount(RuleService.sumFunction(transfer1.getAmount(), transfer2.getAmount()))
                 .build());
           });
       var lastUpdate = ledgerEntries.stream()

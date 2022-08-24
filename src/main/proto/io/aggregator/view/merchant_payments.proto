@@ -12,7 +12,7 @@ message MerchantPayment {
   string account_from = 3;
   string account_to = 4;
   string payment_id = 5;
-  double transaction_total_amount = 6;
+  string transaction_total_amount = 6;
   int32 transaction_count = 7;
   google.protobuf.Timestamp payment_timestamp = 8;
 }

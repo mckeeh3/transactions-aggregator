@@ -7,6 +7,7 @@ import io.aggregator.entity.TransactionMerchantKey;
 import org.junit.ClassRule;
 import org.junit.Test;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -55,7 +56,7 @@ public class SystemIntegrationTest {
         .setEventType("approved")
         .setTimestamp(TimeTo.now())
         .addPricedItem(TransactionApi.PricedItem.newBuilder()
-            .setPricedItemAmount(1.01)
+            .setPricedItemAmount("1.01")
             .setServiceCode("SVC1")
             .build())
         .build()).toCompletableFuture().get(10, SECONDS);
@@ -84,7 +85,7 @@ public class SystemIntegrationTest {
     TransactionMerchantKey.MoneyMovement moneyMovement = paymentStatusResponse.getMoneyMovements(0);
     assertEquals("JPMC", moneyMovement.getAccountFrom());
     assertEquals("MERCHANT-TESCO", moneyMovement.getAccountTo());
-    assertEquals(1.01, moneyMovement.getAmount(), 0.0);
+    assertEquals("1.01", moneyMovement.getAmount());
   }
 
   @Test
@@ -114,19 +115,19 @@ public class SystemIntegrationTest {
           .setEventType("approved")
           .setTimestamp(TimeTo.now())
           .addPricedItem(TransactionApi.PricedItem.newBuilder()
-              .setPricedItemAmount(i + 0.1)
+              .setPricedItemAmount(BigDecimal.valueOf(i).add(new BigDecimal("0.111")).toString())
               .setServiceCode("SVC1")
               .build())
           .addPricedItem(TransactionApi.PricedItem.newBuilder()
-              .setPricedItemAmount(i + 0.2)
+              .setPricedItemAmount(BigDecimal.valueOf(i).add(new BigDecimal("0.222")).toString())
               .setServiceCode("SVC2")
               .build())
           .addPricedItem(TransactionApi.PricedItem.newBuilder()
-              .setPricedItemAmount(i + 0.3)
+              .setPricedItemAmount(BigDecimal.valueOf(i).add(new BigDecimal("0.333")).toString())
               .setServiceCode("SVC3")
               .build())
           .addPricedItem(TransactionApi.PricedItem.newBuilder()
-              .setPricedItemAmount(i + 0.4)
+              .setPricedItemAmount(BigDecimal.valueOf(i).add(new BigDecimal("0.444")).toString())
               .setServiceCode("SVC4")
               .build())
           .build());
@@ -157,16 +158,16 @@ public class SystemIntegrationTest {
       String merchantAccount = "MERCHANT-" + merchant.toUpperCase();
       Optional<TransactionMerchantKey.MoneyMovement> optionalSvc1 = findMoneyMovement(paymentStatusResponse, "JPMC", merchantAccount);
       assertTrue(optionalSvc1.isPresent());
-      assertEquals(amountByMerchant[i] + (numberOfEventsByMerchant[i] * 0.1), optionalSvc1.get().getAmount(), 0.01);
+      assertEquals(BigDecimal.valueOf(amountByMerchant[i]).add(BigDecimal.valueOf(0.1).multiply(new BigDecimal(numberOfEventsByMerchant[i]))).toString(), optionalSvc1.get().getAmount());
       Optional<TransactionMerchantKey.MoneyMovement> optionalSvc2 = findMoneyMovement(paymentStatusResponse, merchantAccount, "JPMC");
       assertTrue(optionalSvc2.isPresent());
-      assertEquals(amountByMerchant[i] + (numberOfEventsByMerchant[i] * 0.2), optionalSvc2.get().getAmount(), 0.01);
+      assertEquals(BigDecimal.valueOf(amountByMerchant[i]).add(BigDecimal.valueOf(0.2).multiply(new BigDecimal(numberOfEventsByMerchant[i]))).toString(), optionalSvc2.get().getAmount());
       Optional<TransactionMerchantKey.MoneyMovement> optionalSvc3 = findMoneyMovement(paymentStatusResponse, merchantAccount, "TAX");
       assertTrue(optionalSvc3.isPresent());
-      assertEquals(amountByMerchant[i] + (numberOfEventsByMerchant[i] * 0.3), optionalSvc3.get().getAmount(), 0.01);
+      assertEquals(BigDecimal.valueOf(amountByMerchant[i]).add(BigDecimal.valueOf(0.3).multiply(new BigDecimal(numberOfEventsByMerchant[i]))).toString(), optionalSvc3.get().getAmount());
       Optional<TransactionMerchantKey.MoneyMovement> optionalSvc4 = findMoneyMovement(paymentStatusResponse, merchantAccount, "CARD-SCHEME");
       assertTrue(optionalSvc4.isPresent());
-      assertEquals(amountByMerchant[i] + (numberOfEventsByMerchant[i] * 0.4), optionalSvc4.get().getAmount(), 0.01);
+      assertEquals(BigDecimal.valueOf(amountByMerchant[i]).add(BigDecimal.valueOf(0.4).multiply(new BigDecimal(numberOfEventsByMerchant[i]))).toString(), optionalSvc4.get().getAmount());
     }
   }
 

@@ -222,9 +222,9 @@ public class PaymentTest {
     testKit.aggregationRequest(aggregationRequestCommand(now, epochDay));
 
     Collection<TransactionMerchantKey.MoneyMovement> moneyMovements = List.of(
-        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("AAA").setAccountTo("BBB").setAmount(1.22).build(),
-        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("CCC").setAccountTo("BBB").setAmount(2.20).build(),
-        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("BBB").setAccountTo("AAA").setAmount(1.22).build()
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("AAA").setAccountTo("BBB").setAmount("1.22").build(),
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("CCC").setAccountTo("BBB").setAmount("2.20").build(),
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("BBB").setAccountTo("AAA").setAmount("1.22").build()
     );
     var response = testKit.dayAggregation(dayAggregationCommand(epochDay, moneyMovements, now));
 
@@ -264,9 +264,9 @@ public class PaymentTest {
     testKit.paymentRequest(paymentRequestCommand(now, epochDay));
 
     Collection<TransactionMerchantKey.MoneyMovement> moneyMovements = List.of(
-        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("AAA").setAccountTo("BBB").setAmount(1.22).build(),
-        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("CCC").setAccountTo("BBB").setAmount(2.20).build(),
-        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("BBB").setAccountTo("AAA").setAmount(1.22).build()
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("AAA").setAccountTo("BBB").setAmount("1.22").build(),
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("CCC").setAccountTo("BBB").setAmount("2.20").build(),
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("BBB").setAccountTo("AAA").setAmount("1.22").build()
     );
     var response = testKit.dayAggregation(dayAggregationCommand(epochDay, moneyMovements, now));
 
@@ -360,9 +360,9 @@ public class PaymentTest {
 
     testKit.aggregationRequest(aggregationRequestCommand(aggregateRequestTimestamp, epochDay));
     Collection<TransactionMerchantKey.MoneyMovement> moneyMovements = List.of(
-        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("AAA").setAccountTo("BBB").setAmount(1.22).build(),
-        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("CCC").setAccountTo("BBB").setAmount(2.20).build(),
-        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("BBB").setAccountTo("AAA").setAmount(1.22).build()
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("AAA").setAccountTo("BBB").setAmount("1.22").build(),
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("CCC").setAccountTo("BBB").setAmount("2.20").build(),
+        TransactionMerchantKey.MoneyMovement.newBuilder().setAccountFrom("BBB").setAccountTo("AAA").setAmount("1.22").build()
     );
     testKit.dayAggregation(dayAggregationCommand(epochDay, moneyMovements, aggregateRequestTimestamp));
 
