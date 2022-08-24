@@ -1,6 +1,6 @@
 package io.aggregator.action;
 
-import com.akkaserverless.javasdk.action.ActionCreationContext;
+import kalix.javasdk.action.ActionCreationContext;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 
@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.stream.Collectors;
 
-// This class was initially generated based on the .proto definition by Akka Serverless tooling.
+// This class was initially generated based on the .proto definition by Kalix tooling.
 // This is the implementation for the Action Service described in your io/aggregator/action/transaction_to_sub_second_action.proto.proto file.
 //
 // As long as this file exists it will not be overwritten: you can maintain it yourself,

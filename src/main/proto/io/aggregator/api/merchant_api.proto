@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-import "akkaserverless/annotations.proto";
+import "kalix/annotations.proto";
 import "google/protobuf/empty.proto";
 import "google/api/annotations.proto";
 
@@ -9,7 +9,7 @@ package io.aggregator.api;
 option java_outer_classname = "MerchantApi";
 
 service Merchant {
-  option (akkaserverless.codegen) = {
+  option (kalix.codegen) = {
     event_sourced_entity: {
       name: "io.aggregator.entity.Merchant"
       entity_type: "merchant"
@@ -45,14 +45,14 @@ service Merchant {
 }
 
 message ActivateDayCommand {
-  string merchant_id = 1 [(akkaserverless.field).entity_key = true];
+  string merchant_id = 1 [(kalix.field).entity_key = true];
   int64 epoch_day = 2;
 }
 
 message MerchantAggregationRequestCommand {
-  string merchant_id = 1 [(akkaserverless.field).entity_key = true];
+  string merchant_id = 1 [(kalix.field).entity_key = true];
 }
 
 message MerchantPaymentRequestCommand {
-  string merchant_id = 1 [(akkaserverless.field).entity_key = true];
+  string merchant_id = 1 [(kalix.field).entity_key = true];
 }

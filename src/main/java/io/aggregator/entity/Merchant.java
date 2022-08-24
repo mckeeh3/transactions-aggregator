@@ -3,7 +3,7 @@ package io.aggregator.entity;
 import java.util.List;
 import java.util.Optional;
 
-import com.akkaserverless.javasdk.eventsourcedentity.EventSourcedEntityContext;
+import kalix.javasdk.eventsourcedentity.EventSourcedEntityContext;
 import com.google.protobuf.Empty;
 
 import org.slf4j.Logger;
@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 import io.aggregator.TimeTo;
 import io.aggregator.api.MerchantApi;
 
-// This class was initially generated based on the .proto definition by Akka Serverless tooling.
+// This class was initially generated based on the .proto definition by Kalix tooling.
 // This is the implementation for the Event Sourced Entity Service described in your io/aggregator/api/merchant_api.proto file.
 //
 // As long as this file exists it will not be overwritten: you can maintain it yourself,

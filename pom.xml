@@ -18,7 +18,7 @@
     <jdk.target>16</jdk.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <akkaserverless-sdk.version>0.10.6</akkaserverless-sdk.version>
+    <kalix-sdk.version>1.0.5</kalix-sdk.version>
     <akka-grpc.version>2.1.4</akka-grpc.version>
   </properties>
 
@@ -113,7 +113,7 @@
       <plugin>
         <groupId>io.fabric8</groupId>
         <artifactId>docker-maven-plugin</artifactId>
-        <version>0.39.1</version>
+        <version>0.40.2</version>
         <configuration>
           <images>
             <image>
@@ -163,7 +163,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
-        <version>3.0.0</version>
+        <version>3.1.0</version>
         <executions>
           <execution>
             <goals>
@@ -233,9 +233,9 @@
       </plugin>
 
       <plugin>
-        <groupId>com.akkaserverless</groupId>
-        <artifactId>akkaserverless-maven-plugin</artifactId>
-        <version>${akkaserverless-sdk.version}</version>
+        <groupId>io.kalix</groupId>
+        <artifactId>kalix-maven-plugin</artifactId>
+        <version>${kalix-sdk.version}</version>
         <executions>
           <execution>
             <goals>
@@ -295,9 +295,9 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.akkaserverless</groupId>
-      <artifactId>akkaserverless-java-sdk</artifactId>
-      <version>${akkaserverless-sdk.version}</version>
+      <groupId>io.kalix</groupId>
+      <artifactId>kalix-java-sdk</artifactId>
+      <version>${kalix-sdk.version}</version>
     </dependency>
     <dependency>
       <groupId>org.projectlombok</groupId>
@@ -307,9 +307,9 @@
     </dependency>
 
     <dependency>
-      <groupId>com.akkaserverless</groupId>
-      <artifactId>akkaserverless-java-sdk-testkit</artifactId>
-      <version>${akkaserverless-sdk.version}</version>
+      <groupId>io.kalix</groupId>
+      <artifactId>kalix-java-sdk-testkit</artifactId>
+      <version>${kalix-sdk.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>

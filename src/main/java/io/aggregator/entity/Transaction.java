@@ -2,7 +2,7 @@ package io.aggregator.entity;
 
 import java.util.Optional;
 
-import com.akkaserverless.javasdk.eventsourcedentity.EventSourcedEntityContext;
+import kalix.javasdk.eventsourcedentity.EventSourcedEntityContext;
 import com.google.protobuf.Empty;
 
 import io.aggregator.service.MerchantService;
@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import io.aggregator.api.TransactionApi;
 
-// This class was initially generated based on the .proto definition by Akka Serverless tooling.
+// This class was initially generated based on the .proto definition by Kalix tooling.
 // This is the implementation for the Event Sourced Entity Service described in your io/aggregator/api/transaction_api.proto file.
 //
 // As long as this file exists it will not be overwritten: you can maintain it yourself,

@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package io.aggregator.action;
 
-import "akkaserverless/annotations.proto";
+import "kalix/annotations.proto";
 import "google/protobuf/empty.proto";
 import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
@@ -10,7 +10,7 @@ import "google/protobuf/timestamp.proto";
 option java_outer_classname = "FrontendService";
 
 service Frontend {
-  option (akkaserverless.codegen) = {
+  option (kalix.codegen) = {
     action: {}
   };
 

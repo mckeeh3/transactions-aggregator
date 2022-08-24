@@ -4,7 +4,7 @@ package io.aggregator.view;
 
 import "google/api/annotations.proto";
 import "google/protobuf/any.proto";
-import "akkaserverless/annotations.proto";
+import "kalix/annotations.proto";
 import "google/protobuf/timestamp.proto";
 import "io/aggregator/entity/transaction_entity.proto";
 import "io/aggregator/view/transaction.proto";
@@ -12,12 +12,12 @@ import "io/aggregator/view/transaction.proto";
 option java_outer_classname = "TransactionsPaidByPaymentByDateModel";
 
 service TransactionsPaidByPaymentByDate {
-  option (akkaserverless.codegen) = {
+  option (kalix.codegen) = {
     view: {}
   };
 
   rpc GetTransactionsPaidByPaymentByDate(TransactionsPaidByPaymentByDateRequest) returns (TransactionsPaidByPaymentByDateResponse) {
-    option (akkaserverless.method).view.query = {
+    option (kalix.method).view.query = {
       query: "SELECT * AS transactions"
              "  FROM transactions_paid OFFSET :transaction_offset LIMIT :transaction_limit"
              " WHERE transaction_timestamp.seconds >= :`from_date.seconds`"
@@ -34,30 +34,30 @@ service TransactionsPaidByPaymentByDate {
   }
 
   rpc OnTransactionCreated(entity.TransactionCreated) returns (Transaction) {
-    option (akkaserverless.method).eventing.in = {
+    option (kalix.method).eventing.in = {
       event_sourced_entity: "transaction"
     };
-    option (akkaserverless.method).view.update = {
+    option (kalix.method).view.update = {
       table: "transactions_paid"
       transform_updates: true
     };
   }
 
   rpc OnPaymentAdded(entity.PaymentAdded) returns (Transaction) {
-    option (akkaserverless.method).eventing.in = {
+    option (kalix.method).eventing.in = {
       event_sourced_entity: "transaction"
     };
-    option (akkaserverless.method).view.update = {
+    option (kalix.method).view.update = {
       table: "transactions_paid"
       transform_updates: true
     };
   }
 
   rpc IgnoreOtherEvents(google.protobuf.Any) returns (Transaction) {
-    option (akkaserverless.method).eventing.in = {
+    option (kalix.method).eventing.in = {
       event_sourced_entity: "transaction"
     };
-    option (akkaserverless.method).view.update = {
+    option (kalix.method).view.update = {
       table: "transactions_paid"
       transform_updates: true
     };

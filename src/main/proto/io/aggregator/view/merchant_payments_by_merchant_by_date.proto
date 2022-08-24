@@ -4,7 +4,7 @@ package io.aggregator.view;
 
 import "google/api/annotations.proto";
 import "google/protobuf/any.proto";
-import "akkaserverless/annotations.proto";
+import "kalix/annotations.proto";
 import "google/protobuf/timestamp.proto";
 import "io/aggregator/entity/payment_entity.proto";
 import "io/aggregator/view/merchant_payments.proto";
@@ -12,12 +12,12 @@ import "io/aggregator/view/merchant_payments.proto";
 option java_outer_classname = "MerchantPaymentsByMerchantByDateModel";
 
 service MerchantPaymentsByMerchantByDate {
-  option (akkaserverless.codegen) = {
+  option (kalix.codegen) = {
     view: {}
   };
 
   rpc GetMerchantPaymentsByMerchantByDate(MerchantPaymentsByMerchantByDateRequest) returns (MerchantPaymentsByMerchantByDateResponse) {
-    option (akkaserverless.method).view.query = {
+    option (kalix.method).view.query = {
       query: "SELECT * AS merchant_payments"
              "  FROM merchant_payments_by_merchant_by_date"
              " WHERE payment_timestamp.seconds >= :`from_date.seconds`"
@@ -30,20 +30,20 @@ service MerchantPaymentsByMerchantByDate {
   }
 
   rpc OnPaymentAggregated(entity.PaymentAggregated) returns (MerchantPayment) {
-    option (akkaserverless.method).eventing.in = {
+    option (kalix.method).eventing.in = {
       event_sourced_entity: "payment"
     };
-    option (akkaserverless.method).view.update = {
+    option (kalix.method).view.update = {
       table: "merchant_payments_by_merchant_by_date"
       transform_updates: true
     };
   }
 
   rpc IgnoreOtherEvents(google.protobuf.Any) returns (MerchantPayment) {
-    option (akkaserverless.method).eventing.in = {
+    option (kalix.method).eventing.in = {
       event_sourced_entity: "payment"
     };
-    option (akkaserverless.method).view.update = {
+    option (kalix.method).view.update = {
       table: "merchant_payments_by_merchant_by_date"
       transform_updates: true
     };

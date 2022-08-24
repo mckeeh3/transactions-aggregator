@@ -5,7 +5,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.IntStream;
 
-import com.akkaserverless.javasdk.action.ActionCreationContext;
+import kalix.javasdk.action.ActionCreationContext;
 import com.google.protobuf.Empty;
 
 import org.slf4j.Logger;
@@ -15,7 +15,7 @@ import io.aggregator.TimeTo;
 import io.aggregator.action.FrontendService.GenerateTransactionsSingleMerchantRequest;
 import io.aggregator.api.TransactionApi;
 
-// This class was initially generated based on the .proto definition by Akka Serverless tooling.
+// This class was initially generated based on the .proto definition by Kalix tooling.
 //
 // As long as this file exists it will not be overwritten: you can maintain it yourself,
 // or delete it so it is regenerated as needed.
@@ -43,7 +43,7 @@ public class FrontendAction extends AbstractFrontendAction {
               .setTransactionId(String.format("transaction-%d-%s", i, UUID.randomUUID()))
               .setShopId("tesco-chelsea")
               .addPricedItem(TransactionApi.PricedItem.newBuilder()
-                  .setServiceCode("service-code-" + random.nextInt(3) + 1)
+                  .setServiceCode("SVC" + random.nextInt(4) + 1)
                   .setPricedItemAmount(random.nextInt(90) + 5)
                   .build())
               .setTimestamp(timestamp)

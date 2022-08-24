@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-import "akkaserverless/annotations.proto";
+import "kalix/annotations.proto";
 import "google/protobuf/empty.proto";
 import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
@@ -11,7 +11,7 @@ package io.aggregator.api;
 option java_outer_classname = "PaymentApi";
 
 service Payment {
-  option (akkaserverless.codegen) = {
+  option (kalix.codegen) = {
     event_sourced_entity: {
       name: "io.aggregator.entity.Payment"
       entity_type: "payment"
@@ -55,22 +55,22 @@ service Payment {
 }
 
 message AggregationRequestCommand {
-  string merchant_id = 1 [(akkaserverless.field).entity_key = true];
-  string payment_id = 2 [(akkaserverless.field).entity_key = true];
+  string merchant_id = 1 [(kalix.field).entity_key = true];
+  string payment_id = 2 [(kalix.field).entity_key = true];
   google.protobuf.Timestamp aggregate_request_timestamp = 3;
   repeated int64 epoch_days = 4;
 }
 
 message PaymentRequestCommand {
-  string merchant_id = 1 [(akkaserverless.field).entity_key = true];
-  string payment_id = 2 [(akkaserverless.field).entity_key = true];
+  string merchant_id = 1 [(kalix.field).entity_key = true];
+  string payment_id = 2 [(kalix.field).entity_key = true];
   google.protobuf.Timestamp aggregate_request_timestamp = 3;
   repeated int64 epoch_days = 4;
 }
 
 message DayAggregationCommand {
-  string merchant_id = 1 [(akkaserverless.field).entity_key = true];
-  string payment_id = 2 [(akkaserverless.field).entity_key = true];
+  string merchant_id = 1 [(kalix.field).entity_key = true];
+  string payment_id = 2 [(kalix.field).entity_key = true];
   int64 epoch_day = 3;
   repeated entity.MoneyMovement money_movements = 4;
   google.protobuf.Timestamp last_update_timestamp = 5;
@@ -78,13 +78,13 @@ message DayAggregationCommand {
 }
 
 message PaymentStatusCommand {
-  string merchant_id = 1 [(akkaserverless.field).entity_key = true];
-  string payment_id = 2 [(akkaserverless.field).entity_key = true];
+  string merchant_id = 1 [(kalix.field).entity_key = true];
+  string payment_id = 2 [(kalix.field).entity_key = true];
 }
 
 message PaymentStatusResponse {
-  string merchant_id = 1 [(akkaserverless.field).entity_key = true];
-  string payment_id = 2 [(akkaserverless.field).entity_key = true];
+  string merchant_id = 1 [(kalix.field).entity_key = true];
+  string payment_id = 2 [(kalix.field).entity_key = true];
   google.protobuf.Timestamp last_update_timestamp = 3;
   google.protobuf.Timestamp aggregate_request_timestamp = 4;
   repeated entity.MoneyMovement money_movements = 5;

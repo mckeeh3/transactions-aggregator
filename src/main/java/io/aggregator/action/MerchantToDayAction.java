@@ -2,14 +2,14 @@ package io.aggregator.action;
 
 import java.util.concurrent.CompletableFuture;
 
-import com.akkaserverless.javasdk.action.ActionCreationContext;
+import kalix.javasdk.action.ActionCreationContext;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 
 import io.aggregator.api.DayApi;
 import io.aggregator.entity.MerchantEntity;
 
-// This class was initially generated based on the .proto definition by Akka Serverless tooling.
+// This class was initially generated based on the .proto definition by Kalix tooling.
 // This is the implementation for the Action Service described in your io/aggregator/action/merchant_to_day_action.proto file.
 //
 // As long as this file exists it will not be overwritten: you can maintain it yourself,

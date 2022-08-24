@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-import "akkaserverless/annotations.proto";
+import "kalix/annotations.proto";
 import "google/protobuf/empty.proto";
 import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
@@ -10,7 +10,7 @@ package io.aggregator.api;
 option java_outer_classname = "TransactionApi";
 
 service Transaction {
-  option (akkaserverless.codegen) = {
+  option (kalix.codegen) = {
     event_sourced_entity: {
       name: "io.aggregator.entity.Transaction"
       entity_type: "transaction"
@@ -36,7 +36,7 @@ service Transaction {
 }
 
 message PaymentPricedCommand {
-  string transaction_id = 1 [(akkaserverless.field).entity_key = true];
+  string transaction_id = 1 [(kalix.field).entity_key = true];
   string shop_id = 2;
   string event_type = 3;
   google.protobuf.Timestamp timestamp = 4;
@@ -49,7 +49,7 @@ message PricedItem {
 }
 
 message GetTransactionRequest {
-  string transaction_id = 1 [(akkaserverless.field).entity_key = true];
+  string transaction_id = 1 [(kalix.field).entity_key = true];
 }
 
 message GetTransactionResponse {

@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-import "akkaserverless/annotations.proto";
+import "kalix/annotations.proto";
 import "google/protobuf/empty.proto";
 import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
@@ -10,7 +10,7 @@ package io.aggregator.api;
 option java_outer_classname = "SubSecondApi";
 
 service SubSecond {
-  option (akkaserverless.codegen) = {
+  option (kalix.codegen) = {
     event_sourced_entity: {
       name: "io.aggregator.entity.SubSecond"
       entity_type: "sub_second"
@@ -39,23 +39,23 @@ service SubSecond {
 }
 
 message AddLedgerItemsCommand {
-  string merchant_id = 1 [(akkaserverless.field).entity_key = true];
-  int64 epoch_sub_second = 2 [(akkaserverless.field).entity_key = true];
+  string merchant_id = 1 [(kalix.field).entity_key = true];
+  int64 epoch_sub_second = 2 [(kalix.field).entity_key = true];
   string transaction_id = 3;
   google.protobuf.Timestamp timestamp = 4;
   repeated LedgerItem ledger_item = 5;
 }
 
 message LedgerItem {
-  string service_code = 1 [(akkaserverless.field).entity_key = true];
-  string account_from = 2 [(akkaserverless.field).entity_key = true];
-  string account_to = 3 [(akkaserverless.field).entity_key = true];
+  string service_code = 1 [(kalix.field).entity_key = true];
+  string account_from = 2 [(kalix.field).entity_key = true];
+  string account_to = 3 [(kalix.field).entity_key = true];
   double amount = 4;
 }
 
 message AggregateSubSecondCommand {
-  string merchant_id = 1 [(akkaserverless.field).entity_key = true];
-  int64 epoch_sub_second = 2 [(akkaserverless.field).entity_key = true];
+  string merchant_id = 1 [(kalix.field).entity_key = true];
+  int64 epoch_sub_second = 2 [(kalix.field).entity_key = true];
   google.protobuf.Timestamp aggregate_request_timestamp = 3;
   string payment_id = 4;
 }

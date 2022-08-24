@@ -76,7 +76,7 @@
               </elementProp>
             </collectionProp>
           </elementProp>
-          <stringProp name="HTTPSampler.domain">hidden-band-8432.us-east1.akkaserverless.app</stringProp>
+          <stringProp name="HTTPSampler.domain">hidden-band-8432.us-east1.kalix.app</stringProp>
           <stringProp name="HTTPSampler.port"></stringProp>
           <stringProp name="HTTPSampler.protocol">https</stringProp>
           <stringProp name="HTTPSampler.contentEncoding"></stringProp>

@@ -1,11 +1,11 @@
 package io.aggregator.view;
 
-import com.akkaserverless.javasdk.view.View;
-import com.akkaserverless.javasdk.view.ViewContext;
+import kalix.javasdk.view.View;
+import kalix.javasdk.view.ViewContext;
 import com.google.protobuf.Any;
 import io.aggregator.entity.TransactionEntity;
 
-// This class was initially generated based on the .proto definition by Akka Serverless tooling.
+// This class was initially generated based on the .proto definition by Kalix tooling.
 // This is the implementation for the View Service described in your io/aggregator/view/ledger_entries_by_payment_id.proto file.
 //
 // As long as this file exists it will not be overwritten: you can maintain it yourself,
