@@ -1,5 +1,6 @@
 package io.aggregator;
 
+import io.aggregator.entity.*;
 import kalix.javasdk.Kalix;
 import io.aggregator.action.DayToHourAction;
 import io.aggregator.action.DayToMerchantAction;
@@ -15,14 +16,6 @@ import io.aggregator.action.SecondToMinuteAction;
 import io.aggregator.action.SecondToSubSecondAction;
 import io.aggregator.action.SubSecondToSecondAction;
 import io.aggregator.action.TransactionToSubSecondAction;
-import io.aggregator.entity.Day;
-import io.aggregator.entity.Hour;
-import io.aggregator.entity.Merchant;
-import io.aggregator.entity.Minute;
-import io.aggregator.entity.Payment;
-import io.aggregator.entity.Second;
-import io.aggregator.entity.SubSecond;
-import io.aggregator.entity.Transaction;
 import io.aggregator.view.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +37,7 @@ public final class Main {
     return KalixFactory.withComponents(
       Day::new,
       Hour::new,
+      Incident::new,
       Merchant::new,
       Minute::new,
       Payment::new,
@@ -56,7 +50,6 @@ public final class Main {
       FrontendAction::new,
       HourToDayAction::new,
       HourToMinuteAction::new,
-      LedgerEntriesByPaymentIdView::new,
       MerchantPaymentsByDateView::new,
       MerchantPaymentsByMerchantByDateView::new,
       MerchantToDayAction::new,

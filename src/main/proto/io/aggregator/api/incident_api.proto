@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+import "kalix/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "io/aggregator/entity/transaction_merchant_key.proto";
+
+package io.aggregator.api;
+
+option java_outer_classname = "IncidentApi";
+
+service Incident {
+  option (kalix.codegen) = {
+    event_sourced_entity: {
+      name: "io.aggregator.entity.Incident"
+      entity_type: "incident"
+      state: "io.aggregator.entity.IncidentState"
+      events: [
+        "io.aggregator.entity.IncidentCreated",
+        "io.aggregator.entity.IncidentPaymentAdded"
+      ]
+    }
+  };
+
+  rpc CreateIncident(CreateIncidentCommand) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/incident/create"
+      body: "*"
+    };
+  }
+  rpc AddPayment(AddPaymentCommand) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/incident/add-payment"
+      body: "*"
+    };
+  }
+
+  rpc GetIncident(GetIncidentRequest) returns (GetIncidentResponse) {
+    option (google.api.http) = {
+      post: "/incident/get"
+      body: "*"
+    };
+  }
+}
+
+message CreateIncidentCommand {
+  string transaction_id = 1[(kalix.field).entity_key = true];
+  string service_code = 2[(kalix.field).entity_key = true];
+  string account_from = 3[(kalix.field).entity_key = true];
+  string account_to = 4[(kalix.field).entity_key = true];
+  google.protobuf.Timestamp timestamp = 5;
+  string incident_amount = 6;
+}
+
+message AddPaymentCommand {
+  string transaction_id = 1[(kalix.field).entity_key = true];
+  string service_code = 2[(kalix.field).entity_key = true];
+  string account_from = 3[(kalix.field).entity_key = true];
+  string account_to = 4[(kalix.field).entity_key = true];
+  google.protobuf.Timestamp timestamp = 5;
+  string payment_id = 6;
+}
+
+message GetIncidentRequest {
+  string transaction_id = 1[(kalix.field).entity_key = true];
+  string service_code = 2[(kalix.field).entity_key = true];
+  string account_from = 3[(kalix.field).entity_key = true];
+  string account_to = 4[(kalix.field).entity_key = true];
+}
+
+message GetIncidentResponse {
+  string incident_amount = 1;
+  string payment_id = 2;
+}

@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+import "io/aggregator/entity/transaction_merchant_key.proto";
+
+package io.aggregator.entity;
+
+option java_outer_classname = "IncidentEntity";
+
+
+message IncidentCreated {
+  TransactionKey transaction_key = 1;
+  google.protobuf.Timestamp incident_timestamp = 2;
+  string incident_amount = 3;
+}
+
+message IncidentPaymentAdded {
+  TransactionKey transaction_key = 1;
+  google.protobuf.Timestamp payment_timestamp = 2;
+  string payment_id = 3;
+}
+
+message IncidentState {
+  TransactionKey transaction_key = 1;
+  string incident_amount = 2;
+  string payment_id = 3;
+}
