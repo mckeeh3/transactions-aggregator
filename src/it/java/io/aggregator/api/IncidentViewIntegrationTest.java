@@ -1,20 +1,21 @@
 package io.aggregator.api;
 
-import com.google.protobuf.Empty;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.aggregator.Main;
-import io.aggregator.entity.IncidentEntity;
-import io.aggregator.entity.IncidentTestKit;
 import io.aggregator.entity.TransactionMerchantKey;
+import io.aggregator.view.IncidentsByDate;
+import io.aggregator.view.IncidentsByDateClient;
+import io.aggregator.view.IncidentsByDateModel;
+import io.aggregator.view.IncidentsByDateView;
 import kalix.javasdk.testkit.junit.KalixTestKitResource;
 import org.junit.ClassRule;
-import org.junit.Ignore;
 import org.junit.Test;
 
+import java.time.Instant;
 import java.util.Date;
 
-import static java.util.concurrent.TimeUnit.*;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.Assert.assertEquals;
 
 // This class was initially generated based on the .proto definition by Kalix tooling.
@@ -24,7 +25,7 @@ import static org.junit.Assert.assertEquals;
 
 // Example of an integration test calling our service via the Kalix proxy
 // Run all test classes ending with "IntegrationTest" using `mvn verify -Pit`
-public class IncidentIntegrationTest {
+public class IncidentViewIntegrationTest {
 
   /**
    * The test kit starts both the service container and the Kalix proxy.
@@ -37,9 +38,11 @@ public class IncidentIntegrationTest {
    * Use the generated gRPC client to call the service through the Kalix proxy.
    */
   private final Incident client;
+  private final IncidentsByDate view;
 
-  public IncidentIntegrationTest() {
+  public IncidentViewIntegrationTest() {
     client = testKit.getGrpcClient(Incident.class);
+    view = testKit.getGrpcClient(IncidentsByDate.class);
   }
 
   @Test
@@ -79,6 +82,21 @@ public class IncidentIntegrationTest {
 
     assertEquals(incidentAmount, get.getIncidentAmount());
     assertEquals(true,get.getPaymentId().isEmpty());
+
+    Thread.sleep(5000);
+
+    Timestamp from = Timestamps.fromMillis(Instant.now().minusSeconds(1000).toEpochMilli());
+    Timestamp to = Timestamps.fromMillis(Instant.now().toEpochMilli());
+    var unPayedIncidentsByMerchantAndDateReq = IncidentsByDateModel.IncidentsByDateRequest.newBuilder()
+            .setFromDate(from)
+            .setToDate(to)
+            .setMerchantId(merchantId)
+            .setPaymentId("0")
+            .build();
+    var unPayedIncidentsByMerchantAndDateRes = view.getIncidentsByDate(unPayedIncidentsByMerchantAndDateReq).toCompletableFuture().get(5,SECONDS);
+    assertEquals(1,unPayedIncidentsByMerchantAndDateRes.getResultsCount());
+
+
     var addPaymentCommand = IncidentApi.AddPaymentCommand.newBuilder()
             .setTransactionId(key.getTransactionId())
             .setServiceCode(key.getServiceCode())
@@ -91,6 +109,20 @@ public class IncidentIntegrationTest {
     assertEquals(incidentAmount, get.getIncidentAmount());
     assertEquals(paymentId,get.getPaymentId());
 
+
+    Thread.sleep(5000);
+
+    //check
+    unPayedIncidentsByMerchantAndDateRes = view.getIncidentsByDate(unPayedIncidentsByMerchantAndDateReq).toCompletableFuture().get(5,SECONDS);
+    assertEquals(0,unPayedIncidentsByMerchantAndDateRes.getResultsCount());
+
+    var payedIncidentsByMerchantAndDateReq = unPayedIncidentsByMerchantAndDateReq
+            .toBuilder()
+            .setPaymentId(paymentId)
+            .build();
+    var payedIncidentsByMerchantAndDateRes = view.getIncidentsByDate(payedIncidentsByMerchantAndDateReq).toCompletableFuture().get(5,SECONDS);
+    assertEquals(1,payedIncidentsByMerchantAndDateRes.getResultsCount());
+    assertEquals(paymentId, payedIncidentsByMerchantAndDateRes.getResults(0).getPaymentId());
 
   }
 

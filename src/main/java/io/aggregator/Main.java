@@ -50,6 +50,7 @@ public final class Main {
       FrontendAction::new,
       HourToDayAction::new,
       HourToMinuteAction::new,
+      IncidentsByDateView::new,
       MerchantPaymentsByDateView::new,
       MerchantPaymentsByMerchantByDateView::new,
       MerchantToDayAction::new,

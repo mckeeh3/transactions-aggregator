@@ -41,6 +41,8 @@ public class Incident extends AbstractIncident {
             .build();
     IncidentEntity.IncidentCreated event = IncidentEntity.IncidentCreated.newBuilder()
             .setTransactionKey(key)
+            .setMerchantId(createIncidentCommand.getMerchantId())
+            .setShopId(createIncidentCommand.getShopId())
             .setIncidentTimestamp(createIncidentCommand.getTimestamp())
             .setIncidentAmount(createIncidentCommand.getIncidentAmount())
             .build();

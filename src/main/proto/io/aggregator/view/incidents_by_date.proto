@@ -1,0 +1,84 @@
+syntax = "proto3";
+
+package io.aggregator.view;
+
+import "google/api/annotations.proto";
+import "google/protobuf/any.proto";
+import "kalix/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "io/aggregator/entity/incident_entity.proto";
+
+option java_outer_classname = "IncidentsByDateModel";
+
+service IncidentsByDate {
+  option (kalix.codegen) = {
+    view: {}
+  };
+
+  rpc GetIncidentsByDate(IncidentsByDateRequest) returns (IncidentsByDateResponse) {
+    option (kalix.method).view.query = {
+      query: "SELECT * AS results"
+             "  FROM incidents_by_date"
+             " WHERE incident_timestamp.seconds >= :`from_date.seconds`"
+             "   AND incident_timestamp.seconds < :`to_date.seconds`"
+             "   AND merchant_id = :merchant_id"
+             "   AND payment_id = :payment_id"
+    };
+    option (google.api.http) = {
+      get: "/incidents-by-date"
+    };
+  }
+
+  rpc OnIncidentCreated(entity.IncidentCreated) returns (IncidentByDateViewState) {
+    option (kalix.method).eventing.in = {
+      event_sourced_entity: "incident"
+    };
+    option (kalix.method).view.update = {
+      table: "incidents_by_date"
+      transform_updates: true
+    };
+  }
+
+  rpc OnIncidentPaymentAdded(entity.IncidentPaymentAdded) returns (IncidentByDateViewState) {
+    option (kalix.method).eventing.in = {
+      event_sourced_entity: "incident"
+    };
+    option (kalix.method).view.update = {
+      table: "incidents_by_date"
+      transform_updates: true
+    };
+  }
+
+  rpc IgnoreOtherEvents(google.protobuf.Any) returns (IncidentByDateViewState) {
+    option (kalix.method).eventing.in = {
+      event_sourced_entity: "incident"
+    };
+    option (kalix.method).view.update = {
+      table: "incidents_by_date"
+      transform_updates: true
+    };
+  }
+}
+
+message IncidentsByDateRequest {
+  google.protobuf.Timestamp from_date = 1;
+  google.protobuf.Timestamp to_date = 2;
+  string merchant_id = 3;
+  string payment_id = 4;
+}
+
+message IncidentByDateViewState {
+  string transaction_id = 1;
+  string service_code = 2;
+  string account_from = 3;
+  string account_to = 4;
+  string shop_id = 5;
+  string merchant_id = 6;
+  google.protobuf.Timestamp incident_timestamp = 7;
+  string incident_amount = 8;
+  string payment_id = 9;
+}
+
+message IncidentsByDateResponse {
+  repeated IncidentByDateViewState results = 1;
+}

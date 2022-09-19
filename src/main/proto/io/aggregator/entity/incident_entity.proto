@@ -12,6 +12,8 @@ message IncidentCreated {
   TransactionKey transaction_key = 1;
   google.protobuf.Timestamp incident_timestamp = 2;
   string incident_amount = 3;
+  string shop_id = 4;
+  string merchant_id = 5;
 }
 
 message IncidentPaymentAdded {

@@ -51,6 +51,8 @@ message CreateIncidentCommand {
   string account_to = 4[(kalix.field).entity_key = true];
   google.protobuf.Timestamp timestamp = 5;
   string incident_amount = 6;
+  string shop_id = 7;
+  string merchant_id = 8;
 }
 
 message AddPaymentCommand {

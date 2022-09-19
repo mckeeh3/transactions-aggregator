@@ -26,6 +26,9 @@ public class IncidentTest {
 
     String incidentAmount = "100";
     String paymentId = "1234";
+    String merchantId = "merchant1";
+    String shopId = "merchant1Shop1";
+
     Timestamp t = Timestamps.fromDate(new Date());
 
     IncidentTestKit service = IncidentTestKit.of(Incident::new);
@@ -41,6 +44,8 @@ public class IncidentTest {
             .setAccountFrom(key.getAccountFrom())
             .setAccountTo(key.getAccountTo())
             .setIncidentAmount(incidentAmount)
+            .setMerchantId(merchantId)
+            .setShopId(shopId)
             .setTimestamp(t)
             .build();
     var createResponse = service.createIncident(createCommand);
@@ -50,6 +55,8 @@ public class IncidentTest {
     assertEquals(key.getAccountFrom(), incidentCreated.getTransactionKey().getAccountFrom());
     assertEquals(key.getAccountTo(), incidentCreated.getTransactionKey().getAccountTo());
     assertEquals(incidentAmount,incidentCreated.getIncidentAmount());
+    assertEquals(merchantId,incidentCreated.getMerchantId());
+    assertEquals(shopId,incidentCreated.getShopId());
 
     var addPaymentCommand = IncidentApi.AddPaymentCommand.newBuilder()
             .setTransactionId(key.getTransactionId())
