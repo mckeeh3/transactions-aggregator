@@ -54,22 +54,6 @@ public class TimeTo {
         .orElse(zero());
   }
 
-  public static From fromEpochSubSecond(long epochSubSecond) {
-    return new From(Timestamp
-        .newBuilder()
-        .setSeconds(epochSubSecond / 100)
-        .setNanos((int) (epochSubSecond % 100) * 10_000_000)
-        .build());
-  }
-
-  public static From fromEpochMilliSeconds(long epochMilliSeconds) {
-    return new From(Timestamp
-        .newBuilder()
-        .setSeconds(epochMilliSeconds / 1_000)
-        .setNanos((int) (epochMilliSeconds % 1_000) * 1_000_000)
-        .build());
-  }
-
   public static From fromEpochSecond(long epochSecond) {
     return new From(Timestamp
         .newBuilder()
@@ -119,14 +103,6 @@ public class TimeTo {
 
     private From(Timestamp timestamp) {
       this.timestamp = timestamp;
-    }
-
-    public long toEpochMilliSeconds() {
-      return timestamp.getSeconds() * 1_000 + timestamp.getNanos() / 1_000_000;
-    }
-
-    public long toEpochSubSecond() {
-      return timestamp.getSeconds() * 100 + timestamp.getNanos() / 10_000_000;
     }
 
     public long toEpochSecond() {
@@ -190,10 +166,6 @@ public class TimeTo {
 
     public From milliSeconds(long milliSeconds) {
       return nanos(milliSeconds * 1_000_000);
-    }
-
-    public From subSeconds(long subSeconds) {
-      return nanos(subSeconds * 10_000_000);
     }
 
     public From seconds(long seconds) {

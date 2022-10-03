@@ -91,9 +91,9 @@ public class StripedSecond extends AbstractStripedSecond {
                 .build())
         .setStripe(event.getStripe())
         .setEpochSecond(event.getEpochSecond())
-        .setEpochMinute(TimeTo.fromEpochSubSecond(event.getEpochSecond()).toEpochMinute())
-        .setEpochHour(TimeTo.fromEpochSubSecond(event.getEpochSecond()).toEpochHour())
-        .setEpochDay(TimeTo.fromEpochSubSecond(event.getEpochSecond()).toEpochDay())
+        .setEpochMinute(TimeTo.fromEpochSecond(event.getEpochSecond()).toEpochMinute())
+        .setEpochHour(TimeTo.fromEpochSecond(event.getEpochSecond()).toEpochHour())
+        .setEpochDay(TimeTo.fromEpochSecond(event.getEpochSecond()).toEpochDay())
         .build();
   }
 
@@ -131,7 +131,7 @@ public class StripedSecond extends AbstractStripedSecond {
   }
 
   static List<?> eventsFor(StripedSecondEntity.StripedSecondState state, StripedSecondApi.AddLedgerItemsCommand command) {
-    var subSecondLedgerItemsAdded = StripedSecondEntity.StripedSecondLedgerItemsAdded
+    var stripedSecondLedgerItemsAdded = StripedSecondEntity.StripedSecondLedgerItemsAdded
         .newBuilder()
         .setMerchantKey(
             TransactionMerchantKey.MerchantKey
@@ -163,7 +163,7 @@ public class StripedSecond extends AbstractStripedSecond {
         .allMatch(transaction -> transaction.getAggregateRequestTimestamp().getSeconds() > 0);
 
     if (isInactive) {
-      var subSecondActivated = StripedSecondEntity.StripedSecondActivated.newBuilder()
+      var stripedSecondActivated = StripedSecondEntity.StripedSecondActivated.newBuilder()
           .setMerchantKey(
               TransactionMerchantKey.MerchantKey.newBuilder()
                   .setMerchantId(command.getMerchantId())
@@ -172,9 +172,9 @@ public class StripedSecond extends AbstractStripedSecond {
           .setStripe(command.getStripe())
           .build();
 
-      return List.of(subSecondActivated, subSecondLedgerItemsAdded);
+      return List.of(stripedSecondActivated, stripedSecondLedgerItemsAdded);
     } else {
-      return List.of(subSecondLedgerItemsAdded);
+      return List.of(stripedSecondLedgerItemsAdded);
     }
   }
 
