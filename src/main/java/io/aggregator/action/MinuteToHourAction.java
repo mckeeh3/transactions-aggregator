@@ -36,7 +36,7 @@ public class MinuteToHourAction extends AbstractMinuteToHourAction {
 
   @Override
   public Effect<Empty> onMinuteAggregated(MinuteEntity.MinuteAggregated event) {
-    log.info(Thread.currentThread().getName() + " - ON EVENT: MinuteAggregated");
+    log.debug("{} - ON EVENT: MinuteAggregated: {}", Thread.currentThread().getName(), event);
 
     return effects().forward(components().hour().minuteAggregation(
         HourApi.MinuteAggregationCommand

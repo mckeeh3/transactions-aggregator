@@ -9,6 +9,10 @@ import java.util.Comparator;
 import com.google.protobuf.Timestamp;
 
 public class TimeTo {
+  public static int stripe(String transactionId) {
+    return Math.abs(transactionId.hashCode() % 20);
+  }
+
   public static Timestamp zero() {
     return Timestamp
         .newBuilder()

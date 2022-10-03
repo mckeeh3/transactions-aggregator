@@ -18,17 +18,17 @@ service Second {
       state: "io.aggregator.entity.SecondState"
       events: [
         "io.aggregator.entity.SecondActivated",
-        "io.aggregator.entity.SubSecondAdded",
+        "io.aggregator.entity.StripedSecondAdded",
         "io.aggregator.entity.SecondAggregationRequested",
         "io.aggregator.entity.SecondAggregated",
-        "io.aggregator.entity.ActiveSubSecondAggregated"
+        "io.aggregator.entity.ActiveStripedSecondAggregated"
       ]
     }
   };
 
-  rpc AddSubSecond(AddSubSecondCommand) returns (google.protobuf.Empty) {
+  rpc AddStripedSecond(AddStripedSecondCommand) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      post: "/second/add-sub-second"
+      post: "/second/add-striped-second"
       body: "*"
     };
   }
@@ -40,18 +40,18 @@ service Second {
     };
   }
 
-  rpc SubSecondAggregation(SubSecondAggregationCommand) returns (google.protobuf.Empty) {
+  rpc StripedSecondAggregation(StripedSecondAggregationCommand) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      post: "/second/-sub-second-aggregation"
+      post: "/second/-striped-second-aggregation"
       body: "*"
     };
   }
 }
 
-message AddSubSecondCommand {
+message AddStripedSecondCommand {
   string merchant_id = 1 [(kalix.field).entity_key = true];
   int64 epoch_second = 2 [(kalix.field).entity_key = true];
-  int64 epoch_sub_second = 3;
+  int32 stripe = 3;
 }
 
 message AggregateSecondCommand {
@@ -61,10 +61,10 @@ message AggregateSecondCommand {
   string payment_id = 4;
 }
 
-message SubSecondAggregationCommand {
+message StripedSecondAggregationCommand {
   string merchant_id = 1 [(kalix.field).entity_key = true];
   int64 epoch_second = 2 [(kalix.field).entity_key = true];
-  int64 epoch_sub_second = 3;
+  int32 stripe = 3;
   repeated entity.MoneyMovement money_movements = 4;
   google.protobuf.Timestamp last_update_timestamp = 5;
   google.protobuf.Timestamp aggregate_request_timestamp = 6;

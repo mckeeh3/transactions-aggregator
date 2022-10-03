@@ -1,28 +1,8 @@
 package io.aggregator;
 
+import io.aggregator.action.*;
+import io.aggregator.entity.*;
 import kalix.javasdk.Kalix;
-import io.aggregator.action.DayToHourAction;
-import io.aggregator.action.DayToMerchantAction;
-import io.aggregator.action.DayToPaymentAction;
-import io.aggregator.action.FrontendAction;
-import io.aggregator.action.HourToDayAction;
-import io.aggregator.action.HourToMinuteAction;
-import io.aggregator.action.MerchantToDayAction;
-import io.aggregator.action.MerchantToPaymentAction;
-import io.aggregator.action.MinuteToHourAction;
-import io.aggregator.action.MinuteToSecondAction;
-import io.aggregator.action.SecondToMinuteAction;
-import io.aggregator.action.SecondToSubSecondAction;
-import io.aggregator.action.SubSecondToSecondAction;
-import io.aggregator.action.TransactionToSubSecondAction;
-import io.aggregator.entity.Day;
-import io.aggregator.entity.Hour;
-import io.aggregator.entity.Merchant;
-import io.aggregator.entity.Minute;
-import io.aggregator.entity.Payment;
-import io.aggregator.entity.Second;
-import io.aggregator.entity.SubSecond;
-import io.aggregator.entity.Transaction;
 import io.aggregator.view.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +28,7 @@ public final class Main {
       Minute::new,
       Payment::new,
       Second::new,
-      SubSecond::new,
+      StripedSecond::new,
       Transaction::new,
       DayToHourAction::new,
       DayToMerchantAction::new,
@@ -56,7 +36,6 @@ public final class Main {
       FrontendAction::new,
       HourToDayAction::new,
       HourToMinuteAction::new,
-      LedgerEntriesByPaymentIdView::new,
       MerchantPaymentsByDateView::new,
       MerchantPaymentsByMerchantByDateView::new,
       MerchantToDayAction::new,
@@ -66,9 +45,9 @@ public final class Main {
       MinuteToHourAction::new,
       MinuteToSecondAction::new,
       SecondToMinuteAction::new,
-      SecondToSubSecondAction::new,
-      SubSecondToSecondAction::new,
-      TransactionToSubSecondAction::new,
+      SecondToStripedSecondAction::new,
+      StripedSecondToSecondAction::new,
+      TransactionToStripedSecondAction::new,
       TransactionsNotPaidByDateView::new,
       TransactionsPaidByPaymentByDateView::new);
   }

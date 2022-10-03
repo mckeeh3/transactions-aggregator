@@ -23,7 +23,7 @@ public class SecondToMinuteAction extends AbstractSecondToMinuteAction {
 
   @Override
   public Effect<Empty> onSecondActivated(SecondEntity.SecondActivated event) {
-    log.info(Thread.currentThread().getName() + " - ON EVENT: SecondActivated");
+    log.info("{} - ON EVENT: SecondActivated", Thread.currentThread().getName());
 
     return effects().forward(components().minute().addSecond(
         MinuteApi.AddSecondCommand
@@ -36,7 +36,7 @@ public class SecondToMinuteAction extends AbstractSecondToMinuteAction {
 
   @Override
   public Effect<Empty> onSecondAggregated(SecondEntity.SecondAggregated event) {
-    log.info(Thread.currentThread().getName() + " - ON EVENT: SecondAggregated");
+    log.debug("{} - ON EVENT: SecondAggregated: {}", Thread.currentThread().getName(), event);
 
     return effects().forward(components().minute().secondAggregation(
         MinuteApi.SecondAggregationCommand

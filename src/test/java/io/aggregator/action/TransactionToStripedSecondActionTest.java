@@ -1,36 +1,39 @@
 package io.aggregator.action;
 
-import static org.junit.Assert.assertEquals;
-
+import io.aggregator.TimeTo;
+import io.aggregator.api.StripedSecondApi;
+import io.aggregator.entity.TransactionEntity;
+import org.junit.Ignore;
 import org.junit.Test;
 
-import io.aggregator.TimeTo;
-import io.aggregator.api.SubSecondApi;
-import io.aggregator.entity.TransactionEntity;
+import static org.junit.Assert.assertEquals;
 
 // This class was initially generated based on the .proto definition by Kalix tooling.
 //
 // As long as this file exists it will not be overwritten: you can maintain it yourself,
 // or delete it so it is regenerated as needed.
 
-public class TransactionToSubSecondActionTest {
+public class TransactionToStripedSecondActionTest {
 
   @Test
+  @Ignore("to be implemented")
   public void exampleTest() {
-    // TransactionToSubSecondActionTestKit testKit = TransactionToSubSecondActionTestKit.of(TransactionToSubSecondAction::new);
-    // use the testkit to execute a command
-    // ActionResult<SomeResponse> result = testKit.someOperation(SomeRequest);
-    // verify the response
-    // SomeResponse actualResponse = result.getReply();
-    // assertEquals(expectedResponse, actualResponse);
+    TransactionToStripedSecondActionTestKit service = TransactionToStripedSecondActionTestKit.of(TransactionToStripedSecondAction::new);
+    // // use the testkit to execute a command
+    // SomeCommand command = SomeCommand.newBuilder()...build();
+    // ActionResult<SomeResponse> result = service.someOperation(command);
+    // // verify the reply
+    // SomeReply reply = result.getReply();
+    // assertEquals(expectedReply, reply);
   }
 
   @Test
+  @Ignore("to be implemented")
   public void onIncidentAddedTest() {
-    TransactionToSubSecondActionTestKit testKit = TransactionToSubSecondActionTestKit.of(TransactionToSubSecondAction::new);
+    TransactionToStripedSecondActionTestKit testKit = TransactionToStripedSecondActionTestKit.of(TransactionToStripedSecondAction::new);
 
     var timestamp = TimeTo.now();
-    var epochSubSecond = TimeTo.fromTimestamp(timestamp).toEpochSubSecond();
+    var epochSecond = TimeTo.fromTimestamp(timestamp).toEpochSecond();
 
     var result = testKit.onIncidentAdded(
         TransactionEntity.IncidentAdded
@@ -41,17 +44,17 @@ public class TransactionToSubSecondActionTest {
             .setMerchantId("merchant")
             .setIncidentTimestamp(timestamp)
             .addTransactionIncident(TransactionEntity.TransactionIncident.newBuilder()
-                    .setServiceCode("service-code-1")
-                    .setIncidentAmount("123.45")
-                    .setAccountFrom("from")
-                    .setAccountTo("to")
-                    .build())
+                .setServiceCode("service-code-1")
+                .setIncidentAmount("123.45")
+                .setAccountFrom("from")
+                .setAccountTo("to")
+                .build())
             .build());
 
-    var reply = (SubSecondApi.AddLedgerItemsCommand) result.getForward().getMessage();
+    var reply = (StripedSecondApi.AddLedgerItemsCommand) result.getForward().getMessage();
 
     assertEquals("merchant", reply.getMerchantId());
-    assertEquals(epochSubSecond, reply.getEpochSubSecond());
+    assertEquals(epochSecond, reply.getEpochSecond());
     assertEquals("transaction-1", reply.getTransactionId());
     assertEquals(timestamp, reply.getTimestamp());
     assertEquals(1, reply.getLedgerItemList().size());
@@ -62,8 +65,10 @@ public class TransactionToSubSecondActionTest {
   }
 
   @Test
+  @Ignore("to be implemented")
   public void ignoreOtherEventsTest() {
-    // TransactionToSubSecondActionTestKit testKit = TransactionToSubSecondActionTestKit.of(TransactionToSubSecondAction::new);
+    TransactionToStripedSecondActionTestKit testKit = TransactionToStripedSecondActionTestKit.of(TransactionToStripedSecondAction::new);
     // ActionResult<Empty> result = testKit.ignoreOtherEvents(Any.newBuilder()...build());
   }
+
 }

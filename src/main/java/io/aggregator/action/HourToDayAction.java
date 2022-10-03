@@ -36,7 +36,7 @@ public class HourToDayAction extends AbstractHourToDayAction {
 
   @Override
   public Effect<Empty> onHourAggregated(HourEntity.HourAggregated event) {
-    log.info(Thread.currentThread().getName() + " - ON EVENT: HourAggregated");
+    log.debug("{} - ON EVENT: HourAggregated: {}", Thread.currentThread().getName(), event);
 
     return effects().forward(components().day().hourAggregation(
         DayApi.HourAggregationCommand

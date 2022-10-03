@@ -89,7 +89,7 @@ public class SystemIntegrationTest {
   }
 
   @Test
-  public void goki() throws Exception {
+  public void transactionToMerchantBulk() throws Exception {
     System.out.println("TEST START TIME: " + Instant.now().toString());
 
     Random random = new Random();
@@ -103,7 +103,7 @@ public class SystemIntegrationTest {
     int[] numberOfEventsByMerchant = new int[merchants.size()];
     int[] amountByMerchant = new int[merchants.size()];
 
-    for (int i = 1; i <= 2000; i++) {
+    for (int i = 1; i <= 300; i++) {
       int merchantIndex = random.nextInt(merchants.size());
       numberOfEventsByMerchant[merchantIndex]++;
       amountByMerchant[merchantIndex] += i;
@@ -158,20 +158,22 @@ public class SystemIntegrationTest {
       String merchantAccount = "MERCHANT-" + merchant.toUpperCase();
       Optional<TransactionMerchantKey.MoneyMovement> optionalSvc1 = findMoneyMovement(paymentStatusResponse, "JPMC", merchantAccount);
       assertTrue(optionalSvc1.isPresent());
-      assertEquals(BigDecimal.valueOf(amountByMerchant[i]).add(BigDecimal.valueOf(0.1).multiply(new BigDecimal(numberOfEventsByMerchant[i]))).toString(), optionalSvc1.get().getAmount());
+      assertEquals(BigDecimal.valueOf(amountByMerchant[i]).add(BigDecimal.valueOf(0.111).multiply(new BigDecimal(numberOfEventsByMerchant[i]))).toString(), optionalSvc1.get().getAmount());
       Optional<TransactionMerchantKey.MoneyMovement> optionalSvc2 = findMoneyMovement(paymentStatusResponse, merchantAccount, "JPMC");
       assertTrue(optionalSvc2.isPresent());
-      assertEquals(BigDecimal.valueOf(amountByMerchant[i]).add(BigDecimal.valueOf(0.2).multiply(new BigDecimal(numberOfEventsByMerchant[i]))).toString(), optionalSvc2.get().getAmount());
+      assertEquals(BigDecimal.valueOf(amountByMerchant[i]).add(BigDecimal.valueOf(0.222).multiply(new BigDecimal(numberOfEventsByMerchant[i]))).toString(), optionalSvc2.get().getAmount());
       Optional<TransactionMerchantKey.MoneyMovement> optionalSvc3 = findMoneyMovement(paymentStatusResponse, merchantAccount, "TAX");
       assertTrue(optionalSvc3.isPresent());
-      assertEquals(BigDecimal.valueOf(amountByMerchant[i]).add(BigDecimal.valueOf(0.3).multiply(new BigDecimal(numberOfEventsByMerchant[i]))).toString(), optionalSvc3.get().getAmount());
+      assertEquals(BigDecimal.valueOf(amountByMerchant[i]).add(BigDecimal.valueOf(0.333).multiply(new BigDecimal(numberOfEventsByMerchant[i]))).toString(), optionalSvc3.get().getAmount());
       Optional<TransactionMerchantKey.MoneyMovement> optionalSvc4 = findMoneyMovement(paymentStatusResponse, merchantAccount, "CARD-SCHEME");
       assertTrue(optionalSvc4.isPresent());
-      assertEquals(BigDecimal.valueOf(amountByMerchant[i]).add(BigDecimal.valueOf(0.4).multiply(new BigDecimal(numberOfEventsByMerchant[i]))).toString(), optionalSvc4.get().getAmount());
+      assertEquals(BigDecimal.valueOf(amountByMerchant[i]).add(BigDecimal.valueOf(0.444).multiply(new BigDecimal(numberOfEventsByMerchant[i]))).toString(), optionalSvc4.get().getAmount());
     }
   }
 
   private Optional<TransactionMerchantKey.MoneyMovement> findMoneyMovement(PaymentApi.PaymentStatusResponse paymentStatusResponse, String from, String to) {
-    return paymentStatusResponse.getMoneyMovementsList().stream().filter(moneyMovement -> moneyMovement.getAccountFrom().equals(from) && moneyMovement.getAccountTo().equals(to)).findFirst();
+    return paymentStatusResponse.getMoneyMovementsList().stream()
+        .filter(moneyMovement -> moneyMovement.getAccountFrom().equals(from) && moneyMovement.getAccountTo().equals(to))
+        .findFirst();
   }
 }

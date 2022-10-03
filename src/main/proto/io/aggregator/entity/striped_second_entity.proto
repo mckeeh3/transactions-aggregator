@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+import "io/aggregator/entity/transaction_merchant_key.proto";
+
+package io.aggregator.entity;
+
+option java_outer_classname = "StripedSecondEntity";
+
+message StripedSecondActivated {
+  MerchantKey merchant_key = 1;
+  int64 epoch_second = 2;
+  int32 stripe = 3;
+}
+
+message StripedSecondLedgerItemsAdded {
+  MerchantKey merchant_key = 1;
+  int64 epoch_second = 2;
+  int32 stripe = 3;
+  repeated LedgerEntry ledger_entries = 4;
+  google.protobuf.Timestamp timestamp = 5;
+}
+
+message StripedSecondAggregated {
+  MerchantKey merchant_key = 1;
+  int64 epoch_second = 2;
+  int32 stripe = 3;
+  google.protobuf.Timestamp last_update_timestamp = 4;
+  google.protobuf.Timestamp aggregate_request_timestamp = 5;
+  string payment_id = 6;
+  repeated MoneyMovement money_movements = 7;
+}
+
+message StripedSecondState {
+  MerchantKey merchant_key = 1;
+  int32 stripe = 2;
+  int64 epoch_second = 3;
+  int64 epoch_minute = 4;
+  int64 epoch_hour = 5;
+  int64 epoch_day = 6;
+  repeated LedgerEntry ledger_entries = 7;
+  google.protobuf.Timestamp last_update_timestamp = 8;
+}
+
+message LedgerEntry {
+  TransactionKey transaction_key = 1;
+  int64 epoch_second = 2;
+  int32 stripe = 3;
+  string amount = 4;
+  google.protobuf.Timestamp timestamp = 5;
+  google.protobuf.Timestamp aggregate_request_timestamp = 6;
+  string payment_id = 7;
+}
