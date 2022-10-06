@@ -1,63 +1,67 @@
 package io.aggregator.entity;
 
+import com.google.protobuf.Empty;
+import io.aggregator.TimeTo;
+import io.aggregator.api.StripedSecondApi;
+import io.aggregator.service.MoneyMovementKey;
+import io.aggregator.service.RuleService;
+import kalix.javasdk.eventsourcedentity.EventSourcedEntityContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import io.aggregator.service.RuleService;
-import kalix.javasdk.eventsourcedentity.EventSourcedEntityContext;
-import com.google.protobuf.Empty;
-
-import io.aggregator.service.MoneyMovementKey;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.aggregator.TimeTo;
-import io.aggregator.api.SubSecondApi;
-
 // This class was initially generated based on the .proto definition by Kalix tooling.
+// This is the implementation for the Event Sourced Entity Service described in your io/aggregator/api/striped_second_api.proto file.
 //
 // As long as this file exists it will not be overwritten: you can maintain it yourself,
 // or delete it so it is regenerated as needed.
 
-public class SubSecond extends AbstractSubSecond {
-  static final Logger log = LoggerFactory.getLogger(SubSecond.class);
+public class StripedSecond extends AbstractStripedSecond {
 
-  public SubSecond(EventSourcedEntityContext context) {
+  @SuppressWarnings("unused")
+  private final String entityId;
+
+  static final Logger log = LoggerFactory.getLogger(StripedSecond.class);
+
+  public StripedSecond(EventSourcedEntityContext context) {
+    this.entityId = context.entityId();
   }
 
   @Override
-  public SubSecondEntity.SubSecondState emptyState() {
-    return SubSecondEntity.SubSecondState.getDefaultInstance();
+  public StripedSecondEntity.StripedSecondState emptyState() {
+    return StripedSecondEntity.StripedSecondState.getDefaultInstance();
   }
 
   @Override
-  public Effect<Empty> addLedgerItems(SubSecondEntity.SubSecondState state, SubSecondApi.AddLedgerItemsCommand command) {
+  public Effect<Empty> addLedgerItems(StripedSecondEntity.StripedSecondState state, StripedSecondApi.AddLedgerItemsCommand command) {
     return handle(state, command);
   }
 
   @Override
-  public Effect<Empty> aggregateSubSecond(SubSecondEntity.SubSecondState state, SubSecondApi.AggregateSubSecondCommand command) {
+  public Effect<Empty> aggregateStripedSecond(StripedSecondEntity.StripedSecondState state, StripedSecondApi.AggregateStripedSecondCommand command) {
     return handle(state, command);
   }
 
   @Override
-  public SubSecondEntity.SubSecondState subSecondActivated(SubSecondEntity.SubSecondState state, SubSecondEntity.SubSecondActivated event) {
+  public StripedSecondEntity.StripedSecondState stripedSecondActivated(StripedSecondEntity.StripedSecondState state, StripedSecondEntity.StripedSecondActivated event) {
     return handle(state, event);
   }
 
   @Override
-  public SubSecondEntity.SubSecondState subSecondLedgerItemsAdded(SubSecondEntity.SubSecondState state, SubSecondEntity.SubSecondLedgerItemsAdded event) {
+  public StripedSecondEntity.StripedSecondState stripedSecondLedgerItemsAdded(StripedSecondEntity.StripedSecondState state, StripedSecondEntity.StripedSecondLedgerItemsAdded event) {
     return handle(state, event);
   }
 
   @Override
-  public SubSecondEntity.SubSecondState subSecondAggregated(SubSecondEntity.SubSecondState state, SubSecondEntity.SubSecondAggregated event) {
+  public StripedSecondEntity.StripedSecondState stripedSecondAggregated(StripedSecondEntity.StripedSecondState state, StripedSecondEntity.StripedSecondAggregated event) {
     return handle(state, event);
   }
 
-  private Effect<Empty> handle(SubSecondEntity.SubSecondState state, SubSecondApi.AddLedgerItemsCommand command) {
+  private Effect<Empty> handle(StripedSecondEntity.StripedSecondState state, StripedSecondApi.AddLedgerItemsCommand command) {
     log.debug(Thread.currentThread().getName() + " - state: {}\nAddLedgerItemsCommand: {}", state, command);
     log.info(Thread.currentThread().getName() + " - RECEIVED COMMAND: AddLedgerItemsCommand");
 
@@ -66,18 +70,18 @@ public class SubSecond extends AbstractSubSecond {
         .thenReply(newState -> Empty.getDefaultInstance());
   }
 
-  private Effect<Empty> handle(SubSecondEntity.SubSecondState state, SubSecondApi.AggregateSubSecondCommand command) {
-    log.debug("state: {}\nAggregateCommand: {}", state, command);
-    log.info(Thread.currentThread().getName() + " - RECEIVED COMMAND: AggregateSubSecondCommand");
+  private Effect<Empty> handle(StripedSecondEntity.StripedSecondState state, StripedSecondApi.AggregateStripedSecondCommand command) {
+    log.debug("state: {}\nAggregateStripedSecondCommand: {}", state, command);
+    log.info(Thread.currentThread().getName() + " - RECEIVED COMMAND: AggregateStripedSecondCommand");
 
     return effects()
         .emitEvents(eventsFor(state, command))
         .thenReply(newState -> Empty.getDefaultInstance());
   }
 
-  static SubSecondEntity.SubSecondState handle(SubSecondEntity.SubSecondState state, SubSecondEntity.SubSecondActivated event) {
-    log.debug(Thread.currentThread().getName() + " - SubSecondActivated: {}", event);
-    log.info(Thread.currentThread().getName() + " - RECEIVED EVENT: SubSecondActivated");
+  static StripedSecondEntity.StripedSecondState handle(StripedSecondEntity.StripedSecondState state, StripedSecondEntity.StripedSecondActivated event) {
+    log.debug(Thread.currentThread().getName() + " - StripedSecondActivated: {}", event);
+    log.info(Thread.currentThread().getName() + " - RECEIVED EVENT: StripedSecondActivated");
 
     return state.toBuilder()
         .setMerchantKey(
@@ -85,17 +89,17 @@ public class SubSecond extends AbstractSubSecond {
                 .newBuilder()
                 .setMerchantId(event.getMerchantKey().getMerchantId())
                 .build())
-        .setEpochSubSecond(event.getEpochSubSecond())
-        .setEpochSecond(TimeTo.fromEpochSubSecond(event.getEpochSubSecond()).toEpochSecond())
-        .setEpochMinute(TimeTo.fromEpochSubSecond(event.getEpochSubSecond()).toEpochMinute())
-        .setEpochHour(TimeTo.fromEpochSubSecond(event.getEpochSubSecond()).toEpochHour())
-        .setEpochDay(TimeTo.fromEpochSubSecond(event.getEpochSubSecond()).toEpochDay())
+        .setStripe(event.getStripe())
+        .setEpochSecond(event.getEpochSecond())
+        .setEpochMinute(TimeTo.fromEpochSecond(event.getEpochSecond()).toEpochMinute())
+        .setEpochHour(TimeTo.fromEpochSecond(event.getEpochSecond()).toEpochHour())
+        .setEpochDay(TimeTo.fromEpochSecond(event.getEpochSecond()).toEpochDay())
         .build();
   }
 
-  static SubSecondEntity.SubSecondState handle(SubSecondEntity.SubSecondState state, SubSecondEntity.SubSecondLedgerItemsAdded event) {
-    log.debug(Thread.currentThread().getName() + " - SubSecondLedgerItemsAdded: {}", event);
-    log.info(Thread.currentThread().getName() + " - RECEIVED EVENT: SubSecondLedgerItemsAdded");
+  static StripedSecondEntity.StripedSecondState handle(StripedSecondEntity.StripedSecondState state, StripedSecondEntity.StripedSecondLedgerItemsAdded event) {
+    log.debug(Thread.currentThread().getName() + " - StripedSecondLedgerItemsAdded: {}", event);
+    log.info(Thread.currentThread().getName() + " - RECEIVED EVENT: StripedSecondLedgerItemsAdded");
 
     var newState = state.toBuilder();
     event.getLedgerEntriesList().stream()
@@ -105,8 +109,8 @@ public class SubSecond extends AbstractSubSecond {
     return newState.build();
   }
 
-  static SubSecondEntity.SubSecondState handle(SubSecondEntity.SubSecondState state, SubSecondEntity.SubSecondAggregated event) {
-    log.info(Thread.currentThread().getName() + " - RECEIVED EVENT: SubSecondAggregated");
+  static StripedSecondEntity.StripedSecondState handle(StripedSecondEntity.StripedSecondState state, StripedSecondEntity.StripedSecondAggregated event) {
+    log.info(Thread.currentThread().getName() + " - RECEIVED EVENT: StripedSecondAggregated");
 
     var ledgerEntries = state.getLedgerEntriesList().stream()
         .map(ledgerEntry -> {
@@ -126,19 +130,20 @@ public class SubSecond extends AbstractSubSecond {
         .build();
   }
 
-  static List<?> eventsFor(SubSecondEntity.SubSecondState state, SubSecondApi.AddLedgerItemsCommand command) {
-    var subSecondLedgerItemsAdded = SubSecondEntity.SubSecondLedgerItemsAdded
+  static List<?> eventsFor(StripedSecondEntity.StripedSecondState state, StripedSecondApi.AddLedgerItemsCommand command) {
+    var stripedSecondLedgerItemsAdded = StripedSecondEntity.StripedSecondLedgerItemsAdded
         .newBuilder()
         .setMerchantKey(
             TransactionMerchantKey.MerchantKey
                 .newBuilder()
                 .setMerchantId(command.getMerchantId())
                 .build())
-        .setEpochSubSecond(command.getEpochSubSecond())
+        .setEpochSecond(command.getEpochSecond())
+        .setStripe(command.getStripe())
         .setTimestamp(command.getTimestamp())
         .addAllLedgerEntries(
             command.getLedgerItemList().stream()
-                .map(ledgerItem -> SubSecondEntity.LedgerEntry.newBuilder()
+                .map(ledgerItem -> StripedSecondEntity.LedgerEntry.newBuilder()
                     .setTransactionKey(TransactionMerchantKey.TransactionKey.newBuilder()
                         .setTransactionId(command.getTransactionId())
                         .setServiceCode(ledgerItem.getServiceCode())
@@ -146,7 +151,8 @@ public class SubSecond extends AbstractSubSecond {
                         .setAccountTo(ledgerItem.getAccountTo())
                         .build())
                     .setAmount(ledgerItem.getAmount())
-                    .setEpochSubSecond(command.getEpochSubSecond())
+                    .setEpochSecond(command.getEpochSecond())
+                    .setStripe(command.getStripe())
                     .setTimestamp(command.getTimestamp())
                     .build())
                 .collect(Collectors.toList())
@@ -157,29 +163,31 @@ public class SubSecond extends AbstractSubSecond {
         .allMatch(transaction -> transaction.getAggregateRequestTimestamp().getSeconds() > 0);
 
     if (isInactive) {
-      var subSecondActivated = SubSecondEntity.SubSecondActivated.newBuilder()
+      var stripedSecondActivated = StripedSecondEntity.StripedSecondActivated.newBuilder()
           .setMerchantKey(
               TransactionMerchantKey.MerchantKey.newBuilder()
                   .setMerchantId(command.getMerchantId())
                   .build())
-          .setEpochSubSecond(command.getEpochSubSecond())
+          .setEpochSecond(command.getEpochSecond())
+          .setStripe(command.getStripe())
           .build();
 
-      return List.of(subSecondActivated, subSecondLedgerItemsAdded);
+      return List.of(stripedSecondActivated, stripedSecondLedgerItemsAdded);
     } else {
-      return List.of(subSecondLedgerItemsAdded);
+      return List.of(stripedSecondLedgerItemsAdded);
     }
   }
 
-  static List<?> eventsFor(SubSecondEntity.SubSecondState state, SubSecondApi.AggregateSubSecondCommand command) {
+  static List<?> eventsFor(StripedSecondEntity.StripedSecondState state, StripedSecondApi.AggregateStripedSecondCommand command) {
     var ledgerEntries = state.getLedgerEntriesList().stream()
         .filter(ledgerEntry -> ledgerEntry.getAggregateRequestTimestamp().getSeconds() == 0)
         .toList();
 
     if (ledgerEntries.size() == 0) {
-      return List.of(SubSecondEntity.SubSecondAggregated.newBuilder()
+      return List.of(StripedSecondEntity.StripedSecondAggregated.newBuilder()
           .setMerchantKey(state.getMerchantKey())
-          .setEpochSubSecond(state.getEpochSubSecond())
+          .setEpochSecond(state.getEpochSecond())
+          .setStripe(state.getStripe())
           .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
           .setPaymentId(command.getPaymentId())
           .build());
@@ -203,13 +211,14 @@ public class SubSecond extends AbstractSubSecond {
                 .build());
           });
       var lastUpdate = ledgerEntries.stream()
-          .map(SubSecondEntity.LedgerEntry::getTimestamp)
+          .map(StripedSecondEntity.LedgerEntry::getTimestamp)
           .max(TimeTo.comparator())
           .get();
 
-      return List.of(SubSecondEntity.SubSecondAggregated.newBuilder()
+      return List.of(StripedSecondEntity.StripedSecondAggregated.newBuilder()
           .setMerchantKey(state.getMerchantKey())
-          .setEpochSubSecond(state.getEpochSubSecond())
+          .setEpochSecond(state.getEpochSecond())
+          .setStripe(state.getStripe())
           .setAggregateRequestTimestamp(command.getAggregateRequestTimestamp())
           .setLastUpdateTimestamp(lastUpdate)
           .setPaymentId(command.getPaymentId())
@@ -217,4 +226,5 @@ public class SubSecond extends AbstractSubSecond {
           .build());
     }
   }
+
 }

@@ -7,9 +7,9 @@ import "google/protobuf/empty.proto";
 import "google/protobuf/any.proto";
 import "io/aggregator/entity/transaction_entity.proto";
 
-option java_outer_classname = "TransactionToSubSecondService";
+option java_outer_classname = "TransactionToStripedSecondService";
 
-service TransactionToSubSecond {
+service TransactionToStripedSecond {
   option (kalix.codegen) = {
     action: {}
   };

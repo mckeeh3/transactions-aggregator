@@ -1,36 +1,36 @@
 package io.aggregator.action;
 
+import com.google.protobuf.Any;
+import com.google.protobuf.Empty;
+import io.aggregator.api.StripedSecondApi;
+import io.aggregator.entity.SecondEntity;
+import kalix.javasdk.action.ActionCreationContext;
+
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-import kalix.javasdk.action.ActionCreationContext;
-import com.google.protobuf.Any;
-import com.google.protobuf.Empty;
-
-import io.aggregator.api.SubSecondApi;
-import io.aggregator.entity.SecondEntity;
-
 // This class was initially generated based on the .proto definition by Kalix tooling.
+// This is the implementation for the Action Service described in your io/aggregator/action/second_to_striped_second_action.proto file.
 //
 // As long as this file exists it will not be overwritten: you can maintain it yourself,
 // or delete it so it is regenerated as needed.
 
-public class SecondToSubSecondAction extends AbstractSecondToSubSecondAction {
+public class SecondToStripedSecondAction extends AbstractSecondToStripedSecondAction {
 
-  public SecondToSubSecondAction(ActionCreationContext creationContext) {
-  }
+  public SecondToStripedSecondAction(ActionCreationContext creationContext) {}
 
   @Override
   public Effect<Empty> onSecondAggregationRequested(SecondEntity.SecondAggregationRequested event) {
-    var results = event.getEpochSubSecondsList().stream()
-        .map(epochSubSecond -> SubSecondApi.AggregateSubSecondCommand
+    var results = event.getStripesList().stream()
+        .map(stripe -> StripedSecondApi.AggregateStripedSecondCommand
             .newBuilder()
             .setMerchantId(event.getMerchantKey().getMerchantId())
-            .setEpochSubSecond(epochSubSecond)
+            .setEpochSecond(event.getEpochSecond())
+            .setStripe(stripe)
             .setAggregateRequestTimestamp(event.getAggregateRequestTimestamp())
             .setPaymentId(event.getPaymentId())
             .build())
-        .map(command -> components().subSecond().aggregateSubSecond(command).execute())
+        .map(command -> components().stripedSecond().aggregateStripedSecond(command).execute())
         .collect(Collectors.toList());
 
     var result = CompletableFuture.allOf(results.toArray(new CompletableFuture[results.size()]))
