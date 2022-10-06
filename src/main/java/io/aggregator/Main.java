@@ -1,21 +1,8 @@
 package io.aggregator;
 
+import io.aggregator.action.*;
 import io.aggregator.entity.*;
 import kalix.javasdk.Kalix;
-import io.aggregator.action.DayToHourAction;
-import io.aggregator.action.DayToMerchantAction;
-import io.aggregator.action.DayToPaymentAction;
-import io.aggregator.action.FrontendAction;
-import io.aggregator.action.HourToDayAction;
-import io.aggregator.action.HourToMinuteAction;
-import io.aggregator.action.MerchantToDayAction;
-import io.aggregator.action.MerchantToPaymentAction;
-import io.aggregator.action.MinuteToHourAction;
-import io.aggregator.action.MinuteToSecondAction;
-import io.aggregator.action.SecondToMinuteAction;
-import io.aggregator.action.SecondToSubSecondAction;
-import io.aggregator.action.SubSecondToSecondAction;
-import io.aggregator.action.TransactionToSubSecondAction;
 import io.aggregator.view.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,6 +49,7 @@ public final class Main {
       SecondToMinuteAction::new,
       SecondToSubSecondAction::new,
       SubSecondToSecondAction::new,
+            TransactionToIncidentAction::new,
       TransactionToSubSecondAction::new,
       TransactionsNotPaidByDateView::new,
       TransactionsPaidByPaymentByDateView::new);

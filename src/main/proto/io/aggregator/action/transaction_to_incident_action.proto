@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package io.aggregator.action;
+
+import "kalix/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/any.proto";
+import "io/aggregator/entity/transaction_entity.proto";
+
+option java_outer_classname = "TransactionToIncidentService";
+
+service TransactionToIncident {
+  option (kalix.codegen) = {
+    action: {}
+  };
+
+  rpc OnIncidentAdded(entity.IncidentAdded) returns (google.protobuf.Empty) {
+    option (kalix.method).eventing.in = {
+      event_sourced_entity: "transaction"
+    };
+  }
+
+  rpc OnPaymentAdded(entity.PaymentAdded) returns (google.protobuf.Empty) {
+    option (kalix.method).eventing.in = {
+      event_sourced_entity: "transaction"
+    };
+  }
+
+  rpc IgnoreOtherEvents(google.protobuf.Any) returns (google.protobuf.Empty) {
+    option (kalix.method).eventing.in = {
+      event_sourced_entity: "transaction"
+    };
+  }
+}
