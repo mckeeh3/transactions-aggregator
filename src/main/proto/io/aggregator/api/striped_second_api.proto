@@ -45,6 +45,7 @@ message AddLedgerItemsCommand {
   string transaction_id = 4;
   google.protobuf.Timestamp timestamp = 5;
   repeated LedgerItem ledger_item = 6;
+  string shop_id = 7;
 }
 
 message LedgerItem {

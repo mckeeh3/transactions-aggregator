@@ -3,9 +3,9 @@ package io.aggregator.action;
 import akka.stream.javadsl.Source;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
-import io.aggregator.action.TransactionToIncidentAction;
-import io.aggregator.action.TransactionToIncidentActionTestKit;
-import io.aggregator.entity.TransactionEntity;
+import io.aggregator.action.StripedSecondToIncidentAction;
+import io.aggregator.action.StripedSecondToIncidentActionTestKit;
+import io.aggregator.entity.StripedSecondEntity;
 import kalix.javasdk.testkit.ActionResult;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -16,12 +16,12 @@ import static org.junit.Assert.*;
 // As long as this file exists it will not be overwritten: you can maintain it yourself,
 // or delete it so it is regenerated as needed.
 
-public class TransactionToIncidentActionTest {
+public class StripedSecondToIncidentActionTest {
 
   @Test
   @Ignore("to be implemented")
   public void exampleTest() {
-    TransactionToIncidentActionTestKit service = TransactionToIncidentActionTestKit.of(TransactionToIncidentAction::new);
+    StripedSecondToIncidentActionTestKit service = StripedSecondToIncidentActionTestKit.of(StripedSecondToIncidentAction::new);
     // // use the testkit to execute a command
     // SomeCommand command = SomeCommand.newBuilder()...build();
     // ActionResult<SomeResponse> result = service.someOperation(command);
@@ -32,22 +32,15 @@ public class TransactionToIncidentActionTest {
 
   @Test
   @Ignore("to be implemented")
-  public void onIncidentAddedTest() {
-    TransactionToIncidentActionTestKit testKit = TransactionToIncidentActionTestKit.of(TransactionToIncidentAction::new);
-    // ActionResult<Empty> result = testKit.onIncidentAdded(TransactionEntity.IncidentAdded.newBuilder()...build());
-  }
-
-  @Test
-  @Ignore("to be implemented")
-  public void onPaymentAddedTest() {
-    TransactionToIncidentActionTestKit testKit = TransactionToIncidentActionTestKit.of(TransactionToIncidentAction::new);
-    // ActionResult<Empty> result = testKit.onPaymentAdded(TransactionEntity.PaymentAdded.newBuilder()...build());
+  public void onStripedSecondAggregatedTest() {
+    StripedSecondToIncidentActionTestKit testKit = StripedSecondToIncidentActionTestKit.of(StripedSecondToIncidentAction::new);
+    // ActionResult<Empty> result = testKit.onStripedSecondAggregated(StripedSecondEntity.StripedSecondAggregated.newBuilder()...build());
   }
 
   @Test
   @Ignore("to be implemented")
   public void ignoreOtherEventsTest() {
-    TransactionToIncidentActionTestKit testKit = TransactionToIncidentActionTestKit.of(TransactionToIncidentAction::new);
+    StripedSecondToIncidentActionTestKit testKit = StripedSecondToIncidentActionTestKit.of(StripedSecondToIncidentAction::new);
     // ActionResult<Empty> result = testKit.ignoreOtherEvents(Any.newBuilder()...build());
   }
 

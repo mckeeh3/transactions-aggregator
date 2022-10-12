@@ -24,6 +24,7 @@ public final class Main {
     return KalixFactory.withComponents(
       Day::new,
       Hour::new,
+      Incident::new,
       Merchant::new,
       Minute::new,
       Payment::new,
@@ -36,6 +37,7 @@ public final class Main {
       FrontendAction::new,
       HourToDayAction::new,
       HourToMinuteAction::new,
+      IncidentsByDateView::new,
       MerchantPaymentsByDateView::new,
       MerchantPaymentsByMerchantByDateView::new,
       MerchantToDayAction::new,
@@ -46,6 +48,7 @@ public final class Main {
       MinuteToSecondAction::new,
       SecondToMinuteAction::new,
       SecondToStripedSecondAction::new,
+      StripedSecondToIncidentAction::new,
       StripedSecondToSecondAction::new,
       TransactionToStripedSecondAction::new,
       TransactionsNotPaidByDateView::new,

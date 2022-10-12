@@ -19,6 +19,7 @@ message StripedSecondLedgerItemsAdded {
   int32 stripe = 3;
   repeated LedgerEntry ledger_entries = 4;
   google.protobuf.Timestamp timestamp = 5;
+  string shop_id = 6;
 }
 
 message StripedSecondAggregated {
@@ -29,6 +30,7 @@ message StripedSecondAggregated {
   google.protobuf.Timestamp aggregate_request_timestamp = 5;
   string payment_id = 6;
   repeated MoneyMovement money_movements = 7;
+  string shop_id = 8;
 }
 
 message StripedSecondState {
@@ -40,6 +42,7 @@ message StripedSecondState {
   int64 epoch_day = 6;
   repeated LedgerEntry ledger_entries = 7;
   google.protobuf.Timestamp last_update_timestamp = 8;
+  string shop_id = 9;
 }
 
 message LedgerEntry {

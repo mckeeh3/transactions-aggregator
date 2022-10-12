@@ -39,6 +39,7 @@ public class TransactionToStripedSecondAction extends AbstractTransactionToStrip
             .setEpochSecond(timestamp.getSeconds())
             .setTimestamp(timestamp)
             .setStripe(stripe)
+            .setShopId(event.getShopId())
             .addAllLedgerItem(event.getTransactionIncidentList().stream()
                 .map(TransactionToStripedSecondAction::toLedgerItem)
                 .collect(Collectors.toList()))

@@ -106,7 +106,7 @@ public class StripedSecond extends AbstractStripedSecond {
         .filter(ledgerEntry -> state.getLedgerEntriesList().stream()
             .noneMatch(existingLedgerEntry -> existingLedgerEntry.getTransactionKey().equals(ledgerEntry.getTransactionKey())))
         .forEach(newState::addLedgerEntries);
-    return newState.build();
+    return newState.setShopId(event.getShopId()).build();
   }
 
   static StripedSecondEntity.StripedSecondState handle(StripedSecondEntity.StripedSecondState state, StripedSecondEntity.StripedSecondAggregated event) {
@@ -138,6 +138,7 @@ public class StripedSecond extends AbstractStripedSecond {
                 .newBuilder()
                 .setMerchantId(command.getMerchantId())
                 .build())
+            .setShopId(command.getShopId())
         .setEpochSecond(command.getEpochSecond())
         .setStripe(command.getStripe())
         .setTimestamp(command.getTimestamp())
@@ -198,6 +199,8 @@ public class StripedSecond extends AbstractStripedSecond {
               .setAccountFrom(ledgerEntry.getTransactionKey().getAccountFrom())
               .setAccountTo(ledgerEntry.getTransactionKey().getAccountTo())
               .setAmount(ledgerEntry.getAmount())
+              .setTransactionId(ledgerEntry.getTransactionKey().getTransactionId())
+                  .setServiceCode(ledgerEntry.getTransactionKey().getServiceCode())
               .build())
           .forEach(transfer -> {
             MoneyMovementKey key = MoneyMovementKey.builder()
@@ -223,6 +226,7 @@ public class StripedSecond extends AbstractStripedSecond {
           .setLastUpdateTimestamp(lastUpdate)
           .setPaymentId(command.getPaymentId())
           .addAllMoneyMovements(summarisedMoneyMovementsMap.values())
+          .setShopId(state.getShopId())
           .build());
     }
   }

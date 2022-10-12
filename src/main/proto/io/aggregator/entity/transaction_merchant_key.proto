@@ -19,4 +19,6 @@ message MoneyMovement {
   string account_from = 1;
   string account_to = 2;
   string amount = 3;
+  string transaction_id = 4;
+  string service_code = 5;
 }
